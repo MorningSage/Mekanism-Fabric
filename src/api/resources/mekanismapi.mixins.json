@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "mekanism.api.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "TagBuilderMixin",
+    "TestMixin",
+    "accessors.ItemTagsAccessor"
+  ],
+  "client": [
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

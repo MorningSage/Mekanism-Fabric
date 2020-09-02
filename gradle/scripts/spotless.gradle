@@ -1,0 +1,14 @@
+spotless {
+    java {
+        target 'src/*/java/mekanism/**/*.java'
+
+        indentWithSpaces()
+        eclipse().configFile 'codeformat/codeformat.xml'
+        importOrderFile 'codeformat/mekanism.importorder'
+    }
+    format 'json', {
+        target 'src/*/resources/**/*.json'
+        targetExclude 'src/generated/resources/**'
+        prettier().config(['parser': 'json'])
+    }
+}

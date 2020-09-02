@@ -1,0 +1,60 @@
+processResources {
+    exclude '.cache'
+}
+
+jar {
+    finalizedBy 'remapJar'
+
+    from sourceSets.main.output.classesDirs
+    from sourceSets.api.output.classesDirs
+    from sourceSets.main.output.resourcesDir
+    from sourceSets.api.output.resourcesDir
+
+    manifest {
+        attributes([
+                "Specification-Title": "Mekanism",
+                "Specification-Vendor": "Mekanism",
+                "Specification-Version": "${project.version}",
+                "Implementation-Title": "${project.name}",
+                "Implementation-Version": "${project.version}",
+                "Implementation-Vendor" :"Mekanism",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+}
+
+task javadocs(type: Javadoc) {
+    classpath = sourceSets.main.compileClasspath
+    source = sourceSets.api.java
+    include "mekanism/api/**"
+
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
+
+task javadocJar(type: Jar, dependsOn: javadocs) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+// if it is present.
+// If you remove this task, sources will not be generated.
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+    from sourceSets.api.allSource
+}
+
+task apiJar(type: Jar) {
+    classifier = "api"
+    from sourceSets.api.output
+    include "mekanism/api/**"
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+    archives apiJar
+}

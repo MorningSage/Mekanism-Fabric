@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "mekanism",
+  "version": "1.0.0",
+  "name": "Mekanism Api",
+  "description": "",
+  "authors": ["Mekanism"],
+  "contact": {
+    "homepage": "http://aidancbrady.com/mekanism/",
+    "sources": "https://github.com/mekanism/Mekanism"
+  },
+  "license": "MIT",
+  "icon": "assets/mekanism/icon.png",
+  "environment": "*",
+  "entrypoints": {
+  },
+  "depends": {
+    "fabricloader": ">=0.7.1",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  }
+}

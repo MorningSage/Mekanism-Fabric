@@ -1,29 +1,33 @@
-# gradle
+# exclude all
+/*
 
-.gradle/
-build/
-out/
-classes/
+# include important folders
+# need gradle 
+!gradle/
+!gradlew
+!gradlew.bat
+!build.gradle
+!gradle.properties
+!.travis.yml
 
-# eclipse
+# include markdowns
+!README.md
+!LICENSE
 
-*.launch
+# include sourcecode except generated
+!src/
+src/generated
 
-# idea
+# include git important files
+!.gitmodules
+!.gitignore
+!.gitattributes
 
-.idea/
-*.iml
-*.ipr
-*.iws
+# code format to reduce noise in git commits
+!codeformat/
 
-# vscode
+# Github specific files and directories
+!.github/
 
-.settings/
-.vscode/
-bin/
-.classpath
-.project
-
-# fabric
-
-run/
+# Explicit ignores
+Thumbs.db

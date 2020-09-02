@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "mekanism.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ItemRendererMixin"
+  ],
+  "client": [
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

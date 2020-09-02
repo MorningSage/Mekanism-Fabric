@@ -1,0 +1,32 @@
+def isAlpha = project.version.contains("alpha")
+def isBeta = project.version.contains("beta")
+
+def cfReleaseType = "release"
+if (isAlpha) {
+  cfReleaseType = "alpha"
+} else if (isBeta) {
+  cfReleaseType = "beta"
+}
+
+if (System.getenv("CURSEFORGE") && !version.endsWith("-SNAPSHOT")) {
+  curseforge {
+    apiKey = System.getenv("CURSEFORGE")
+    project {
+      id = project.curseforge_project
+      changelogType = "markdown"
+      changelog = System.getenv("CHANGELOG") ?: "Please visit our [releases](https://github.com/mekanism/Mekanism/releases) for a changelog"
+      releaseType = cfReleaseType
+      addGameVersion project.minecraft_version
+      addGameVersion "Fabric"
+      mainArtifact(remapJar.archiveFile) {
+        displayName = "${project.version} [FABRIC]"
+      }
+    }
+    options {
+      forgeGradleIntegration = false
+    }
+    afterEvaluate {
+      tasks.getByName("curseforge${project.curseforge_project}").dependsOn remapJar
+    }
+  }
+}

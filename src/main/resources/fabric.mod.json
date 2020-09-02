@@ -1,37 +1,39 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "mekanism",
   "version": "${version}",
-
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
-  "authors": [
-    "Me!"
-  ],
+  "name": "Mekanism - Fabric",
+  "description": "Mekanism is a Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, armor, and weapons.",
+  "authors": ["Mekanism"],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "http://aidancbrady.com/mekanism/",
+    "sources": "https://github.com/mekanism/Mekanism"
   },
-
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
-
+  "license": "MIT",
+  "icon": "assets/mekanism/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "net.fabricmc.example.ExampleMod"
-    ]
+    "main": ["mekanism.core.MekanismCommon"],
+    "client": ["mekanism.core.MekanismClient"],
+    "server": ["mekanism.core.MekanismServer"]
   },
-  "mixins": [
-    "modid.mixins.json"
-  ],
-
+  "mixins": ["mekanism.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.7.4",
+    "fabricloader": ">=0.7.1",
     "fabric": "*",
-    "minecraft": "1.16.x"
+    "minecraft": "1.16.x",
+    "libblockattributes_core": ">=0.7.1-pre.4",
+    "libblockattributes_items": ">=0.7.1-pre.4",
+    "libblockattributes_fluids": ">=0.7.1-pre.4"
   },
   "suggests": {
     "flamingo": "*"
+  },
+  "accessWidener": "mekanism.accesswidener",
+  "custom": {
+    "waila:plugins": {
+      "id": "mekanism:hwyla",
+      "initializer": "mekanism.integration.waila.WailaModule"
+    }
   }
 }
