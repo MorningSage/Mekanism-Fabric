@@ -3,6 +3,9 @@ package mekanism.api.recipes;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import mekanism.api._helpers_pls_remove.FluidStack;
+import mekanism.api._helpers_pls_remove.TriPredicate;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
@@ -12,10 +15,8 @@ import mekanism.api.recipes.inputs.FluidStackIngredient;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import mekanism.api.recipes.inputs.chemical.GasStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.common.util.TriPredicate;
-import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Contract;
 
@@ -32,8 +33,8 @@ public abstract class PressurizedReactionRecipe extends MekanismRecipe implement
     private final ItemStack outputItem;
     private final GasStack outputGas;
 
-    public PressurizedReactionRecipe(ResourceLocation id, ItemStackIngredient inputSolid, FluidStackIngredient inputFluid, GasStackIngredient inputGas,
-          FloatingLong energyRequired, int duration, ItemStack outputItem, GasStack outputGas) {
+    public PressurizedReactionRecipe(Identifier id, ItemStackIngredient inputSolid, FluidStackIngredient inputFluid, GasStackIngredient inputGas,
+        FloatingLong energyRequired, int duration, ItemStack outputItem, GasStack outputGas) {
         super(id);
         this.inputSolid = inputSolid;
         this.inputFluid = inputFluid;
@@ -82,7 +83,7 @@ public abstract class PressurizedReactionRecipe extends MekanismRecipe implement
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         inputSolid.write(buffer);
         inputFluid.write(buffer);
         inputGas.write(buffer);

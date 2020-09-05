@@ -15,7 +15,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodsReturnNonnullByDefault
 public abstract class GasToGasRecipe extends ChemicalToChemicalRecipe<Gas, GasStack, GasStackIngredient> {
 
-    public GasToGasRecipe(ResourceLocation id, GasStackIngredient input, GasStack output) {
+    public GasToGasRecipe(Identifier id, GasStackIngredient input, GasStack output) {
         super(id, input, output);
     }
 

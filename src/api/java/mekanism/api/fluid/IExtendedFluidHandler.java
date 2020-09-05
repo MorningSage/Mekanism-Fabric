@@ -1,19 +1,21 @@
 package mekanism.api.fluid;
 
+import mekanism.api._helpers_pls_remove.FluidAction;
 import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
 import net.minecraft.fluid.Fluid;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-/**
- * Extended version of {@link IFluidHandler} to make it easier to integrate with Mekanism
- */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface IExtendedFluidHandler extends IFluidHandler {
+public interface IExtendedFluidHandler {
+
+
+    int getTanks();
+    @Nonnull FluidStack getFluidInTank(int tank);
 
     /**
      * Overrides the stack in the given tank. This method may throw an error if it is called unexpectedly.
@@ -29,7 +31,6 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * <p>
      * Inserts a {@link FluidStack} into a given tank and return the remainder. The {@link FluidStack} <em>should not</em> be modified in this function!
      * </p>
-     * Note: This behaviour is subtly <strong>different</strong> from {@link IFluidHandler#fill(FluidStack, FluidAction)}
      *
      * @param tank   Tank to insert to.
      * @param stack  {@link FluidStack} to insert. This must not be modified by the tank.
@@ -60,7 +61,6 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * Inserts a {@link FluidStack} into this handler, distribution is left <strong>entirely</strong> to this {@link IExtendedFluidHandler}. The {@link FluidStack}
      * <em>should not</em> be modified in this function!
      * </p>
-     * Note: This behaviour is subtly <strong>different</strong> from {@link IFluidHandler#fill(FluidStack, FluidAction)}
      *
      * @param stack  {@link FluidStack} to insert. This must not be modified by the handler.
      * @param action The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
@@ -120,7 +120,6 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      *
      * Wrapped to properly use our method declarations
      */
-    @Override
     @Deprecated
     default int fill(FluidStack stack, FluidAction action) {
         return stack.getAmount() - insertFluid(stack, Action.fromFluidAction(action)).getAmount();
@@ -131,7 +130,6 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      *
      * Wrapped to properly use our method declarations
      */
-    @Override
     @Deprecated
     default FluidStack drain(FluidStack stack, FluidAction action) {
         return extractFluid(stack, Action.fromFluidAction(action));
@@ -142,7 +140,6 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      *
      * Wrapped to properly use our method declarations
      */
-    @Override
     @Deprecated
     default FluidStack drain(int amount, FluidAction action) {
         return extractFluid(amount, Action.fromFluidAction(action));

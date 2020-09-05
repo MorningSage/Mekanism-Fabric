@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.google.gson.JsonSyntaxException;
+import mekanism.api._helpers_pls_remove.CraftingHelper;
 import mekanism.api._helpers_pls_remove.ICondition;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.JsonConstants;
@@ -24,7 +25,6 @@ import net.minecraft.data.server.recipe.RecipeJsonProvider;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import net.minecraftforge.common.crafting.CraftingHelper;
 
 //TODO: We may also want to validate inputs, currently we are not validating our input ingredients as being valid, and are just validating the other parameters
 @FieldsAreNonnullByDefault

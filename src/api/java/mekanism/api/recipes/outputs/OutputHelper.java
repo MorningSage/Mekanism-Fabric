@@ -1,6 +1,7 @@
 package mekanism.api.recipes.outputs;
 
 import mekanism.api.Action;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
@@ -12,7 +13,6 @@ import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
 import mekanism.api.recipes.SawmillRecipe.ChanceOutput;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;

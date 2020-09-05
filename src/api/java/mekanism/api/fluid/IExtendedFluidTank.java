@@ -1,6 +1,8 @@
 package mekanism.api.fluid;
 
+import mekanism.api._helpers_pls_remove.FluidAction;
 import mekanism.api._helpers_pls_remove.FluidStack;
+import mekanism.api._helpers_pls_remove.IFluidTank;
 import mekanism.api._helpers_pls_remove.INBTSerializable;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
@@ -8,8 +10,6 @@ import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.inventory.AutomationType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -32,7 +32,6 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
      * Inserts a {@link FluidStack} into this {@link IExtendedFluidTank} and return the remainder. The {@link FluidStack} <em>should not</em> be modified in this
      * function!
      * </p>
-     * Note: This behaviour is subtly <strong>different</strong> from {@link net.minecraftforge.fluids.capability.IFluidHandler#fill(FluidStack, FluidAction)}
      *
      * @param stack          {@link FluidStack} to insert. This must not be modified by the tank.
      * @param action         The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
@@ -222,10 +221,10 @@ public interface IExtendedFluidTank extends IFluidTank, INBTSerializable<Compoun
     }
 
     @Override
-    default CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    default CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         if (!isEmpty()) {
-            nbt.put(NBTConstants.STORED, getFluid().writeToNBT(new CompoundNBT()));
+            nbt.put(NBTConstants.STORED, getFluid().writeToNBT(new CompoundTag()));
         }
         return nbt;
     }

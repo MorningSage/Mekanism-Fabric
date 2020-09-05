@@ -1,12 +1,12 @@
 package mekanism.api.recipes;
 
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.recipes.inputs.FluidStackIngredient;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -20,7 +20,7 @@ public abstract class FluidToFluidRecipe extends MekanismRecipe implements Predi
     private final FluidStackIngredient input;
     private final FluidStack output;
 
-    public FluidToFluidRecipe(ResourceLocation id, FluidStackIngredient input, FluidStack output) {
+    public FluidToFluidRecipe(Identifier id, FluidStackIngredient input, FluidStack output) {
         super(id);
         this.input = input;
         this.output = output;
@@ -45,7 +45,7 @@ public abstract class FluidToFluidRecipe extends MekanismRecipe implements Predi
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         input.write(buffer);
         output.writeToPacket(buffer);
     }

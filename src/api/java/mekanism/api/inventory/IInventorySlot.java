@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mekanism.api._helpers_pls_remove.INBTSerializable;
+import mekanism.api._helpers_pls_remove.ItemHandlerHelper;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
 import mekanism.api.IContentsListener;
@@ -11,8 +12,6 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.slot.Slot;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -143,7 +142,7 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
     }
 
     /**
-     * Retrieves the maximum stack size allowed to exist in this {@link IInventorySlot}. Unlike {@link IItemHandler#getSlotLimit(int)} this takes a stack that it can use
+     * Retrieves the maximum stack size allowed to exist in this {@link IInventorySlot}. This takes a stack that it can use
      * for checking max stack size, if this {@link IInventorySlot} wants to respect the maximum stack size.
      *
      * @param stack The stack we want to know the limit for in case this {@link IInventorySlot} wants to obey the stack limit. If the empty stack is passed, then it

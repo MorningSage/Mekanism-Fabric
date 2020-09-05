@@ -4,8 +4,9 @@
   "package": "mekanism.api.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "IngredientMixin",
     "TagBuilderMixin",
-    "TestMixin",
+    "accessors.FluidTagsAccessor",
     "accessors.ItemTagsAccessor"
   ],
   "client": [

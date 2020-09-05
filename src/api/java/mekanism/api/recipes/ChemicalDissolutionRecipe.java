@@ -9,7 +9,7 @@ import mekanism.api.chemical.merged.BoxedChemicalStack;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import mekanism.api.recipes.inputs.chemical.GasStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 
@@ -32,7 +32,7 @@ public abstract class ChemicalDissolutionRecipe extends MekanismRecipe implement
     private final GasStackIngredient gasInput;
     private final BoxedChemicalStack output;
 
-    public ChemicalDissolutionRecipe(ResourceLocation id, ItemStackIngredient itemInput, GasStackIngredient gasInput, ChemicalStack<?> output) {
+    public ChemicalDissolutionRecipe(Identifier id, ItemStackIngredient itemInput, GasStackIngredient gasInput, ChemicalStack<?> output) {
         super(id);
         this.itemInput = itemInput;
         this.gasInput = gasInput;
@@ -62,10 +62,10 @@ public abstract class ChemicalDissolutionRecipe extends MekanismRecipe implement
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         itemInput.write(buffer);
         gasInput.write(buffer);
-        buffer.writeEnumValue(output.getChemicalType());
+        buffer.writeEnumConstant(output.getChemicalType());
         output.getChemicalStack().writeToPacket(buffer);
     }
 }

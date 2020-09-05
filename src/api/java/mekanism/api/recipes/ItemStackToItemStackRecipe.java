@@ -5,7 +5,7 @@ import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 
@@ -25,7 +25,7 @@ public abstract class ItemStackToItemStackRecipe extends MekanismRecipe implemen
     private final ItemStackIngredient input;
     private final ItemStack output;
 
-    public ItemStackToItemStackRecipe(ResourceLocation id, ItemStackIngredient input, ItemStack output) {
+    public ItemStackToItemStackRecipe(Identifier id, ItemStackIngredient input, ItemStack output) {
         super(id);
         this.input = input;
         this.output = output.copy();
@@ -55,7 +55,7 @@ public abstract class ItemStackToItemStackRecipe extends MekanismRecipe implemen
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         input.write(buffer);
         buffer.writeItemStack(output);
     }

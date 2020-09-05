@@ -5,7 +5,7 @@ import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.inputs.chemical.GasStackIngredient;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 
@@ -23,7 +23,7 @@ public abstract class ChemicalInfuserRecipe extends MekanismRecipe implements Bi
     private final GasStackIngredient rightInput;
     private final GasStack output;
 
-    public ChemicalInfuserRecipe(ResourceLocation id, GasStackIngredient leftInput, GasStackIngredient rightInput, GasStack output) {
+    public ChemicalInfuserRecipe(Identifier id, GasStackIngredient leftInput, GasStackIngredient rightInput, GasStack output) {
         super(id);
         this.leftInput = leftInput;
         this.rightInput = rightInput;
@@ -53,7 +53,7 @@ public abstract class ChemicalInfuserRecipe extends MekanismRecipe implements Bi
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         leftInput.write(buffer);
         rightInput.write(buffer);
         output.writeToPacket(buffer);

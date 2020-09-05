@@ -9,7 +9,7 @@ import mekanism.api.chemical.ChemicalType;
 import mekanism.api.chemical.merged.BoxedChemicalStack;
 import mekanism.api.recipes.inputs.chemical.IChemicalStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 
@@ -27,7 +27,7 @@ public abstract class ChemicalCrystallizerRecipe extends MekanismRecipe implemen
     private final IChemicalStackIngredient<?, ?> input;
     private final ItemStack output;
 
-    public ChemicalCrystallizerRecipe(ResourceLocation id, IChemicalStackIngredient<?, ?> input, ItemStack output) {
+    public ChemicalCrystallizerRecipe(Identifier id, IChemicalStackIngredient<?, ?> input, ItemStack output) {
         super(id);
         this.input = input;
         this.chemicalType = ChemicalType.getTypeFor(input);
@@ -61,8 +61,8 @@ public abstract class ChemicalCrystallizerRecipe extends MekanismRecipe implemen
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
-        buffer.writeEnumValue(chemicalType);
+    public void write(PacketByteBuf buffer) {
+        buffer.writeEnumConstant(chemicalType);
         input.write(buffer);
         buffer.writeItemStack(output);
     }

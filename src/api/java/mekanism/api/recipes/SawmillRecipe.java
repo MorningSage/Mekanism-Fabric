@@ -6,7 +6,7 @@ import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 
@@ -28,7 +28,7 @@ public abstract class SawmillRecipe extends MekanismRecipe implements Predicate<
     private final ItemStack secondaryOutput;
     private final double secondaryChance;
 
-    public SawmillRecipe(ResourceLocation id, ItemStackIngredient input, ItemStack mainOutput, ItemStack secondaryOutput, double secondaryChance) {
+    public SawmillRecipe(Identifier id, ItemStackIngredient input, ItemStack mainOutput, ItemStack secondaryOutput, double secondaryChance) {
         super(id);
         this.input = input;
         this.mainOutput = mainOutput;
@@ -63,7 +63,7 @@ public abstract class SawmillRecipe extends MekanismRecipe implements Predicate<
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         input.write(buffer);
         buffer.writeItemStack(mainOutput);
         buffer.writeItemStack(secondaryOutput);

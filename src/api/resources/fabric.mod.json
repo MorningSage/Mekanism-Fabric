@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "mekanism",
+  "id": "mekanism-api",
   "version": "1.0.0",
   "name": "Mekanism Api",
   "description": "",
@@ -10,7 +10,6 @@
     "sources": "https://github.com/mekanism/Mekanism"
   },
   "license": "MIT",
-  "icon": "assets/mekanism/icon.png",
   "environment": "*",
   "entrypoints": {
   },

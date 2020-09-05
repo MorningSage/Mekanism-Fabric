@@ -4,6 +4,7 @@ import mekanism.api.math.FloatingLong;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.PacketByteBuf;
 
 // Only a placeholder until Fabric actually decides to do something
@@ -67,5 +68,13 @@ public class FluidStack {
 
     public void writeToPacket(PacketByteBuf buffer) {
 
+    }
+
+    public CompoundTag writeToNBT(CompoundTag compoundTag) {
+        return compoundTag;
+    }
+
+    public FluidStack copy() {
+        return null;
     }
 }

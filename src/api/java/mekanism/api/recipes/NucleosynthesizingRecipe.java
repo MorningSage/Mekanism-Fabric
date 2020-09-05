@@ -6,7 +6,7 @@ import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import mekanism.api.recipes.inputs.chemical.GasStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 /**
@@ -19,13 +19,13 @@ public abstract class NucleosynthesizingRecipe extends ItemStackGasToItemStackRe
 
     private final int duration;
 
-    public NucleosynthesizingRecipe(ResourceLocation id, ItemStackIngredient itemInput, GasStackIngredient gasInput, ItemStack output, int duration) {
+    public NucleosynthesizingRecipe(Identifier id, ItemStackIngredient itemInput, GasStackIngredient gasInput, ItemStack output, int duration) {
         super(id, itemInput, gasInput, output);
         this.duration = duration;
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         super.write(buffer);
         buffer.writeVarInt(duration);
     }

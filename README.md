@@ -3,7 +3,7 @@
 
 # Mekanism for Minecraft 1.16 #
 
-Mekanism is a Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, 
+Mekanism is a Minecraft add-on featuring high-tech machinery that can be used to create powerful mekanism.tools, 
 armor, and weapons. You can find more detail on the features at the [**Official Website**](http://aidancbrady.com/mekanism/).
 Mekanism is an independent tech mod that brings low, mid, and high tier machinery to Minecraft. The 
 mod doesn't have an actual goal, and you'll understand this when you see all the random content 
@@ -57,7 +57,7 @@ dependencies {
     runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}")// core
     runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:additions")// Mekanism: Additions
     runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:generators")// Mekanism: Generators
-    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:tools")// Mekanism: Tools
+    runtimeOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:mekanism.tools")// Mekanism: Tools
 }
 ```
 
@@ -83,7 +83,7 @@ mekanism_version=1.16.1-10.0.0.423
   * JaSpr
 
 ## YourKit ##
-YourKit supports open source projects with innovative and intelligent tools for monitoring and 
+YourKit supports open source projects with innovative and intelligent mekanism.tools for monitoring and 
 profiling Java and .NET applications. YourKit is the creator of [YourKit Java Profiler](https://www.yourkit.com/java/profiler), 
 [YourKit .NET Profiler](https://www.yourkit.com/.net/profiler/) and [YourKit YouMonitor](https://www.yourkit.com/youmonitor/).
 Mekanism uses YourKit for all our profiling needs!

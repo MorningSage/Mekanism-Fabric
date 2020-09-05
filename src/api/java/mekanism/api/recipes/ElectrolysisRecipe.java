@@ -1,14 +1,14 @@
 package mekanism.api.recipes;
 
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.inputs.FluidStackIngredient;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Contract;
 
@@ -26,7 +26,7 @@ public abstract class ElectrolysisRecipe extends MekanismRecipe implements Predi
     private final GasStack rightGasOutput;
     private final FloatingLong energyMultiplier;
 
-    public ElectrolysisRecipe(ResourceLocation id, FluidStackIngredient input, FloatingLong energyMultiplier, GasStack leftGasOutput, GasStack rightGasOutput) {
+    public ElectrolysisRecipe(Identifier id, FluidStackIngredient input, FloatingLong energyMultiplier, GasStack leftGasOutput, GasStack rightGasOutput) {
         super(id);
         this.input = input;
         this.energyMultiplier = energyMultiplier;
@@ -61,7 +61,7 @@ public abstract class ElectrolysisRecipe extends MekanismRecipe implements Predi
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         input.write(buffer);
         energyMultiplier.writeToBuffer(buffer);
         leftGasOutput.writeToPacket(buffer);

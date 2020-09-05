@@ -6,7 +6,7 @@ import mekanism.api.annotations.NonNull;
 import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -20,7 +20,7 @@ public abstract class ItemStackToEnergyRecipe extends MekanismRecipe implements 
     protected final ItemStackIngredient input;
     protected final FloatingLong output;
 
-    public ItemStackToEnergyRecipe(ResourceLocation id, ItemStackIngredient input, FloatingLong output) {
+    public ItemStackToEnergyRecipe(Identifier id, ItemStackIngredient input, FloatingLong output) {
         super(id);
         this.input = input;
         //Ensure that the floating long we are storing is immutable
@@ -45,7 +45,7 @@ public abstract class ItemStackToEnergyRecipe extends MekanismRecipe implements 
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         input.write(buffer);
         output.writeToBuffer(buffer);
     }

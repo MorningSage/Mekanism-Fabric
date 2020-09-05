@@ -5,13 +5,10 @@ import mekanism.api.NBTConstants;
 import mekanism.api.chemical.attribute.ChemicalAttribute;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.IHasTranslationKey;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.registries.IRegistryDelegate;
 
 import javax.annotation.Nonnull;

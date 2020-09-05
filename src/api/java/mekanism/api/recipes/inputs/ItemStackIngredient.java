@@ -5,15 +5,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import mekanism.api.JsonConstants;
+import mekanism.api._helpers_pls_remove.NBTIngredient;
 import mekanism.api.annotations.NonNull;
+import mekanism.api.mixin.accessors.IngredientAccessor;
+import mekanism.api.providers.IItemProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.JSONUtils;
-import net.minecraftforge.common.crafting.NBTIngredient;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.tag.Tag;
+import net.minecraft.util.JsonHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,7 +33,7 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         //Support NBT that is on the stack in case it matters
         //It is a protected constructor so pretend we are extending it and implementing it via the {}
         // Note: Only bother making it an NBT ingredient if the stack has NBT, otherwise there is no point in doing the extra checks
-        Ingredient ingredient = stack.hasTag() ? new NBTIngredient(stack) {} : Ingredient.fromStacks(stack);
+        Ingredient ingredient = stack.hasTag() ? new NBTIngredient(stack) {} : Ingredient.ofStacks(stack);
         return from(ingredient, amount);
     }
 
@@ -44,11 +45,11 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         return from(new ItemStack(item), amount);
     }
 
-    public static ItemStackIngredient from(@Nonnull ITag<Item> itemTag) {
+    public static ItemStackIngredient from(@Nonnull Tag<Item> itemTag) {
         return from(itemTag, 1);
     }
 
-    public static ItemStackIngredient from(@Nonnull ITag<Item> itemTag, int amount) {
+    public static ItemStackIngredient from(@Nonnull Tag<Item> itemTag, int amount) {
         return from(Ingredient.fromTag(itemTag), amount);
     }
 
@@ -60,9 +61,9 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         return new Single(ingredient, amount);
     }
 
-    public static ItemStackIngredient read(PacketBuffer buffer) {
+    public static ItemStackIngredient read(PacketByteBuf buffer) {
         //TODO: Allow supporting serialization of different types than just the ones we implement?
-        IngredientType type = buffer.readEnumValue(IngredientType.class);
+        IngredientType type = buffer.readEnumConstant(IngredientType.class);
         if (type == IngredientType.SINGLE) {
             return Single.read(buffer);
         }
@@ -96,7 +97,7 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         int amount = 1;
         if (jsonObject.has(JsonConstants.AMOUNT)) {
             JsonElement count = jsonObject.get(JsonConstants.AMOUNT);
-            if (!JSONUtils.isNumber(count)) {
+            if (!JsonHelper.isNumber(count)) {
                 throw new JsonSyntaxException("Expected amount to be a number that is one or larger.");
             }
             amount = count.getAsJsonPrimitive().getAsInt();
@@ -104,9 +105,9 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
                 throw new JsonSyntaxException("Expected amount to larger than or equal to one");
             }
         }
-        JsonElement jsonelement = JSONUtils.isJsonArray(jsonObject, JsonConstants.INGREDIENT) ? JSONUtils.getJsonArray(jsonObject, JsonConstants.INGREDIENT) :
-                                  JSONUtils.getJsonObject(jsonObject, JsonConstants.INGREDIENT);
-        Ingredient ingredient = Ingredient.deserialize(jsonelement);
+        JsonElement jsonelement = JsonHelper.hasArray(jsonObject, JsonConstants.INGREDIENT) ? JsonHelper.getArray(jsonObject, JsonConstants.INGREDIENT) :
+            JsonHelper.getObject(jsonObject, JsonConstants.INGREDIENT);
+        Ingredient ingredient = Ingredient.fromJson(jsonelement);
         return from(ingredient, amount);
     }
 
@@ -167,7 +168,7 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         public List<@NonNull ItemStack> getRepresentations() {
             //TODO: Can this be cached some how
             List<@NonNull ItemStack> representations = new ArrayList<>();
-            for (ItemStack stack : ingredient.getMatchingStacks()) {
+            for (ItemStack stack : ((IngredientAccessor) ingredient).getMatchingStacksSafe()) {
                 if (stack.getCount() == amount) {
                     representations.add(stack);
                 } else {
@@ -180,8 +181,8 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         }
 
         @Override
-        public void write(PacketBuffer buffer) {
-            buffer.writeEnumValue(IngredientType.SINGLE);
+        public void write(PacketByteBuf buffer) {
+            buffer.writeEnumConstant(IngredientType.SINGLE);
             ingredient.write(buffer);
             buffer.writeVarInt(amount);
         }
@@ -193,12 +194,12 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
             if (amount > 1) {
                 json.addProperty(JsonConstants.AMOUNT, amount);
             }
-            json.add("ingredient", ingredient.serialize());
+            json.add("ingredient", ingredient.toJson());
             return json;
         }
 
-        public static Single read(PacketBuffer buffer) {
-            return new Single(Ingredient.read(buffer), buffer.readVarInt());
+        public static Single read(PacketByteBuf buffer) {
+            return new Single(Ingredient.fromPacket(buffer), buffer.readVarInt());
         }
     }
 
@@ -243,8 +244,8 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
         }
 
         @Override
-        public void write(PacketBuffer buffer) {
-            buffer.writeEnumValue(IngredientType.MULTI);
+        public void write(PacketByteBuf buffer) {
+            buffer.writeEnumConstant(IngredientType.MULTI);
             buffer.writeVarInt(ingredients.length);
             for (ItemStackIngredient ingredient : ingredients) {
                 ingredient.write(buffer);
@@ -261,7 +262,7 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
             return json;
         }
 
-        public static ItemStackIngredient read(PacketBuffer buffer) {
+        public static ItemStackIngredient read(PacketByteBuf buffer) {
             ItemStackIngredient[] ingredients = new ItemStackIngredient[buffer.readVarInt()];
             for (int i = 0; i < ingredients.length; i++) {
                 ingredients[i] = ItemStackIngredient.read(buffer);

@@ -5,6 +5,7 @@ import mekanism.api.JsonConstants;
 import mekanism.api.SerializerHelper;
 import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.NonNull;
+import mekanism.api.mixin.accessors.FluidTagsAccessor;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.tag.FluidTags;
@@ -229,7 +230,7 @@ public abstract class FluidStackIngredient implements InputIngredient<@NonNull F
         }
 
         public static Tagged read(PacketByteBuf buffer) {
-            return new Tagged(FluidTags.register(buffer.readIdentifier().toString()), buffer.readVarInt());
+            return new Tagged(FluidTagsAccessor.register(buffer.readIdentifier().toString()), buffer.readVarInt());
         }
     }
 

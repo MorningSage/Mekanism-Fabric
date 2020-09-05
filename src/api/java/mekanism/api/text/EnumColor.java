@@ -7,13 +7,11 @@ import mekanism.api.math.MathUtils;
 import net.minecraft.block.MaterialColor;
 import net.minecraft.item.Item;
 import net.minecraft.tag.Tag;
-import net.minecraft.tags.ITag;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.DyeColor;
-import net.minecraftforge.common.Tags;
 
 /**
  * Simple color enum for adding colors to in-game GUI strings of text.

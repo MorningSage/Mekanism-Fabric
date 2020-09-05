@@ -1,13 +1,13 @@
 package mekanism.api.recipes;
 
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.inputs.FluidStackIngredient;
 import mekanism.api.recipes.inputs.chemical.GasStackIngredient;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -26,17 +26,17 @@ public abstract class RotaryRecipe extends MekanismRecipe {
     private boolean hasGasToFluid = true;
     private boolean hasFluidToGas = true;
 
-    public RotaryRecipe(ResourceLocation id, FluidStackIngredient fluidInput, GasStack gasOutput) {
+    public RotaryRecipe(Identifier id, FluidStackIngredient fluidInput, GasStack gasOutput) {
         this(id, fluidInput, EMPTY_GAS_INPUT, gasOutput, FluidStack.EMPTY);
         hasGasToFluid = false;
     }
 
-    public RotaryRecipe(ResourceLocation id, GasStackIngredient gasInput, FluidStack fluidOutput) {
+    public RotaryRecipe(Identifier id, GasStackIngredient gasInput, FluidStack fluidOutput) {
         this(id, EMPTY_FLUID_INPUT, gasInput, GasStack.EMPTY, fluidOutput);
         hasFluidToGas = false;
     }
 
-    public RotaryRecipe(ResourceLocation id, FluidStackIngredient fluidInput, GasStackIngredient gasInput, GasStack gasOutput, FluidStack fluidOutput) {
+    public RotaryRecipe(Identifier id, FluidStackIngredient fluidInput, GasStackIngredient gasInput, GasStack gasOutput, FluidStack fluidOutput) {
         super(id);
         this.gasInput = gasInput;
         this.fluidInput = fluidInput;
@@ -93,7 +93,7 @@ public abstract class RotaryRecipe extends MekanismRecipe {
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         buffer.writeBoolean(hasFluidToGas);
         if (hasFluidToGas) {
             fluidInput.write(buffer);

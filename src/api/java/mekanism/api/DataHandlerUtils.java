@@ -1,5 +1,7 @@
 package mekanism.api;
 
+import mekanism.api._helpers_pls_remove.IFluidTank;
+import mekanism.api._helpers_pls_remove.INBTSerializable;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
@@ -7,8 +9,6 @@ import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.inventory.IInventorySlot;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fluids.IFluidTank;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;

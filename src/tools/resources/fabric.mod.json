@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "mekanism-tools",
+  "version": "1.0.0",
+  "name": "Mekanism Tools",
+  "description": "",
+  "authors": ["Mekanism"],
+  "contact": {
+    "homepage": "http://aidancbrady.com/mekanism/",
+    "sources": "https://github.com/mekanism/Mekanism"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "client": ["mekanism.tools.client.ToolsClientRegistration"],
+    "rei_plugins": [
+      "mekanism.tools.client.rei.ToolsREI"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.7.1",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  }
+}

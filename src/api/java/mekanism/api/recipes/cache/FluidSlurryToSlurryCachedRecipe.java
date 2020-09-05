@@ -1,5 +1,6 @@
 package mekanism.api.recipes.cache;
 
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.chemical.slurry.Slurry;
@@ -9,7 +10,6 @@ import mekanism.api.recipes.cache.chemical.FluidChemicalToChemicalCachedRecipe;
 import mekanism.api.recipes.inputs.IInputHandler;
 import mekanism.api.recipes.inputs.chemical.SlurryStackIngredient;
 import mekanism.api.recipes.outputs.IOutputHandler;
-import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

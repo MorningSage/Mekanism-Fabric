@@ -1,5 +1,7 @@
 package mekanism.api;
 
+import mekanism.api._helpers_pls_remove.FluidAction;
+
 public enum Action {
     EXECUTE(FluidAction.EXECUTE),
     SIMULATE(FluidAction.SIMULATE);

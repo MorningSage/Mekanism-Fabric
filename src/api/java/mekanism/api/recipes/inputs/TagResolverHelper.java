@@ -1,7 +1,6 @@
 package mekanism.api.recipes.inputs;
 
 import net.minecraft.tag.Tag;
-import net.minecraft.tags.ITag;
 
 import java.util.Collections;
 import java.util.List;

@@ -2,6 +2,7 @@ package mekanism.api.recipes.inputs;
 
 import mekanism.api.Action;
 import mekanism.api.MekanismAPI;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
@@ -9,7 +10,6 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;

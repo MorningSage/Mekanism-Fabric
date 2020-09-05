@@ -254,7 +254,7 @@ task generateData(type: RunClientTask, dependsOn: downloadAssets, group: "Mekani
     classpath sourceSets.api.output
     classpath sourceSets.main.output
     classpath sourceSets.datagen.output
-    systemProperty "appeng.generateData", "true"
+    systemProperty "mekanism.generateData", "true"
 }
 build.dependsOn generateData
 

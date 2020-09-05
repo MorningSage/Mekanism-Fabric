@@ -4,22 +4,18 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 
-/**
- * A sided variant of {@link IItemHandlerModifiable}
- */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public interface ISidedItemHandler extends IItemHandlerModifiable {
+public interface ISidedItemHandler {
 
     /**
      * The side this {@link ISidedItemHandler} is for. This defaults to null, which is for internal use.
      *
-     * @return The default side to use for the normal {@link IItemHandler} methods when wrapping them into {@link ISidedItemHandler} methods.
+     * @return The default side to use when wrapping them into {@link ISidedItemHandler} methods.
      */
     @Nullable
     default Direction getInventorySideFor() {
@@ -27,8 +23,6 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
     }
 
     /**
-     * A sided variant of {@link IItemHandlerModifiable#setStackInSlot(int, ItemStack)}, docs copied for convenience.
-     *
      * Overrides the stack in the given slot. This method is used by the standard Forge helper methods and classes. It is not intended for general use by other mods, and
      * the handler may throw an error if it is called unexpectedly.
      *
@@ -40,14 +34,11 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     void setStackInSlot(int slot, ItemStack stack, @Nullable Direction side);
 
-    @Override
     default void setStackInSlot(int slot, ItemStack stack) {
         setStackInSlot(slot, stack, getInventorySideFor());
     }
 
     /**
-     * A sided variant of {@link IItemHandler#getSlots()}, docs copied for convenience.
-     *
      * Returns the number of slots available
      *
      * @param side The side we are interacting with the handler from (null for internal).
@@ -56,14 +47,11 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     int getSlots(@Nullable Direction side);
 
-    @Override
     default int getSlots() {
         return getSlots(getInventorySideFor());
     }
 
     /**
-     * A sided variant of {@link IItemHandler#getStackInSlot(int)}, docs copied for convenience.
-     *
      * Returns the {@link ItemStack} in a given slot.
      *
      * The result's stack size may be greater than the itemstack's max size.
@@ -87,14 +75,11 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     ItemStack getStackInSlot(int slot, @Nullable Direction side);
 
-    @Override
     default ItemStack getStackInSlot(int slot) {
         return getStackInSlot(slot, getInventorySideFor());
     }
 
     /**
-     * A sided variant of {@link IItemHandler#insertItem(int, ItemStack, boolean)}, docs copied for convenience.
-     *
      * <p>
      * Inserts an {@link ItemStack} into the given slot and return the remainder. The {@link ItemStack} <em>should not</em> be modified in this function!
      * </p>
@@ -111,18 +96,15 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     ItemStack insertItem(int slot, ItemStack stack, @Nullable Direction side, Action action);
 
-    @Override
     default ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
         return insertItem(slot, stack, getInventorySideFor(), Action.get(!simulate));
     }
 
     /**
-     * A sided variant of {@link IItemHandler#extractItem(int, int, boolean)}, docs copied for convenience.
-     *
      * Extracts an {@link ItemStack} from the given slot.
      * <p>
      * The returned value must be empty if nothing is extracted, otherwise its stack size must be less than or equal to {@code amount} and {@link
-     * ItemStack#getMaxStackSize()}.
+     * ItemStack#getMaxCount()}.
      * </p>
      *
      * @param slot   Slot to extract from.
@@ -137,14 +119,11 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     ItemStack extractItem(int slot, int amount, @Nullable Direction side, Action action);
 
-    @Override
     default ItemStack extractItem(int slot, int amount, boolean simulate) {
         return extractItem(slot, amount, getInventorySideFor(), Action.get(!simulate));
     }
 
     /**
-     * A sided variant of {@link IItemHandler#getSlotLimit(int)}, docs copied for convenience.
-     *
      * Retrieves the maximum stack size allowed to exist in the given slot.
      *
      * @param slot Slot to query.
@@ -154,16 +133,13 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     int getSlotLimit(int slot, @Nullable Direction side);
 
-    @Override
     default int getSlotLimit(int slot) {
         return getSlotLimit(slot, getInventorySideFor());
     }
 
     /**
-     * A sided variant of {@link IItemHandler#isItemValid(int, ItemStack)}, docs copied for convenience.
-     *
      * <p>
-     * This function re-implements the vanilla function {@link IInventory#isItemValidForSlot(int, ItemStack)}. It should be used instead of simulated insertions in cases
+     * This function re-implements the vanilla function {@link Inventory#isValid(int, ItemStack)}. It should be used instead of simulated insertions in cases
      * where the contents and state of the inventory are irrelevant, mainly for the purpose of automation and logic (for instance, testing if a minecart can wait to
      * deposit its items into a full inventory, or if the items in the minecart can never be placed into the inventory and should move on).
      * </p>
@@ -182,7 +158,6 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     boolean isItemValid(int slot, ItemStack stack, @Nullable Direction side);
 
-    @Override
     default boolean isItemValid(int slot, ItemStack stack) {
         return isItemValid(slot, stack, getInventorySideFor());
     }

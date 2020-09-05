@@ -7,7 +7,7 @@ import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.recipes.inputs.ItemStackIngredient;
 import mekanism.api.recipes.inputs.chemical.InfusionStackIngredient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 
@@ -25,7 +25,7 @@ public abstract class MetallurgicInfuserRecipe extends MekanismRecipe implements
     private final InfusionStackIngredient infusionInput;
     private final ItemStack output;
 
-    public MetallurgicInfuserRecipe(ResourceLocation id, ItemStackIngredient itemInput, InfusionStackIngredient infusionInput, ItemStack output) {
+    public MetallurgicInfuserRecipe(Identifier id, ItemStackIngredient itemInput, InfusionStackIngredient infusionInput, ItemStack output) {
         super(id);
         this.itemInput = itemInput;
         this.infusionInput = infusionInput;
@@ -55,7 +55,7 @@ public abstract class MetallurgicInfuserRecipe extends MekanismRecipe implements
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
+    public void write(PacketByteBuf buffer) {
         itemInput.write(buffer);
         infusionInput.write(buffer);
         buffer.writeItemStack(output);
