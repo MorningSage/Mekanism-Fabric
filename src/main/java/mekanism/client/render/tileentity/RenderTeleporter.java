@@ -1,6 +1,6 @@
 package mekanism.client.render.tileentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.EnumMap;
 import java.util.Map;
 import javax.annotation.Nullable;

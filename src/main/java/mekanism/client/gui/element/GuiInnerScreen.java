@@ -1,6 +1,6 @@
 package mekanism.client.gui.element;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
@@ -9,17 +9,17 @@ import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.jei.interfaces.IJEIRecipeArea;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiInnerScreen extends GuiScalableElement implements IJEIRecipeArea<GuiInnerScreen> {
 
-    public static final ResourceLocation SCREEN = MekanismUtils.getResource(ResourceType.GUI, "inner_screen.png");
+    public static final Identifier SCREEN = MekanismUtils.getResource(ResourceType.GUI, "inner_screen.png");
 
-    private Supplier<List<ITextComponent>> renderStrings;
-    private Supplier<List<ITextComponent>> tooltipStrings;
+    private Supplier<List<Text>> renderStrings;
+    private Supplier<List<Text>> tooltipStrings;
 
-    private ResourceLocation[] recipeCategories;
+    private Identifier[] recipeCategories;
     private boolean centerY;
     private int spacing = 1;
     private int padding = 3;
@@ -29,13 +29,13 @@ public class GuiInnerScreen extends GuiScalableElement implements IJEIRecipeArea
         super(SCREEN, gui, x, y, width, height, 32, 32);
     }
 
-    public GuiInnerScreen(IGuiWrapper gui, int x, int y, int width, int height, Supplier<List<ITextComponent>> renderStrings) {
+    public GuiInnerScreen(IGuiWrapper gui, int x, int y, int width, int height, Supplier<List<Text>> renderStrings) {
         this(gui, x, y, width, height);
         this.renderStrings = renderStrings;
         defaultFormat();
     }
 
-    public GuiInnerScreen tooltip(Supplier<List<ITextComponent>> tooltipStrings) {
+    public GuiInnerScreen tooltip(Supplier<List<Text>> tooltipStrings) {
         this.tooltipStrings = tooltipStrings;
         active = true;
         return this;
@@ -75,13 +75,13 @@ public class GuiInnerScreen extends GuiScalableElement implements IJEIRecipeArea
         super.renderForeground(matrix, mouseX, mouseY);
 
         if (renderStrings != null) {
-            List<ITextComponent> list = renderStrings.get();
+            List<Text> list = renderStrings.get();
             float startY = relativeY + padding;
             if (centerY) {
                 int totalHeight = list.size() * 8 + spacing * (list.size() - 1);
                 startY = relativeY + getHeight() / 2F - totalHeight / 2F;
             }
-            for (ITextComponent text : renderStrings.get()) {
+            for (Text text : renderStrings.get()) {
                 drawText(matrix, text, relativeX + padding, startY);
                 startY += 8 + spacing;
             }
@@ -92,27 +92,27 @@ public class GuiInnerScreen extends GuiScalableElement implements IJEIRecipeArea
     public void renderToolTip(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         super.renderToolTip(matrix, mouseX, mouseY);
         if (tooltipStrings != null) {
-            List<ITextComponent> list = tooltipStrings.get();
+            List<Text> list = tooltipStrings.get();
             if (list != null && !list.isEmpty()) {
                 displayTooltips(matrix, list, mouseX, mouseY);
             }
         }
     }
 
-    private void drawText(MatrixStack matrix, ITextComponent text, float x, float y) {
+    private void drawText(MatrixStack matrix, Text text, float x, float y) {
         drawScaledTextScaledBound(matrix, text, x, y, screenTextColor(), getWidth() - padding * 2, textScale);
     }
 
     @Nonnull
     @Override
-    public GuiInnerScreen jeiCategories(@Nullable ResourceLocation... recipeCategories) {
+    public GuiInnerScreen jeiCategories(@Nullable Identifier... recipeCategories) {
         this.recipeCategories = recipeCategories;
         return this;
     }
 
     @Nullable
     @Override
-    public ResourceLocation[] getRecipeCategories() {
+    public Identifier[] getRecipeCategories() {
         return recipeCategories;
     }
 

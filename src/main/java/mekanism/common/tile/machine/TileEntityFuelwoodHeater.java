@@ -17,6 +17,7 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.ForgeHooks;
 
 public class TileEntityFuelwoodHeater extends TileEntityMekanism {
@@ -71,16 +72,16 @@ public class TileEntityFuelwoodHeater extends TileEntityMekanism {
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         burnTime = nbtTags.getInt(NBTConstants.BURN_TIME);
         maxBurnTime = nbtTags.getInt(NBTConstants.MAX_BURN_TIME);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putInt(NBTConstants.BURN_TIME, burnTime);
         nbtTags.putInt(NBTConstants.MAX_BURN_TIME, maxBurnTime);
         return nbtTags;

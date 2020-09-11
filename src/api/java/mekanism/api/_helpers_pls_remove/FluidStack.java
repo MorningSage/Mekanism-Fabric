@@ -34,6 +34,10 @@ public class FluidStack {
         return EMPTY;
     }
 
+    public static FluidStack loadFluidStackFromNBT(CompoundTag compound) {
+        return null;
+    }
+
     public Fluid getFluid() {
         return fluid;
     }
@@ -76,5 +80,13 @@ public class FluidStack {
 
     public FluidStack copy() {
         return null;
+    }
+
+    public void shrink(int amount) {
+
+    }
+
+    public void setAmount(int amount) {
+
     }
 }

@@ -1,26 +1,27 @@
 package mekanism.client.jei.interfaces;
 
 import javax.annotation.Nullable;
+
+import me.shedaniel.rei.plugin.DefaultPlugin;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.common.Mekanism;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mezz.jei.api.constants.VanillaRecipeCategoryUid;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.Element;
+import net.minecraft.util.Identifier;
 
-public interface IJEIRecipeArea<ELEMENT extends GuiElement> extends IGuiEventListener {
+public interface IJEIRecipeArea<ELEMENT extends GuiElement> extends Element {
 
     /**
      * @return null if not an active recipe area, otherwise the category
      */
     @Nullable
-    ResourceLocation[] getRecipeCategories();
+    Identifier[] getRecipeCategories();
 
     default boolean isActive() {
         return true;
     }
 
-    ELEMENT jeiCategories(@Nullable ResourceLocation... recipeCategories);
+    ELEMENT jeiCategories(@Nullable Identifier... recipeCategories);
 
     default ELEMENT jeiCategory(TileEntityMekanism tile) {
         return jeiCategories(tile.getBlockType().getRegistryName());
@@ -28,9 +29,9 @@ public interface IJEIRecipeArea<ELEMENT extends GuiElement> extends IGuiEventLis
 
     default ELEMENT jeiCrafting() {
         if (Mekanism.hooks.JEILoaded) {
-            return jeiCategories(VanillaRecipeCategoryUid.CRAFTING);
+            return jeiCategories(DefaultPlugin.CRAFTING);
         }
-        return jeiCategories((ResourceLocation) null);
+        return jeiCategories((Identifier) null);
     }
 
     default boolean isMouseOverJEIArea(double mouseX, double mouseY) {

@@ -1,10 +1,11 @@
 package mekanism.common.lib.distribution;
 
+import net.minecraft.util.math.Direction;
+
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.minecraft.util.Direction;
 
 /**
  * Keeps track of a target for emitting from various networks.

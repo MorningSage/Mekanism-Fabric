@@ -1,10 +1,6 @@
 package mekanism.common.content.network.transmitter;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.NBTConstants;
@@ -22,15 +18,14 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 
 public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEPTOR, NETWORK, TRANSMITTER>,
       TRANSMITTER extends Transmitter<ACCEPTOR, NETWORK, TRANSMITTER>> implements ITileWrapper {
@@ -184,7 +179,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     }
 
     @Nonnull
-    public LazyOptional<ACCEPTOR> getAcceptor(Direction side) {
+    public Optional<ACCEPTOR> getAcceptor(Direction side) {
         return acceptorCache.getCachedAcceptor(side);
     }
 
@@ -201,7 +196,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
             return connections;
         }
         for (Direction side : EnumUtils.DIRECTIONS) {
-            TileEntity tile = MekanismUtils.getTileEntity(getTileWorld(), getTilePos().offset(side));
+            BlockEntity tile = MekanismUtils.getTileEntity(getTileWorld(), getTilePos().offset(side));
             if (canConnectMutual(side, tile) && tile instanceof TileEntityTransmitter) {
                 Transmitter<?, ?, ?> transmitter = ((TileEntityTransmitter) tile).getTransmitter();
                 if (supportsTransmissionType(transmitter) && isValidTransmitter(transmitter)) {
@@ -219,7 +214,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         if (handlesRedstone() && redstoneReactive && redstonePowered) {
             return false;
         }
-        TileEntity tile = MekanismUtils.getTileEntity(getTileWorld(), getTilePos().offset(side));
+        BlockEntity tile = MekanismUtils.getTileEntity(getTileWorld(), getTilePos().offset(side));
         if (canConnectMutual(side, tile) && isValidAcceptor(tile, side)) {
             return true;
         }
@@ -234,7 +229,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         if (handlesRedstone() && redstoneReactive && redstonePowered) {
             return false;
         }
-        TileEntity tile = MekanismUtils.getTileEntity(getTileWorld(), getTilePos().offset(side));
+        BlockEntity tile = MekanismUtils.getTileEntity(getTileWorld(), getTilePos().offset(side));
         if (canConnectMutual(side, tile) && tile instanceof TileEntityTransmitter) {
             Transmitter<?, ?, ?> transmitter = ((TileEntityTransmitter) tile).getTransmitter();
             return supportsTransmissionType(transmitter) && isValidTransmitter(transmitter);
@@ -252,9 +247,9 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         }
         for (Direction side : EnumUtils.DIRECTIONS) {
             BlockPos offset = getTilePos().offset(side);
-            TileEntity tile = MekanismUtils.getTileEntity(getTileWorld(), offset);
+            BlockEntity tile = MekanismUtils.getTileEntity(getTileWorld(), offset);
             if (canConnectMutual(side, tile)) {
-                if (!isRemote() && !getTileWorld().isBlockPresent(offset)) {
+                if (!isRemote() && !getTileWorld().canSetBlock(offset)) {
                     getTransmitterTile().setForceUpdate();
                     continue;
                 }
@@ -284,7 +279,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     @Nullable
     public BlockPos getAdjacentConnectableTransmitterPos(Direction side) {
         BlockPos sidePos = getTilePos().offset(side);
-        TileEntity potentialTransmitterTile = MekanismUtils.getTileEntity(getTileWorld(), sidePos);
+        BlockEntity potentialTransmitterTile = MekanismUtils.getTileEntity(getTileWorld(), sidePos);
         if (canConnectMutual(side, potentialTransmitterTile) && potentialTransmitterTile instanceof TileEntityTransmitter) {
             Transmitter<?, ?, ?> transmitter = ((TileEntityTransmitter) potentialTransmitterTile).getTransmitter();
             if (supportsTransmissionType(transmitter) && isValidTransmitter(transmitter)) {
@@ -297,13 +292,13 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     /**
      * @apiNote Only call this from the server side
      */
-    public boolean isValidAcceptor(TileEntity tile, Direction side) {
+    public boolean isValidAcceptor(BlockEntity tile, Direction side) {
         //TODO: Rename this method better to make it more apparent that it caches and also listens to the acceptor
         //If it isn't a transmitter or the transmission type is different than the one the transmitter has
         return !(tile instanceof TileEntityTransmitter) || !supportsTransmissionType((TileEntityTransmitter) tile);
     }
 
-    public boolean canConnectMutual(Direction side, @Nullable TileEntity cachedTile) {
+    public boolean canConnectMutual(Direction side, @Nullable BlockEntity cachedTile) {
         if (!canConnect(side)) {
             return false;
         }
@@ -340,7 +335,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     }
 
     @Nonnull
-    public CompoundNBT getReducedUpdateTag(CompoundNBT updateTag) {
+    public CompoundTag getReducedUpdateTag(CompoundTag updateTag) {
         updateTag.putByte(NBTConstants.CURRENT_CONNECTIONS, currentTransmitterConnections);
         updateTag.putByte(NBTConstants.CURRENT_ACCEPTORS, acceptorCache.currentAcceptorConnections);
         for (int i = 0; i < EnumUtils.DIRECTIONS.length; i++) {
@@ -348,12 +343,12 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         }
         //Transmitter
         if (hasTransmitterNetwork()) {
-            updateTag.putUniqueId(NBTConstants.NETWORK, getTransmitterNetwork().getUUID());
+            updateTag.putUuid(NBTConstants.NETWORK, getTransmitterNetwork().getUUID());
         }
         return updateTag;
     }
 
-    public void handleUpdateTag(@Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(@Nonnull CompoundTag tag) {
         NBTUtils.setByteIfPresent(tag, NBTConstants.CURRENT_CONNECTIONS, connections -> currentTransmitterConnections = connections);
         NBTUtils.setByteIfPresent(tag, NBTConstants.CURRENT_ACCEPTORS, acceptors -> acceptorCache.currentAcceptorConnections = acceptors);
         for (int i = 0; i < EnumUtils.DIRECTIONS.length; i++) {
@@ -384,10 +379,10 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         setTransmitterNetwork(network);
     }
 
-    protected void handleContentsUpdateTag(@Nonnull NETWORK network, @Nonnull CompoundNBT tag) {
+    protected void handleContentsUpdateTag(@Nonnull NETWORK network, @Nonnull CompoundTag tag) {
     }
 
-    public void read(@Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull CompoundTag nbtTags) {
         redstoneReactive = nbtTags.getBoolean(NBTConstants.REDSTONE);
         for (int i = 0; i < EnumUtils.DIRECTIONS.length; i++) {
             int index = i;
@@ -396,7 +391,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     }
 
     @Nonnull
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public CompoundTag write(@Nonnull CompoundTag nbtTags) {
         nbtTags.putBoolean(NBTConstants.REDSTONE, redstoneReactive);
         for (int i = 0; i < EnumUtils.DIRECTIONS.length; i++) {
             nbtTags.putInt(NBTConstants.CONNECTION + i, connectionTypes[i].ordinal());
@@ -563,19 +558,19 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         return sides;
     }
 
-    public ActionResultType onConfigure(PlayerEntity player, Direction side) {
-        return ActionResultType.PASS;
+    public ActionResult onConfigure(PlayerEntity player, Direction side) {
+        return ActionResult.PASS;
     }
 
-    public ActionResultType onRightClick(PlayerEntity player, Direction side) {
+    public ActionResult onRightClick(PlayerEntity player, Direction side) {
         if (handlesRedstone()) {
             redstoneReactive ^= true;
             refreshConnections();
             notifyTileChange();
-            player.sendMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM,
-                  MekanismLang.REDSTONE_SENSITIVITY.translateColored(EnumColor.GRAY, EnumColor.INDIGO, OnOff.of(redstoneReactive))), Util.DUMMY_UUID);
+            player.sendSystemMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM,
+                  MekanismLang.REDSTONE_SENSITIVITY.translateColored(EnumColor.GRAY, EnumColor.INDIGO, OnOff.of(redstoneReactive))), Util.NIL_UUID);
         }
-        return ActionResultType.SUCCESS;
+        return ActionResult.SUCCESS;
     }
 
     public void notifyTileChange() {

@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.bar;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.client.gui.IGuiWrapper;
@@ -8,16 +7,17 @@ import mekanism.client.gui.element.GuiTexturedElement;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public abstract class GuiBar<INFO extends IBarInfoHandler> extends GuiTexturedElement {
 
-    public static final ResourceLocation BAR = MekanismUtils.getResource(ResourceType.GUI_BAR, "base.png");
+    public static final Identifier BAR = MekanismUtils.getResource(ResourceType.GUI_BAR, "base.png");
 
     private final INFO handler;
 
-    public GuiBar(ResourceLocation resource, IGuiWrapper gui, INFO handler, int x, int y, int width, int height) {
+    public GuiBar(Identifier resource, IGuiWrapper gui, INFO handler, int x, int y, int width, int height) {
         super(resource, gui, x, y, width + 2, height + 2);
         this.handler = handler;
     }
@@ -34,14 +34,14 @@ public abstract class GuiBar<INFO extends IBarInfoHandler> extends GuiTexturedEl
         renderExtendedTexture(matrix, BAR, 2, 2);
         //If there are any contents render them
         if (handler.getLevel() > 0) {
-            minecraft.textureManager.bindTexture(getResource());
+            minecraft.getTextureManager().bindTexture(getResource());
             renderBarOverlay(matrix, mouseX, mouseY, partialTicks);
         }
     }
 
     @Override
     public void renderToolTip(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
-        ITextComponent tooltip = handler.getTooltip();
+        Text tooltip = handler.getTooltip();
         if (tooltip != null) {
             displayTooltip(matrix, tooltip, mouseX, mouseY);
         }
@@ -61,7 +61,7 @@ public abstract class GuiBar<INFO extends IBarInfoHandler> extends GuiTexturedEl
     public interface IBarInfoHandler {
 
         @Nullable
-        default ITextComponent getTooltip() {
+        default Text getTooltip() {
             return null;
         }
 

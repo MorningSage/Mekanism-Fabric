@@ -1,6 +1,6 @@
 package mekanism.client.jei;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.List;

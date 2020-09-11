@@ -4,13 +4,14 @@ import java.lang.ref.WeakReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.common.config.MekanismConfig;
-import net.minecraft.client.audio.ITickableSound;
-import net.minecraft.client.audio.LocatableSound;
+import net.minecraft.client.sound.AbstractSoundInstance;
+import net.minecraft.client.sound.MovingSoundInstance;
+import net.minecraft.client.sound.TickableSoundInstance;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 
-public abstract class PlayerSound extends LocatableSound implements ITickableSound {
+public abstract class PlayerSound extends AbstractSoundInstance implements TickableSoundInstance {
 
     @Nonnull
     private WeakReference<PlayerEntity> playerReference;
@@ -98,7 +99,7 @@ public abstract class PlayerSound extends LocatableSound implements ITickableSou
     }
 
     @Override
-    public boolean isDonePlaying() {
+    public boolean isDone() {
         return donePlaying;
     }
 

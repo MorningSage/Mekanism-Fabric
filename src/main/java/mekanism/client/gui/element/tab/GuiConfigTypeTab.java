@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.tab;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.client.SpecialColors;

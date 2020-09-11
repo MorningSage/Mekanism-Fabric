@@ -13,6 +13,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -76,7 +77,7 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
     }
 
     @Override
-    public TileEntityType<TileEntityCardboardBox> getTileType() {
+    public BlockEntityType<? extends TileEntityCardboardBox> getTileType() {
         return MekanismTileEntityTypes.CARDBOARD_BOX.getTileEntityType();
     }
 

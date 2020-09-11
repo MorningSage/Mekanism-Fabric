@@ -1,15 +1,15 @@
 package mekanism.common.tile.component;
 
 import mekanism.common.inventory.container.MekanismContainer;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public interface ITileComponent {
 
     void tick();
 
-    void read(CompoundNBT nbtTags);
+    void read(CompoundTag nbtTags);
 
-    void write(CompoundNBT nbtTags);
+    void write(CompoundTag nbtTags);
 
     default void invalidate() {
     }
@@ -19,7 +19,7 @@ public interface ITileComponent {
 
     void trackForMainContainer(MekanismContainer container);
 
-    void addToUpdateTag(CompoundNBT updateTag);
+    void addToUpdateTag(CompoundTag updateTag);
 
-    void readFromUpdateTag(CompoundNBT updateTag);
+    void readFromUpdateTag(CompoundTag updateTag);
 }

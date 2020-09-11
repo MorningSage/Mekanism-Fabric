@@ -18,17 +18,24 @@ import mekanism.common.tile.interfaces.ITileSound;
 import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundEngine;
 import net.minecraft.client.audio.TickableSound;
+import net.minecraft.client.sound.Sound;
+import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
@@ -63,7 +70,7 @@ public class SoundHandler {
     private static final Set<UUID> gravitationalModulationSounds = new ObjectOpenHashSet<>();
     public static final Map<RadiationScale, GeigerSound> radiationSoundMap = new EnumMap<>(RadiationScale.class);
 
-    private static final Long2ObjectMap<ISound> soundMap = new Long2ObjectOpenHashMap<>();
+    private static final Long2ObjectMap<SoundInstance> soundMap = new Long2ObjectOpenHashMap<>();
     private static boolean IN_MUFFLED_CHECK = false;
     private static SoundEngine soundEngine;
 
@@ -81,7 +88,7 @@ public class SoundHandler {
         gravitationalModulationSounds.remove(uuid);
     }
 
-    public static void startSound(@Nonnull IWorld world, @Nonnull UUID uuid, @Nonnull SoundType soundType) {
+    public static void startSound(@Nonnull WorldAccess world, @Nonnull UUID uuid, @Nonnull SoundType soundType) {
         switch (soundType) {
             case JETPACK:
                 if (!jetpackSounds.contains(uuid)) {
@@ -129,13 +136,13 @@ public class SoundHandler {
         playSound(SimpleSound.master(sound, 1, MekanismConfig.client.baseSoundVolume.get()));
     }
 
-    public static void playSound(ISound sound) {
-        Minecraft.getInstance().getSoundHandler().play(sound);
+    public static void playSound(SoundInstance sound) {
+        MinecraftClient.getInstance().getSoundManager().play(sound);
     }
 
-    public static ISound startTileSound(SoundEvent soundEvent, SoundCategory category, float volume, BlockPos pos) {
+    public static SoundInstance startTileSound(SoundEvent soundEvent, SoundCategory category, float volume, BlockPos pos) {
         // First, check to see if there's already a sound playing at the desired location
-        ISound s = soundMap.get(pos.toLong());
+        SoundInstance s = soundMap.get(pos.asLong());
         if (s == null || !Minecraft.getInstance().getSoundHandler().isPlaying(s)) {
             // No sound playing, start one up - we assume that tile sounds will play until explicitly stopped
             // The TileTickableSound will then periodically poll to see if the volume should be adjusted

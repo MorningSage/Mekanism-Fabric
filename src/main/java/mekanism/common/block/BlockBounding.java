@@ -12,6 +12,7 @@ import mekanism.common.util.MekanismUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.particle.DiggingParticle;
@@ -205,7 +206,7 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
     }
 
     @Override
-    public TileEntityType<TileEntityBoundingBlock> getTileType() {
+    public BlockEntityType<? extends TileEntityBoundingBlock> getTileType() {
         if (advanced) {
             return MekanismTileEntityTypes.ADVANCED_BOUNDING_BLOCK.getTileEntityType();
         }

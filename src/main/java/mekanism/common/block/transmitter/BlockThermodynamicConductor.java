@@ -7,6 +7,7 @@ import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.ConductorTier;
 import mekanism.common.tile.transmitter.TileEntityThermodynamicConductor;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.tileentity.TileEntityType;
 
 public class BlockThermodynamicConductor extends BlockSmallTransmitter implements ITypeBlock, IHasTileEntity<TileEntityThermodynamicConductor> {
@@ -23,7 +24,7 @@ public class BlockThermodynamicConductor extends BlockSmallTransmitter implement
     }
 
     @Override
-    public TileEntityType<TileEntityThermodynamicConductor> getTileType() {
+    public BlockEntityType<? extends TileEntityThermodynamicConductor> getTileType() {
         switch (tier) {
             case ADVANCED:
                 return MekanismTileEntityTypes.ADVANCED_THERMODYNAMIC_CONDUCTOR.getTileEntityType();

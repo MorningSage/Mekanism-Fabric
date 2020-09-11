@@ -14,8 +14,10 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 
 public class AttributeStateFacing extends AttributeState {
@@ -96,8 +98,8 @@ public class AttributeStateFacing extends AttributeState {
 
     @Override
     @Contract("_, null, _, _, _, _ -> null")
-    public BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull IWorld world, @Nonnull BlockPos pos, @Nullable PlayerEntity player,
-          @Nonnull Direction face) {
+    public BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull @Nonnull World world, @Nonnull BlockPos pos, @Nullable PlayerEntity player,
+                                           @Nonnull @Nonnull Direction face) {
         if (state == null) {
             return null;
         }

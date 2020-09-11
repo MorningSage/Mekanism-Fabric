@@ -1,6 +1,7 @@
 package mekanism.client.gui.element.bar;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nullable;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.gas.Gas;
@@ -21,8 +22,7 @@ import mekanism.common.capabilities.chemical.dynamic.IGasTracker;
 import mekanism.common.capabilities.chemical.dynamic.IInfusionTracker;
 import mekanism.common.capabilities.chemical.dynamic.IPigmentTracker;
 import mekanism.common.capabilities.chemical.dynamic.ISlurryTracker;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiMergedChemicalBar<HANDLER extends IGasTracker & IInfusionTracker & IPigmentTracker & ISlurryTracker> extends GuiBar<IBarInfoHandler> implements
       IJEIIngredientHelper {
@@ -34,7 +34,7 @@ public class GuiMergedChemicalBar<HANDLER extends IGasTracker & IInfusionTracker
     private final GuiChemicalBar<Slurry, SlurryStack> slurryBar;
 
     public GuiMergedChemicalBar(IGuiWrapper gui, HANDLER handler, MergedChemicalTank chemicalTank, int x, int y, int width, int height, boolean horizontal) {
-        super(AtlasTexture.LOCATION_BLOCKS_TEXTURE, gui, new IBarInfoHandler() {
+        super(SpriteAtlasTexture.BLOCK_ATLAS_TEX, gui, new IBarInfoHandler() {
             @Nullable
             private IChemicalTank<?, ?> getCurrentTank() {
                 Current current = chemicalTank.getCurrent();
@@ -54,7 +54,7 @@ public class GuiMergedChemicalBar<HANDLER extends IGasTracker & IInfusionTracker
             }
 
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 IChemicalTank<?, ?> currentTank = getCurrentTank();
                 if (currentTank == null) {
                     return MekanismLang.EMPTY.translate();

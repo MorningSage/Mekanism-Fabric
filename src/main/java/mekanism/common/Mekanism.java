@@ -84,6 +84,7 @@ import net.minecraft.resources.IFutureReloadListener;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.tags.NetworkTagManager;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -242,8 +243,8 @@ public class Mekanism {
         MekanismRecipeType.registerRecipeTypes(event.getRegistry());
     }
 
-    public static ResourceLocation rl(String path) {
-        return new ResourceLocation(Mekanism.MODID, path);
+    public static Identifier rl(String path) {
+        return new Identifier(Mekanism.MODID, path);
     }
 
     private void setTagManager(MekanismTagManager manager) {

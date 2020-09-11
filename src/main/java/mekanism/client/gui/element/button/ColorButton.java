@@ -1,20 +1,20 @@
 package mekanism.client.gui.element.button;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.MekanismLang;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
 
 public class ColorButton extends MekanismButton {
 
     private final Supplier<EnumColor> colorSupplier;
 
     public ColorButton(IGuiWrapper gui, int x, int y, int width, int height, Supplier<EnumColor> colorSupplier, Runnable onPress, Runnable onRightClick) {
-        super(gui, x, y, width, height, StringTextComponent.EMPTY, onPress, onRightClick, (onHover, matrix, xAxis, yAxis) -> {
+        super(gui, x, y, width, height, LiteralText.EMPTY, onPress, onRightClick, (onHover, matrix, xAxis, yAxis) -> {
             EnumColor color = colorSupplier.get();
             if (color != null) {
                 gui.displayTooltip(matrix, color.getColoredName(), xAxis, yAxis);

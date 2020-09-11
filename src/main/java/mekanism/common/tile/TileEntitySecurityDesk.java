@@ -19,6 +19,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -94,15 +95,15 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         NBTUtils.setUUIDIfPresent(nbtTags, NBTConstants.OWNER_UUID, uuid -> ownerUUID = uuid);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         if (ownerUUID != null) {
             nbtTags.putUniqueId(NBTConstants.OWNER_UUID, ownerUUID);
         }

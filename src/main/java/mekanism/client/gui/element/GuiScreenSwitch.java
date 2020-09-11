@@ -4,7 +4,7 @@ import static mekanism.client.gui.element.GuiDigitalSwitch.BUTTON_SIZE_X;
 import static mekanism.client.gui.element.GuiDigitalSwitch.BUTTON_SIZE_Y;
 import static mekanism.client.gui.element.GuiDigitalSwitch.SWITCH;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.Collections;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nonnull;

@@ -54,6 +54,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Direction;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.tuple.Pair;
@@ -266,16 +267,16 @@ public class TileEntityElectrolyticSeparator extends TileEntityRecipeMachine<Ele
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.DUMP_LEFT, GasMode::byIndexStatic, mode -> dumpLeft = mode);
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.DUMP_RIGHT, GasMode::byIndexStatic, mode -> dumpRight = mode);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putInt(NBTConstants.DUMP_LEFT, dumpLeft.ordinal());
         nbtTags.putInt(NBTConstants.DUMP_RIGHT, dumpRight.ordinal());
         return nbtTags;

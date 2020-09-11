@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.Action;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.api.math.MathUtils;
@@ -24,13 +25,8 @@ import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.FluidUtils;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.util.Direction;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNetwork, FluidStack, MechanicalPipe> implements IMekanismFluidHandler {
 
@@ -226,12 +222,12 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
     }
 
     @Override
-    public ITextComponent getNeededInfo() {
+    public Text getNeededInfo() {
         return MekanismLang.FLUID_NETWORK_NEEDED.translate(fluidTank.getNeeded() / 1_000F);
     }
 
     @Override
-    public ITextComponent getStoredInfo() {
+    public @Nullable Text getStoredInfo() {
         if (fluidTank.isEmpty()) {
             return MekanismLang.NONE.translate();
         }
@@ -239,7 +235,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
     }
 
     @Override
-    public ITextComponent getFlowInfo() {
+    public @Nullable Text getFlowInfo() {
         return MekanismLang.NETWORK_MB_PER_TICK.translate(prevTransferAmount);
     }
 

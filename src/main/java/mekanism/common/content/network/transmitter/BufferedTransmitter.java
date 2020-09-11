@@ -9,6 +9,7 @@ import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Direction;
 
 public abstract class BufferedTransmitter<ACCEPTOR, NETWORK extends DynamicBufferedNetwork<ACCEPTOR, NETWORK, BUFFER, TRANSMITTER>, BUFFER,
@@ -173,7 +174,7 @@ public abstract class BufferedTransmitter<ACCEPTOR, NETWORK extends DynamicBuffe
     }
 
     @Override
-    protected void handleContentsUpdateTag(@Nonnull NETWORK network, @Nonnull CompoundNBT tag) {
+    protected void handleContentsUpdateTag(@Nonnull NETWORK network, @Nonnull @Nonnull CompoundTag tag) {
         network.updateCapacity();
     }
 

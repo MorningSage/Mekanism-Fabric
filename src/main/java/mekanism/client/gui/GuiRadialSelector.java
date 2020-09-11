@@ -1,6 +1,6 @@
 package mekanism.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Arrays;
 import java.util.function.Consumer;

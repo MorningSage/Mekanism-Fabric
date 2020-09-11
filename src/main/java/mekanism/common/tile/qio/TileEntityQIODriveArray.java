@@ -18,6 +18,7 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
@@ -90,13 +91,13 @@ public class TileEntityQIODriveArray extends TileEntityQIOComponent implements I
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT tag) {
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag tag) {
         QIOFrequency freq = getFrequency(FrequencyType.QIO);
         if (freq != null) {
             // save all item data before we save
             freq.saveAll();
         }
-        super.write(tag);
+        super.toTag(tag);
         return tag;
     }
 

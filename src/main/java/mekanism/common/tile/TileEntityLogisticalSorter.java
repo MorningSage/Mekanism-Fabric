@@ -40,6 +40,7 @@ import mekanism.common.util.TransporterUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -136,14 +137,14 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         return getConfigurationData(nbtTags);
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         setConfigurationData(nbtTags);
     }
 

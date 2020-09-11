@@ -1,9 +1,13 @@
 package mekanism.common.integration;
 
 import mekanism.common.integration.lookingat.theoneprobe.TOPProvider;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
+
+import java.util.Collection;
 
 /**
  * Hooks for Mekanism. Use to grab items or blocks out of different mods.
@@ -27,13 +31,13 @@ public final class MekanismHooks {
     public boolean TOPLoaded = false;
 
     public void hookCommonSetup() {
-        ModList modList = ModList.get();
-        CraftTweakerLoaded = modList.isLoaded(CRAFTTWEAKER_MOD_ID);
-        IC2Loaded = modList.isLoaded(IC2_MOD_ID);
-        JEILoaded = modList.isLoaded(JEI_MOD_ID);
-        ProjectELoaded = modList.isLoaded(PROJECTE_MOD_ID);
-        TOPLoaded = modList.isLoaded(TOP_MOD_ID);
-        FluxNetworksLoaded = modList.isLoaded(FLUX_NETWORKS_MOD_ID);
+        FabricLoader modList = FabricLoader.getInstance();
+        CraftTweakerLoaded = modList.isModLoaded(CRAFTTWEAKER_MOD_ID);
+        IC2Loaded = modList.isModLoaded(IC2_MOD_ID);
+        JEILoaded = modList.isModLoaded(JEI_MOD_ID);
+        ProjectELoaded = modList.isModLoaded(PROJECTE_MOD_ID);
+        TOPLoaded = modList.isModLoaded(TOP_MOD_ID);
+        FluxNetworksLoaded = modList.isModLoaded(FLUX_NETWORKS_MOD_ID);
     }
 
     public void sendIMCMessages(InterModEnqueueEvent event) {

@@ -1,9 +1,9 @@
 package mekanism.common.block.interfaces;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 
-public interface IHasTileEntity<TILE extends TileEntity> {
+public interface IHasTileEntity<TILE extends BlockEntity> {
 
-    TileEntityType<? extends TILE> getTileType();
+    BlockEntityType<? extends TILE> getTileType();
 }

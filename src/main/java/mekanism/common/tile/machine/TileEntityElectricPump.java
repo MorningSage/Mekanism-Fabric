@@ -47,6 +47,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ActionResultType;
@@ -272,8 +273,8 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putInt(NBTConstants.PROGRESS, operatingTicks);
         nbtTags.putBoolean(NBTConstants.SUCKED_LAST_OPERATION, suckedLastOperation);
         if (!activeType.isEmpty()) {
@@ -290,8 +291,8 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         operatingTicks = nbtTags.getInt(NBTConstants.PROGRESS);
         suckedLastOperation = nbtTags.getBoolean(NBTConstants.SUCKED_LAST_OPERATION);
         NBTUtils.setFluidStackIfPresent(nbtTags, NBTConstants.FLUID_STORED, fluid -> activeType = fluid);

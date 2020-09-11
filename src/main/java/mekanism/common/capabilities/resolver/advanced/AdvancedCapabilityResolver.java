@@ -13,7 +13,7 @@ import net.minecraftforge.common.util.NonNullLazy;
 import net.minecraftforge.common.util.NonNullSupplier;
 
 /**
- * Capability resolver for handling a read only variant, a generic unsided implementation variant.
+ * Capability resolver for handling a fromTag only variant, a generic unsided implementation variant.
  */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -24,7 +24,7 @@ public class AdvancedCapabilityResolver implements ICapabilityResolver {
     }
 
     /**
-     * Creates a capability resolver that strongly caches the result of the read only supplier. Persisting the calculated value through capability invalidation.
+     * Creates a capability resolver that strongly caches the result of the fromTag only supplier. Persisting the calculated value through capability invalidation.
      */
     public static <T> AdvancedCapabilityResolver readOnly(Capability<T> supportedCapability, T value, NonNullSupplier<T> readOnlySupplier) {
         return create(supportedCapability, () -> value, NonNullLazy.of(readOnlySupplier));

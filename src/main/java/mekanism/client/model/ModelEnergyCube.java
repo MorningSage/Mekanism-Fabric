@@ -1,6 +1,6 @@
 package mekanism.client.model;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import java.util.EnumSet;
 import java.util.Set;

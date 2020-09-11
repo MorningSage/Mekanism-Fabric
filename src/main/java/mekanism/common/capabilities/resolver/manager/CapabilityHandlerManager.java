@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
+import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.common.capabilities.holder.IHolder;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -65,7 +65,7 @@ public class CapabilityHandlerManager<HOLDER extends IHolder, CONTAINER, HANDLER
     }
 
     /**
-     * Lazily get and cache a handler instance for the given side, and make it be read only if something else is trying to interact with us using the null side
+     * Lazily get and cache a handler instance for the given side, and make it be fromTag only if something else is trying to interact with us using the null side
      *
      * @apiNote Assumes that {@link #canHandle} has been called before this and that it was {@code true}.
      */

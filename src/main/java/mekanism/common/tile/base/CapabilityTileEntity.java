@@ -9,8 +9,8 @@ import mekanism.common.capabilities.CapabilityCache;
 import mekanism.common.capabilities.resolver.ICapabilityResolver;
 import mekanism.common.capabilities.resolver.manager.ICapabilityHandlerManager;
 import mekanism.common.tile.component.TileComponentConfig;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -18,7 +18,7 @@ public abstract class CapabilityTileEntity extends TileEntityUpdateable {
 
     private final CapabilityCache capabilityCache = new CapabilityCache();
 
-    public CapabilityTileEntity(TileEntityType<?> type) {
+    public CapabilityTileEntity(BlockEntityType<?> type) {
         super(type);
     }
 

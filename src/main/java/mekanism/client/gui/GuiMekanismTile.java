@@ -1,6 +1,5 @@
 package mekanism.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import mekanism.api.inventory.IInventorySlot;
@@ -15,16 +14,17 @@ import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.component.config.slot.ISlotInfo;
 import mekanism.common.tile.component.config.slot.InventorySlotInfo;
 import mekanism.common.tile.interfaces.ISideConfiguration;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 
 public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER extends MekanismTileContainer<TILE>> extends GuiMekanism<CONTAINER> {
 
     protected final TILE tile;
 
-    protected GuiMekanismTile(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    protected GuiMekanismTile(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         tile = container.getTileEntity();
     }
@@ -62,7 +62,7 @@ public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER
     }
 
     private DataType getFromSlot(Slot slot) {
-        if (slot.slotNumber < tile.getSlots() && slot instanceof InventoryContainerSlot) {
+        if (slot.id < tile.getSlots() && slot instanceof InventoryContainerSlot) {
             ISideConfiguration config = (ISideConfiguration) tile;
             ConfigInfo info = config.getConfig().getConfig(TransmissionType.ITEM);
             if (info != null) {

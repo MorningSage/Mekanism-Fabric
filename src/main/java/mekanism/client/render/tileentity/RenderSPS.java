@@ -1,7 +1,7 @@
 package mekanism.client.render.tileentity;
 
 import com.google.common.base.Objects;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;

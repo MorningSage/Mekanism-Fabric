@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.button;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.Supplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.Mekanism;
@@ -9,15 +9,15 @@ import mekanism.common.network.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.TileEntityChemicalTank.GasMode;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
 
 public class GuiGasMode extends MekanismImageButton {
 
-    private static final ResourceLocation IDLE = MekanismUtils.getResource(ResourceType.GUI, "gas_mode_idle.png");
-    private static final ResourceLocation EXCESS = MekanismUtils.getResource(ResourceType.GUI, "gas_mode_excess.png");
-    private static final ResourceLocation DUMP = MekanismUtils.getResource(ResourceType.GUI, "gas_mode_dump.png");
+    private static final Identifier IDLE = MekanismUtils.getResource(ResourceType.GUI, "gas_mode_idle.png");
+    private static final Identifier EXCESS = MekanismUtils.getResource(ResourceType.GUI, "gas_mode_excess.png");
+    private static final Identifier DUMP = MekanismUtils.getResource(ResourceType.GUI, "gas_mode_dump.png");
 
     private final boolean left;
     private final Supplier<GasMode> gasModeSupplier;
@@ -29,7 +29,7 @@ public class GuiGasMode extends MekanismImageButton {
     }
 
     @Override
-    protected ResourceLocation getResource() {
+    protected Identifier getResource() {
         GasMode mode = gasModeSupplier.get();
         switch (mode) {
             case DUMPING_EXCESS:
@@ -43,7 +43,7 @@ public class GuiGasMode extends MekanismImageButton {
     @Override
     public void renderForeground(MatrixStack matrix, int mouseX, int mouseY) {
         //Draw the text next to the button
-        ITextComponent component = gasModeSupplier.get().getTextComponent();
+        Text component = gasModeSupplier.get().getTextComponent();
         int xPos = x - guiObj.getLeft();
         int yPos = y - guiObj.getTop();
         if (left) {

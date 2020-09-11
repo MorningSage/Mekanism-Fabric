@@ -1,6 +1,6 @@
 package mekanism.client.gui.machine;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import mekanism.client.gui.GuiConfigurableTile;
 import mekanism.client.gui.element.bar.GuiChemicalBar;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;

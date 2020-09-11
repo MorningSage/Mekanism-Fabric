@@ -1,6 +1,6 @@
 package mekanism.client.gui.item;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.tab.GuiSecurityTab;

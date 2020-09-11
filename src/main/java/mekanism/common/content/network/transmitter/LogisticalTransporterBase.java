@@ -30,6 +30,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.TransporterUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -256,7 +257,7 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
 
     @Nonnull
     @Override
-    public CompoundNBT getReducedUpdateTag(CompoundNBT updateTag) {
+    public @Nonnull CompoundTag getReducedUpdateTag(CompoundTag updateTag) {
         updateTag = super.getReducedUpdateTag(updateTag);
         ListNBT stacks = new ListNBT();
         for (Int2ObjectMap.Entry<TransporterStack> entry : transit.int2ObjectEntrySet()) {
@@ -272,7 +273,7 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
     }
 
     @Override
-    public void handleUpdateTag(@Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(@Nonnull @Nonnull CompoundTag tag) {
         super.handleUpdateTag(tag);
         transit.clear();
         if (tag.contains(NBTConstants.ITEMS, NBT.TAG_LIST)) {
@@ -286,7 +287,7 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.read(nbtTags);
         readFromNBT(nbtTags);
     }
@@ -306,7 +307,7 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public @Nonnull CompoundTag write(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.write(nbtTags);
         writeToNBT(nbtTags);
         return nbtTags;

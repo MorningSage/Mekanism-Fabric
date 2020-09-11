@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
+import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalTankBuilder;
@@ -39,11 +39,8 @@ import mekanism.common.capabilities.Capabilities;
 import mekanism.common.content.network.distribution.ChemicalHandlerTarget;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tier.ChemicalTankTier;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.common.capabilities.Capability;
 
 /**
  * @apiNote This class is called ChemicalUtil instead of ChemicalUtils so that it does not overlap with {@link mekanism.api.chemical.ChemicalUtils}
@@ -251,15 +248,15 @@ public class ChemicalUtil {
         return list;
     }
 
-    public static void emit(IChemicalTank<?, ?> tank, TileEntity from) {
+    public static void emit(IChemicalTank<?, ?> tank, BlockEntity from) {
         emit(EnumSet.allOf(Direction.class), tank, from);
     }
 
-    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, TileEntity from) {
+    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, BlockEntity from) {
         emit(outputSides, tank, from, tank.getCapacity());
     }
 
-    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, TileEntity from, long maxOutput) {
+    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, BlockEntity from, long maxOutput) {
         if (!tank.isEmpty() && maxOutput > 0) {
             tank.extract(emit(outputSides, tank.extract(maxOutput, Action.SIMULATE, AutomationType.INTERNAL), from), Action.EXECUTE, AutomationType.INTERNAL);
         }

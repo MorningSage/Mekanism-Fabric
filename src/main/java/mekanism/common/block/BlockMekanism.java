@@ -254,12 +254,12 @@ public abstract class BlockMekanism extends Block {
             }
         }
         if (tile.supportsUpgrades()) {
-            //The read method validates that data is stored
+            //The fromTag method validates that data is stored
             tile.getComponent().read(ItemDataUtils.getDataMap(stack));
         }
         if (tile instanceof ISideConfiguration) {
             ISideConfiguration config = (ISideConfiguration) tile;
-            //The read methods validate that data is stored
+            //The fromTag methods validate that data is stored
             config.getConfig().read(ItemDataUtils.getDataMap(stack));
             config.getEjector().read(ItemDataUtils.getDataMap(stack));
         }

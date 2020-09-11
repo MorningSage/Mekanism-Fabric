@@ -8,12 +8,10 @@ import mekanism.common.network.PacketUpdateTile;
 import mekanism.common.tile.interfaces.ITileWrapper;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.PacketDirection;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -21,9 +19,9 @@ import net.minecraft.world.World;
  * Extension of TileEntity that adds various helpers we use across the majority of our Tiles even those that are not an instance of TileEntityMekanism. Additionally we
  * improve the performance of markDirty by not firing neighbor updates unless the markDirtyComparator method is overridden.
  */
-public abstract class TileEntityUpdateable extends TileEntity implements ITileWrapper {
+public abstract class TileEntityUpdateable extends BlockEntity implements ITileWrapper {
 
-    public TileEntityUpdateable(TileEntityType<?> type) {
+    public TileEntityUpdateable(BlockEntityType<?> type) {
         super(type);
     }
 
@@ -38,7 +36,7 @@ public abstract class TileEntityUpdateable extends TileEntity implements ITileWr
     }
 
     public boolean isRemote() {
-        return getWorldNN().isRemote();
+        return getWorldNN().isClient();
     }
 
     /**
@@ -68,20 +66,20 @@ public abstract class TileEntityUpdateable extends TileEntity implements ITileWr
 
     @Nullable
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(getPos(), 0, getUpdateTag());
+    public BlockEntityUpdateS2CPacket toUpdatePacket() {
+        return new BlockEntityUpdateS2CPacket(getPos(), 0, getUpdateTag());
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, @Nonnull CompoundNBT tag) {
-        //We don't want to do a full read from NBT so simply call the super's read method to let Forge do whatever
+    public void handleUpdateTag(BlockState state, @Nonnull CompoundTag tag) {
+        //We don't want to do a full fromTag from NBT so simply call the super's fromTag method to let Forge do whatever
         // it wants, but don't treat this as if it was the full saved NBT data as not everything has to be synced to the client
         super.read(state, tag);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT getUpdateTag() {
+    public CompoundTag getUpdateTag() {
         return getReducedUpdateTag();
     }
 
@@ -89,7 +87,7 @@ public abstract class TileEntityUpdateable extends TileEntity implements ITileWr
      * Similar to {@link #getUpdateTag()} but with reduced information for when we are doing our own syncing.
      */
     @Nonnull
-    public CompoundNBT getReducedUpdateTag() {
+    public CompoundTag getReducedUpdateTag() {
         //Add the base update tag information
         return super.getUpdateTag();
     }
@@ -102,7 +100,7 @@ public abstract class TileEntityUpdateable extends TileEntity implements ITileWr
         }
     }
 
-    public void handleUpdatePacket(@Nonnull CompoundNBT tag) {
+    public void handleUpdatePacket(@Nonnull CompoundTag tag) {
         handleUpdateTag(getBlockState(), tag);
     }
 
@@ -110,7 +108,7 @@ public abstract class TileEntityUpdateable extends TileEntity implements ITileWr
         sendUpdatePacket(this);
     }
 
-    public void sendUpdatePacket(TileEntity tracking) {
+    public void sendUpdatePacket(BlockEntity tracking) {
         if (isRemote()) {
             Mekanism.logger.warn("Update packet call requested from client side", new IllegalStateException());
         } else if (isRemoved()) {

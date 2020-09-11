@@ -28,6 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -262,8 +263,8 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         if (!getMultiblock().isFormed()) {
             NBTUtils.setUUIDIfPresent(nbtTags, NBTConstants.INVENTORY_ID, id -> {
                 cachedID = id;
@@ -277,8 +278,8 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         if (cachedID != null) {
             nbtTags.putUniqueId(NBTConstants.INVENTORY_ID, cachedID);
             if (cachedData != null) {

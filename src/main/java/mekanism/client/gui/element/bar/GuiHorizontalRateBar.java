@@ -1,15 +1,15 @@
 package mekanism.client.gui.element.bar;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiHorizontalRateBar extends GuiBar<IBarInfoHandler> {
 
-    private static final ResourceLocation RATE_BAR = MekanismUtils.getResource(ResourceType.GUI_BAR, "horizontal_rate.png");
+    private static final Identifier RATE_BAR = MekanismUtils.getResource(ResourceType.GUI_BAR, "horizontal_rate.png");
     private static final int texWidth = 78;
     private static final int texHeight = 8;
 
@@ -20,6 +20,6 @@ public class GuiHorizontalRateBar extends GuiBar<IBarInfoHandler> {
     @Override
     protected void renderBarOverlay(MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         int displayInt = (int) (getHandler().getLevel() * texWidth);
-        blit(matrix, x + 1, y + 1, 0, 0, displayInt, texHeight, texWidth, texHeight);
+        drawTexture(matrix, x + 1, y + 1, 0, 0, displayInt, texHeight, texWidth, texHeight);
     }
 }

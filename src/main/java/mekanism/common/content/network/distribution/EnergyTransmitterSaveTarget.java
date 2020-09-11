@@ -4,7 +4,7 @@ import mekanism.api.math.FloatingLong;
 import mekanism.common.content.network.transmitter.UniversalCable;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public class EnergyTransmitterSaveTarget extends Target<UniversalCable, FloatingLong, FloatingLong> {
 

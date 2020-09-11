@@ -12,6 +12,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UpgradeUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.text.ITextComponent;
 
 public abstract class TileEntityProgressMachine<RECIPE extends MekanismRecipe> extends TileEntityRecipeMachine<RECIPE> {
@@ -45,15 +46,15 @@ public abstract class TileEntityProgressMachine<RECIPE extends MekanismRecipe> e
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         operatingTicks = nbtTags.getInt(NBTConstants.PROGRESS);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putInt(NBTConstants.PROGRESS, getOperatingTicks());
         return nbtTags;
     }

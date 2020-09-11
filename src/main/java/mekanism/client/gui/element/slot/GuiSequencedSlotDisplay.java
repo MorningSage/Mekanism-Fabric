@@ -1,13 +1,13 @@
 package mekanism.client.gui.element.slot;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiRelativeElement;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.NonNullSupplier;
 
 public class GuiSequencedSlotDisplay extends GuiRelativeElement {
 
@@ -16,10 +16,10 @@ public class GuiSequencedSlotDisplay extends GuiRelativeElement {
     private int stackSwitchTicker;
     @Nonnull
     private ItemStack renderStack = ItemStack.EMPTY;
-    private final NonNullSupplier<List<ItemStack>> stackListSupplier;
+    private final Supplier<List<ItemStack>> stackListSupplier;
     private float zOffset;
 
-    public GuiSequencedSlotDisplay(IGuiWrapper gui, int x, int y, NonNullSupplier<List<ItemStack>> stackListSupplier) {
+    public GuiSequencedSlotDisplay(IGuiWrapper gui, int x, int y, Supplier<List<ItemStack>> stackListSupplier) {
         super(gui, x, y, 16, 16);
         this.stackListSupplier = stackListSupplier;
         //Mark it as false for active so that it doesn't intercept click events and ensures that it properly clears it
@@ -58,9 +58,9 @@ public class GuiSequencedSlotDisplay extends GuiRelativeElement {
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
         if (!renderStack.isEmpty()) {
-            guiObj.getItemRenderer().zLevel += zOffset;
+            guiObj.getItemRenderer().zOffset += zOffset;
             guiObj.renderItem(matrix, renderStack, x, y);
-            guiObj.getItemRenderer().zLevel -= zOffset;
+            guiObj.getItemRenderer().zOffset -= zOffset;
         }
     }
 

@@ -66,7 +66,7 @@ public class EnergyHandlerManager implements ICapabilityHandlerManager<IEnergyCo
     }
 
     /**
-     * Lazily get and cache a handler instance for the given side, and make it be read only if something else is trying to interact with us using the null side
+     * Lazily get and cache a handler instance for the given side, and make it be fromTag only if something else is trying to interact with us using the null side
      *
      * @apiNote Assumes that {@link #canHandle} has been called before this and that it was {@code true}.
      */

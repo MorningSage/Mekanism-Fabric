@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.Property;
-import net.minecraft.util.Direction;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 
 public abstract class AttributeState implements Attribute {
@@ -23,7 +23,7 @@ public abstract class AttributeState implements Attribute {
     }
 
     @Contract("_, null, _, _, _, _ -> null")
-    public BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull IWorld world, @Nonnull BlockPos pos, @Nullable PlayerEntity player, @Nonnull Direction face) {
+    public BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nullable PlayerEntity player, @Nonnull Direction face) {
         return state;
     }
 }

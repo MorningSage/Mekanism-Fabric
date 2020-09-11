@@ -13,6 +13,7 @@ import mekanism.common.util.NBTUtils;
 import mekanism.common.util.TransporterUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Util;
@@ -71,14 +72,14 @@ public class LogisticalTransporter extends LogisticalTransporterBase {
 
     @Nonnull
     @Override
-    public CompoundNBT getReducedUpdateTag(CompoundNBT updateTag) {
+    public @Nonnull CompoundTag getReducedUpdateTag(CompoundTag updateTag) {
         updateTag = super.getReducedUpdateTag(updateTag);
         updateTag.putInt(NBTConstants.COLOR, TransporterUtils.getColorIndex(getColor()));
         return updateTag;
     }
 
     @Override
-    public void handleUpdateTag(@Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(@Nonnull @Nonnull CompoundTag tag) {
         super.handleUpdateTag(tag);
         NBTUtils.setEnumIfPresent(tag, NBTConstants.COLOR, TransporterUtils::readColor, this::setColor);
     }

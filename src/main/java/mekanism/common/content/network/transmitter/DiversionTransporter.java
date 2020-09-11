@@ -16,6 +16,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Util;
@@ -61,25 +62,25 @@ public class DiversionTransporter extends LogisticalTransporterBase {
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.read(nbtTags);
         readModes(nbtTags);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public @Nonnull CompoundTag write(@Nonnull @Nonnull CompoundTag nbtTags) {
         return writeModes(super.write(nbtTags));
     }
 
     @Nonnull
     @Override
-    public CompoundNBT getReducedUpdateTag(CompoundNBT updateTag) {
+    public @Nonnull CompoundTag getReducedUpdateTag(CompoundTag updateTag) {
         return writeModes(super.getReducedUpdateTag(updateTag));
     }
 
     @Override
-    public void handleUpdateTag(@Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(@Nonnull @Nonnull CompoundTag tag) {
         super.handleUpdateTag(tag);
         readModes(tag);
     }

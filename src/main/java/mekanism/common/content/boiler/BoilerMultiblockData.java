@@ -105,7 +105,7 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     @Override
     public void onCreated(World world) {
         super.onCreated(world);
-        // update the heat capacity now that we've read
+        // update the heat capacity now that we've fromTag
         heatCapacitor.setHeatCapacity(CASING_HEAT_CAPACITY * locations.size(), true);
     }
 

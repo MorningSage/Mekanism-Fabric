@@ -1,6 +1,7 @@
 package mekanism.client.gui.element.button;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import mekanism.api.RelativeSide;
@@ -14,8 +15,7 @@ import mekanism.common.network.PacketConfigurationUpdate;
 import mekanism.common.network.PacketConfigurationUpdate.ConfigurationPacket;
 import mekanism.common.tile.component.config.DataType;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
 
 public class SideDataButton extends MekanismButton {
 
@@ -23,8 +23,8 @@ public class SideDataButton extends MekanismButton {
     private final Supplier<EnumColor> colorSupplier;
 
     public SideDataButton(IGuiWrapper gui, int x, int y, RelativeSide slotPos, Supplier<DataType> dataTypeSupplier, Supplier<EnumColor> colorSupplier,
-          TileEntity tile, Supplier<TransmissionType> transmissionType, ConfigurationPacket packetType, IHoverable onHover) {
-        super(gui, x, y, 14, 14, StringTextComponent.EMPTY,
+            BlockEntity tile, Supplier<TransmissionType> transmissionType, ConfigurationPacket packetType, IHoverable onHover) {
+        super(gui, x, y, 14, 14, LiteralText.EMPTY,
               () -> Mekanism.packetHandler.sendToServer(new PacketConfigurationUpdate(packetType, tile.getPos(), Screen.hasShiftDown() ? 2 : 0, slotPos, transmissionType.get())),
               () -> Mekanism.packetHandler.sendToServer(new PacketConfigurationUpdate(packetType, tile.getPos(), 1, slotPos, transmissionType.get())), onHover);
         this.dataTypeSupplier = dataTypeSupplier;

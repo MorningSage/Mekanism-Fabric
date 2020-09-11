@@ -1,6 +1,6 @@
 package mekanism.client.jei.machine;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.Collections;
 import java.util.List;
 import mekanism.api.recipes.ItemStackToEnergyRecipe;

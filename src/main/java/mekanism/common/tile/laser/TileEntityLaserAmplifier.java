@@ -21,6 +21,7 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class TileEntityLaserAmplifier extends TileEntityLaserReceptor implements IHasMode {
 
@@ -106,8 +107,8 @@ public class TileEntityLaserAmplifier extends TileEntityLaserReceptor implements
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         NBTUtils.setFloatingLongIfPresent(nbtTags, NBTConstants.MIN, value -> minThreshold = value);
         NBTUtils.setFloatingLongIfPresent(nbtTags, NBTConstants.MAX, value -> maxThreshold = value);
         NBTUtils.setIntIfPresent(nbtTags, NBTConstants.TIME, value -> time = value);
@@ -116,8 +117,8 @@ public class TileEntityLaserAmplifier extends TileEntityLaserReceptor implements
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putString(NBTConstants.MIN, minThreshold.toString());
         nbtTags.putString(NBTConstants.MAX, maxThreshold.toString());
         nbtTags.putInt(NBTConstants.TIME, time);

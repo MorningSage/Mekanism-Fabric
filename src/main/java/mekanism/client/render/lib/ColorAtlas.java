@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 import mekanism.common.Mekanism;
 import mekanism.common.lib.Color;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.resource.Resource;
+import net.minecraft.util.Identifier;
 
 public class ColorAtlas {
 
@@ -29,7 +29,7 @@ public class ColorAtlas {
         return obj;
     }
 
-    public void parse(ResourceLocation rl) {
+    public void parse(Identifier rl) {
         List<Color> parsed = load(rl, colors.size());
         if (parsed.size() < colors.size()) {
             Mekanism.logger.error("Failed to parse '" + name + "' color atlas.");
@@ -40,7 +40,7 @@ public class ColorAtlas {
         }
     }
 
-    public static List<Color> load(ResourceLocation rl, int count) {
+    public static List<Color> load(Identifier rl, int count) {
         List<Color> ret = new ArrayList<>();
         try {
             loadColorAtlas(rl, count, ret);
@@ -51,8 +51,8 @@ public class ColorAtlas {
         return ret;
     }
 
-    private static void loadColorAtlas(ResourceLocation rl, int count, List<Color> ret) throws IOException {
-        IResource resource = Minecraft.getInstance().getResourceManager().getResource(rl);
+    private static void loadColorAtlas(Identifier rl, int count, List<Color> ret) throws IOException {
+        Resource resource = MinecraftClient.getInstance().getResourceManager().getResource(rl);
         BufferedImage img = ImageIO.read(resource.getInputStream());
         for (int i = 0; i < count; i++) {
             ret.add(Color.argb(img.getRGB(i % ATLAS_SIZE, i / ATLAS_SIZE)));

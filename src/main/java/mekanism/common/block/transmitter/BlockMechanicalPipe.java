@@ -7,6 +7,7 @@ import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.PipeTier;
 import mekanism.common.tile.transmitter.TileEntityMechanicalPipe;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.tileentity.TileEntityType;
 
 public class BlockMechanicalPipe extends BlockLargeTransmitter implements ITypeBlock, IHasTileEntity<TileEntityMechanicalPipe> {
@@ -23,7 +24,7 @@ public class BlockMechanicalPipe extends BlockLargeTransmitter implements ITypeB
     }
 
     @Override
-    public TileEntityType<TileEntityMechanicalPipe> getTileType() {
+    public BlockEntityType<? extends TileEntityMechanicalPipe> getTileType() {
         switch (tier) {
             case ADVANCED:
                 return MekanismTileEntityTypes.ADVANCED_MECHANICAL_PIPE.getTileEntityType();

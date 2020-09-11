@@ -7,6 +7,7 @@ import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.TubeTier;
 import mekanism.common.tile.transmitter.TileEntityPressurizedTube;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.tileentity.TileEntityType;
 
 public class BlockPressurizedTube extends BlockSmallTransmitter implements ITypeBlock, IHasTileEntity<TileEntityPressurizedTube> {
@@ -23,7 +24,7 @@ public class BlockPressurizedTube extends BlockSmallTransmitter implements IType
     }
 
     @Override
-    public TileEntityType<TileEntityPressurizedTube> getTileType() {
+    public BlockEntityType<? extends TileEntityPressurizedTube> getTileType() {
         switch (tier) {
             case ADVANCED:
                 return MekanismTileEntityTypes.ADVANCED_PRESSURIZED_TUBE.getTileEntityType();

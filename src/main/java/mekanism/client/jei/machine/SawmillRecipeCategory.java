@@ -1,6 +1,6 @@
 package mekanism.client.jei.machine;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.Arrays;
 import java.util.Collections;
 import mekanism.api.providers.IBlockProvider;

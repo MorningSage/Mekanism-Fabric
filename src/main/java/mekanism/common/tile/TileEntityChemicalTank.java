@@ -56,9 +56,9 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Direction;
 
 public class TileEntityChemicalTank extends TileEntityMekanism implements ISideConfiguration, ISustainedData, IHasGasMode {
 
@@ -205,15 +205,15 @@ public class TileEntityChemicalTank extends TileEntityMekanism implements ISideC
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.DUMP_MODE, GasMode::byIndexStatic, mode -> dumping = mode);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public CompoundTag toTag(@Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putInt(NBTConstants.DUMP_MODE, dumping.ordinal());
         return nbtTags;
     }
@@ -348,7 +348,7 @@ public class TileEntityChemicalTank extends TileEntityMekanism implements ISideC
         }
 
         @Override
-        public ITextComponent getTextComponent() {
+        public Text getTextComponent() {
             return langEntry.translate();
         }
 

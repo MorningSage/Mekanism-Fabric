@@ -52,7 +52,7 @@ public class SearchQueryParser {
                 // default to the name query type otherwise; no need to increment as name has no prefix
                 type = QueryType.NAME;
             }
-            // read the key string(s) of the given query type
+            // fromTag the key string(s) of the given query type
             Pair<Boolean, Integer> keyListResult = readKeyList(query, i, type, curQuery);
             if (!keyListResult.getLeft()) {
                 return INVALID;

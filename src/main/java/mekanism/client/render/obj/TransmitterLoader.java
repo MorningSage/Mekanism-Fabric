@@ -28,7 +28,7 @@ public class TransmitterLoader implements IModelLoader<TransmitterModel> {
     @Nonnull
     @Override
     public TransmitterModel read(@Nonnull JsonDeserializationContext deserializationContext, @Nonnull JsonObject modelContents) {
-        //Wrap the Obj loader to read our file
+        //Wrap the Obj loader to fromTag our file
         OBJModel model = OBJLoader.INSTANCE.read(deserializationContext, modelContents);
         OBJModel glass = null;
         if (modelContents.has(JsonConstants.GLASS)) {

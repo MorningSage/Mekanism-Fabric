@@ -7,15 +7,15 @@ import mekanism.api.inventory.AutomationType;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
 
 //Like net.minecraftforge.items.SlotItemHandler, except directly interacts with the IInventorySlot instead
 public class InventoryContainerSlot extends Slot implements IInsertableSlot {
 
-    private static final IInventory emptyInventory = new Inventory(0);
+    private static final Inventory emptyInventory = new SimpleInventory(0);
     private final ContainerSlotType slotType;
     private final BasicInventorySlot slot;
     @Nullable
@@ -42,8 +42,9 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
         return remainder;
     }
 
+
     @Override
-    public boolean isItemValid(@Nonnull ItemStack stack) {
+    public boolean canInsert(@Nonnull ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
@@ -67,7 +68,7 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
     }
 
     @Override
-    public void putStack(@Nonnull ItemStack stack) {
+    public void setStack(@Nonnull ItemStack stack) {
         slot.setStack(stack);
         onSlotChanged();
     }

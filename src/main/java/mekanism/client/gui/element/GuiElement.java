@@ -1,8 +1,6 @@
 package mekanism.client.gui.element;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -15,26 +13,28 @@ import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.IFancyFontRenderer;
 import mekanism.client.render.MekanismRenderer;
+import mekanism.client.sound.SoundHandler;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.sound.SoundManager;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 
-public abstract class GuiElement extends Widget implements IFancyFontRenderer {
+public abstract class GuiElement extends AbstractButtonWidget implements IFancyFontRenderer {
 
     private static final NumberFormat intFormatter = NumberFormat.getIntegerInstance();
     private static final int BUTTON_TEX_X = 200, BUTTON_TEX_Y = 60;
 
-    public static final Minecraft minecraft = Minecraft.getInstance();
+    public static final MinecraftClient minecraft = MinecraftClient.getInstance();
 
     protected ButtonBackground buttonBackground = ButtonBackground.NONE;
 
@@ -45,7 +45,7 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
     protected boolean playClickSound;
     public boolean isOverlay;
 
-    public GuiElement(IGuiWrapper gui, int x, int y, int width, int height, ITextComponent text) {
+    public GuiElement(IGuiWrapper gui, int x, int y, int width, int height, Text text) {
         super(x, y, width, height, text);
         guiObj = gui;
     }
@@ -95,15 +95,15 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
         children.forEach(GuiElement::onWindowClose);
     }
 
-    protected ResourceLocation getButtonLocation(String name) {
+    protected Identifier getButtonLocation(String name) {
         return MekanismUtils.getResource(ResourceType.GUI_BUTTON, name + ".png");
     }
 
     protected IHoverable getOnHover(ILangEntry translationHelper) {
-        return getOnHover((Supplier<ITextComponent>) translationHelper::translate);
+        return getOnHover((Supplier<Text>) translationHelper::translate);
     }
 
-    protected IHoverable getOnHover(Supplier<ITextComponent> componentSupplier) {
+    protected IHoverable getOnHover(Supplier<Text> componentSupplier) {
         return (onHover, matrix, xAxis, yAxis) -> displayTooltip(matrix, componentSupplier.get(), xAxis, yAxis);
     }
 
@@ -161,11 +161,11 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
               .forEach(child -> child.renderToolTip(matrix, mouseX, mouseY));
     }
 
-    public void displayTooltip(MatrixStack matrix, ITextComponent component, int xAxis, int yAxis) {
+    public void displayTooltip(MatrixStack matrix, Text component, int xAxis, int yAxis) {
         guiObj.displayTooltip(matrix, component, xAxis, yAxis);
     }
 
-    public void displayTooltips(MatrixStack matrix, List<ITextComponent> list, int xAxis, int yAxis) {
+    public void displayTooltips(MatrixStack matrix, List<Text> list, int xAxis, int yAxis) {
         guiObj.displayTooltips(matrix, list, xAxis, yAxis);
     }
 
@@ -199,7 +199,7 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
     }
 
     @Override
-    public FontRenderer getFont() {
+    public TextRenderer getFont() {
         return guiObj.getFont();
     }
 
@@ -298,13 +298,13 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
     }
 
     protected void drawButtonText(MatrixStack matrix) {
-        ITextComponent message = getMessage();
+        Text message = getMessage();
         //Only attempt to draw the message if we have a message to draw
         if (!message.getString().isEmpty()) {
             //TODO: Improve the math for this so that it calculates the y value better
             int halfWidthLeft = width / 2;
-            drawCenteredString(matrix, getFont(), message, x - guiObj.getLeft() + halfWidthLeft, y - guiObj.getTop() + (height - 8) / 2,
-                  getFGColor() | MathHelper.ceil(alpha * 255.0F) << 24);
+            drawCenteredText(matrix, getFont(), message, x - guiObj.getLeft() + halfWidthLeft, y - guiObj.getTop() + (height - 8) / 2,
+                this.active ? 16777215 : 10526880 | MathHelper.ceil(alpha * 255.0F) << 24);
         }
     }
 
@@ -319,8 +319,8 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
         MekanismRenderer.bindTexture(buttonBackground.getTexture());
         int i = getYImage(isMouseOverCheckWindows(mouseX, mouseY));
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
-        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
 
         int width = getButtonWidth();
         int height = getButtonHeight();
@@ -333,13 +333,13 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
         int x = getButtonX();
         int y = getButtonY();
         //Left Top Corner
-        blit(matrix, x, y, 0, position, halfWidthLeft, halfHeightTop, BUTTON_TEX_X, BUTTON_TEX_Y);
+        drawTexture(matrix, x, y, 0, position, halfWidthLeft, halfHeightTop, BUTTON_TEX_X, BUTTON_TEX_Y);
         //Left Bottom Corner
-        blit(matrix, x, y + halfHeightTop, 0, position + 20 - halfHeightBottom, halfWidthLeft, halfHeightBottom, BUTTON_TEX_X, BUTTON_TEX_Y);
+        drawTexture(matrix, x, y + halfHeightTop, 0, position + 20 - halfHeightBottom, halfWidthLeft, halfHeightBottom, BUTTON_TEX_X, BUTTON_TEX_Y);
         //Right Top Corner
-        blit(matrix, x + halfWidthLeft, y, 200 - halfWidthRight, position, halfWidthRight, halfHeightTop, BUTTON_TEX_X, BUTTON_TEX_Y);
+        drawTexture(matrix, x + halfWidthLeft, y, 200 - halfWidthRight, position, halfWidthRight, halfHeightTop, BUTTON_TEX_X, BUTTON_TEX_Y);
         //Right Bottom Corner
-        blit(matrix, x + halfWidthLeft, y + halfHeightTop, 200 - halfWidthRight, position + 20 - halfHeightBottom, halfWidthRight, halfHeightBottom, BUTTON_TEX_X, BUTTON_TEX_Y);
+        drawTexture(matrix, x + halfWidthLeft, y + halfHeightTop, 200 - halfWidthRight, position + 20 - halfHeightBottom, halfWidthRight, halfHeightBottom, BUTTON_TEX_X, BUTTON_TEX_Y);
 
         //TODO: Add support for buttons that are larger than 200x20 in either direction (most likely would be in the height direction
         // Can use a lot of the same logic as GuiMekanism does for its background
@@ -348,24 +348,25 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
         RenderSystem.disableBlend();
     }
 
-    protected void renderExtendedTexture(MatrixStack matrix, ResourceLocation resource, int sideWidth, int sideHeight) {
+    protected void renderExtendedTexture(MatrixStack matrix, Identifier resource, int sideWidth, int sideHeight) {
         GuiUtils.renderExtendedTexture(matrix, resource, sideWidth, sideHeight, getButtonX(), getButtonY(), getButtonWidth(), getButtonHeight());
     }
 
-    protected void renderBackgroundTexture(MatrixStack matrix, ResourceLocation resource, int sideWidth, int sideHeight) {
+    protected void renderBackgroundTexture(MatrixStack matrix, Identifier resource, int sideWidth, int sideHeight) {
         GuiUtils.renderBackgroundTexture(matrix, resource, sideWidth, sideHeight, getButtonX(), getButtonY(), getButtonWidth(), getButtonHeight(), 256, 256);
     }
 
     @Override
-    public void playDownSound(@Nonnull SoundHandler soundHandler) {
+    public void playDownSound(@Nonnull SoundManager soundManager) {
         if (playClickSound) {
             //Respect the sound config
-            soundHandler.play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1, MekanismConfig.client.baseSoundVolume.get()));
+            soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1, MekanismConfig.client.baseSoundVolume.get()));
         }
     }
 
-    protected void drawTiledSprite(MatrixStack matrix, int xPosition, int yPosition, int yOffset, int desiredWidth, int desiredHeight, TextureAtlasSprite sprite) {
-        GuiUtils.drawTiledSprite(matrix, xPosition, yPosition, yOffset, desiredWidth, desiredHeight, sprite, 16, 16, getBlitOffset());
+
+    protected void drawTiledSprite(MatrixStack matrix, int xPosition, int yPosition, int yOffset, int desiredWidth, int desiredHeight, Sprite sprite) {
+        GuiUtils.drawTiledSprite(matrix, xPosition, yPosition, yOffset, desiredWidth, desiredHeight, sprite, 16, 16, getZOffset());
     }
 
     protected static String formatInt(long l) {
@@ -377,13 +378,13 @@ public abstract class GuiElement extends Widget implements IFancyFontRenderer {
         DIGITAL(MekanismUtils.getResource(ResourceType.GUI, "button_digital.png")),
         NONE(null);
 
-        private final ResourceLocation texture;
+        private final Identifier texture;
 
-        ButtonBackground(ResourceLocation texture) {
+        ButtonBackground(Identifier texture) {
             this.texture = texture;
         }
 
-        public ResourceLocation getTexture() {
+        public Identifier getTexture() {
             return texture;
         }
     }

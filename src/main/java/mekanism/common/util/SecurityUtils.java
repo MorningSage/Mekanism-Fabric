@@ -12,11 +12,11 @@ import mekanism.common.lib.security.ISecurityTile;
 import mekanism.common.lib.security.ISecurityTile.SecurityMode;
 import mekanism.common.lib.security.SecurityData;
 import mekanism.common.lib.security.SecurityFrequency;
+import net.fabricmc.api.EnvType;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Util;
-import net.minecraftforge.api.distmarker.Dist;
 
 public final class SecurityUtils {
 
@@ -27,7 +27,7 @@ public final class SecurityUtils {
         }
         if (!(stack.getItem() instanceof ISecurityItem) && stack.getItem() instanceof IOwnerItem) {
             UUID owner = ((IOwnerItem) stack.getItem()).getOwnerUUID(stack);
-            return owner == null || owner.equals(player.getUniqueID());
+            return owner == null || owner.equals(player.getUuid());
         }
         if (stack.isEmpty() || !(stack.getItem() instanceof ISecurityItem)) {
             return true;
@@ -39,7 +39,7 @@ public final class SecurityUtils {
         return canAccess(security.getSecurity(stack), player, security.getOwnerUUID(stack));
     }
 
-    public static boolean canAccess(PlayerEntity player, TileEntity tile) {
+    public static boolean canAccess(PlayerEntity player, BlockEntity tile) {
         if (!(tile instanceof ISecurityTile) || !((ISecurityTile) tile).hasSecurity()) {
             //If this tile does not have security allow access
             return true;
@@ -56,7 +56,7 @@ public final class SecurityUtils {
         if (!MekanismConfig.general.allowProtection.get()) {
             return true;
         }
-        if (owner == null || player.getUniqueID().equals(owner)) {
+        if (owner == null || player.getUuid().equals(owner)) {
             return true;
         }
         SecurityFrequency freq = getFrequency(owner);
@@ -69,7 +69,7 @@ public final class SecurityUtils {
         if (mode == SecurityMode.PUBLIC) {
             return true;
         } else if (mode == SecurityMode.TRUSTED) {
-            return freq.getTrustedUUIDs().contains(player.getUniqueID());
+            return freq.getTrustedUUIDs().contains(player.getUuid());
         }
         return false;
     }
@@ -82,19 +82,19 @@ public final class SecurityUtils {
     }
 
     public static void displayNoAccess(PlayerEntity player) {
-        player.sendMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM, EnumColor.RED, MekanismLang.NO_ACCESS), Util.DUMMY_UUID);
+        player.sendSystemMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM, EnumColor.RED, MekanismLang.NO_ACCESS), Util.NIL_UUID);
     }
 
-    public static SecurityMode getSecurity(ISecurityTile security, Dist side) {
+    public static SecurityMode getSecurity(ISecurityTile security, EnvType side) {
         if (!security.hasSecurity()) {
             return SecurityMode.PUBLIC;
         }
-        if (side.isDedicatedServer()) {
+        if (side == EnvType.SERVER) {
             SecurityFrequency freq = security.getSecurity().getFreq();
             if (freq != null && freq.isOverridden()) {
                 return freq.getSecurityMode();
             }
-        } else if (side.isClient()) {
+        } else if (side == EnvType.CLIENT) {
             SecurityData data = MekanismClient.clientSecurityMap.get(security.getSecurity().getOwnerUUID());
             if (data != null && data.override) {
                 return data.mode;
@@ -103,16 +103,16 @@ public final class SecurityUtils {
         return security.getSecurity().getMode();
     }
 
-    public static SecurityMode getSecurity(ItemStack stack, Dist side) {
+    public static SecurityMode getSecurity(ItemStack stack, EnvType side) {
         ISecurityItem security = (ISecurityItem) stack.getItem();
         SecurityMode mode = security.getSecurity(stack);
         if (security.getOwnerUUID(stack) != null) {
-            if (side.isDedicatedServer()) {
+            if (side == EnvType.SERVER) {
                 SecurityFrequency freq = getFrequency(security.getOwnerUUID(stack));
                 if (freq != null && freq.isOverridden()) {
                     mode = freq.getSecurityMode();
                 }
-            } else if (side.isClient()) {
+            } else if (side == EnvType.CLIENT) {
                 SecurityData data = MekanismClient.clientSecurityMap.get(security.getOwnerUUID(stack));
                 if (data != null && data.override) {
                     mode = data.mode;
@@ -122,12 +122,12 @@ public final class SecurityUtils {
         return mode;
     }
 
-    public static boolean isOverridden(ItemStack stack, Dist side) {
+    public static boolean isOverridden(ItemStack stack, EnvType side) {
         ISecurityItem security = (ISecurityItem) stack.getItem();
         if (security.getOwnerUUID(stack) == null) {
             return false;
         }
-        if (side.isDedicatedServer()) {
+        if (side == EnvType.SERVER) {
             SecurityFrequency freq = getFrequency(security.getOwnerUUID(stack));
             return freq != null && freq.isOverridden();
         }
@@ -135,12 +135,12 @@ public final class SecurityUtils {
         return data != null && data.override;
     }
 
-    public static boolean isOverridden(TileEntity tile, Dist side) {
+    public static boolean isOverridden(BlockEntity tile, EnvType side) {
         ISecurityTile security = (ISecurityTile) tile;
         if (!security.hasSecurity() || security.getSecurity().getOwnerUUID() == null) {
             return false;
         }
-        if (side.isDedicatedServer()) {
+        if (side == EnvType.SERVER) {
             SecurityFrequency freq = getFrequency(security.getSecurity().getOwnerUUID());
             return freq != null && freq.isOverridden();
         }

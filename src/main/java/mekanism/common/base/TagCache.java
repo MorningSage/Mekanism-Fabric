@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.common.block.BlockBounding;
 import mekanism.common.lib.WildcardMatcher;
@@ -15,13 +17,13 @@ import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagCollection;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.ItemTags;
+import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 
 public final class TagCache {
 
@@ -57,21 +59,21 @@ public final class TagCache {
         return check == null || check.isEmpty() ? Collections.emptyList() : getTagsAsStrings(check.getType().getTags());
     }
 
-    public static List<String> getTagsAsStrings(Set<ResourceLocation> tags) {
-        return tags.stream().map(ResourceLocation::toString).collect(Collectors.toList());
+    public static List<String> getTagsAsStrings(Set<Identifier> tags) {
+        return tags.stream().map(Identifier::toString).collect(Collectors.toList());
     }
 
     public static List<ItemStack> getItemTagStacks(String oreName) {
         if (itemTagStacks.get(oreName) != null) {
             return itemTagStacks.get(oreName);
         }
-        TagCollection<Item> tagCollection = ItemTags.getCollection();
-        List<ResourceLocation> keys = tagCollection.getRegisteredTags().stream().filter(rl -> WildcardMatcher.matches(oreName, rl.toString())).collect(Collectors.toList());
+        TagGroup<Item> tagCollection = ItemTags.getTagGroup();
+        List<Identifier> keys = tagCollection.getTagIds().stream().filter(rl -> WildcardMatcher.matches(oreName, rl.toString())).collect(Collectors.toList());
         Set<Item> items = new HashSet<>();
-        for (ResourceLocation key : keys) {
-            ITag<Item> itemTag = tagCollection.get(key);
+        for (Identifier key : keys) {
+            Tag<Item> itemTag = tagCollection.getTag(key);
             if (itemTag != null) {
-                items.addAll(itemTag.getAllElements());
+                items.addAll(itemTag.values());
             }
         }
         List<ItemStack> stacks = items.stream().map(ItemStack::new).collect(Collectors.toList());
@@ -83,13 +85,13 @@ public final class TagCache {
         if (blockTagStacks.get(oreName) != null) {
             return blockTagStacks.get(oreName);
         }
-        TagCollection<Block> tagCollection = BlockTags.getCollection();
-        List<ResourceLocation> keys = tagCollection.getRegisteredTags().stream().filter(rl -> WildcardMatcher.matches(oreName, rl.toString())).collect(Collectors.toList());
+        TagGroup<Block> tagCollection = BlockTags.getTagGroup();
+        List<Identifier> keys = tagCollection.getTagIds().stream().filter(rl -> WildcardMatcher.matches(oreName, rl.toString())).collect(Collectors.toList());
         Set<Block> blocks = new HashSet<>();
-        for (ResourceLocation key : keys) {
-            ITag<Block> blockTag = tagCollection.get(key);
+        for (Identifier key : keys) {
+            Tag<Block> blockTag = tagCollection.getTag(key);
             if (blockTag != null) {
-                blocks.addAll(blockTag.getAllElements());
+                blocks.addAll(blockTag.values());
             }
         }
         List<ItemStack> stacks = blocks.stream().map(ItemStack::new).collect(Collectors.toList());
@@ -102,14 +104,14 @@ public final class TagCache {
             return modIDStacks.get(modName);
         }
         List<ItemStack> stacks = new ArrayList<>();
-        for (Item item : ForgeRegistries.ITEMS.getValues()) {
-            if (!forceBlock || item instanceof BlockItem) {
+        for (Map.Entry<RegistryKey<Item>, Item> item : Registry.ITEM.getEntries()) {
+            if (!forceBlock || item.getValue() instanceof BlockItem) {
                 //Ugly check to make sure we don't include our bounding block in render list. Eventually this should use getRenderType() with a dummy BlockState
-                if (item instanceof BlockItem && ((BlockItem) item).getBlock() instanceof BlockBounding) {
+                if (item.getValue() instanceof BlockItem && ((BlockItem) item.getValue()).getBlock() instanceof BlockBounding) {
                     continue;
                 }
-                if (WildcardMatcher.matches(modName, item.getRegistryName().getNamespace())) {
-                    stacks.add(new ItemStack(item));
+                if (WildcardMatcher.matches(modName, item.getKey().getValue().getNamespace())) {
+                    stacks.add(new ItemStack(item.getValue()));
                 }
             }
         }

@@ -25,6 +25,7 @@ import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -79,28 +80,28 @@ public class ThermodynamicConductor extends Transmitter<IHeatHandler, HeatNetwor
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT tag) {
+    public @Nonnull CompoundTag write(@Nonnull @Nonnull CompoundTag tag) {
         tag = super.write(tag);
         tag.put(NBTConstants.HEAT_CAPACITORS, DataHandlerUtils.writeContainers(getHeatCapacitors(null)));
         return tag;
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT tag) {
+    public void read(@Nonnull @Nonnull CompoundTag tag) {
         super.read(tag);
         DataHandlerUtils.readContainers(getHeatCapacitors(null), tag.getList(NBTConstants.HEAT_CAPACITORS, NBT.TAG_COMPOUND));
     }
 
     @Nonnull
     @Override
-    public CompoundNBT getReducedUpdateTag(CompoundNBT updateTag) {
+    public @Nonnull CompoundTag getReducedUpdateTag(CompoundTag updateTag) {
         updateTag = super.getReducedUpdateTag(updateTag);
         updateTag.putDouble(NBTConstants.TEMPERATURE, buffer.getHeat());
         return updateTag;
     }
 
     @Override
-    public void handleUpdateTag(@Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(@Nonnull @Nonnull CompoundTag tag) {
         super.handleUpdateTag(tag);
         NBTUtils.setDoubleIfPresent(tag, NBTConstants.TEMPERATURE, buffer::setHeat);
     }

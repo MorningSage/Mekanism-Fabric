@@ -1,31 +1,26 @@
 package mekanism.common.lib.transmitter.acceptor;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
+import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.common.content.network.transmitter.Transmitter;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
 
 @FieldsAreNonnullByDefault
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class AbstractAcceptorCache<ACCEPTOR, INFO extends AbstractAcceptorInfo> {
 
-    private final Map<Direction, NonNullConsumer<LazyOptional<ACCEPTOR>>> cachedListeners = new EnumMap<>(Direction.class);
+    private final Map<Direction, Consumer<Optional<ACCEPTOR>>> cachedListeners = new EnumMap<>(Direction.class);
     protected final Map<Direction, INFO> cachedAcceptors = new EnumMap<>(Direction.class);
     protected final Transmitter<ACCEPTOR, ?, ?> transmitter;
     private final TileEntityTransmitter transmitterTile;
@@ -56,8 +51,8 @@ public abstract class AbstractAcceptorCache<ACCEPTOR, INFO extends AbstractAccep
     /**
      * @implNote Grabs the acceptors from cache, ensuring that the connection map contains the side
      */
-    public LazyOptional<ACCEPTOR> getCachedAcceptor(Direction side) {
-        return Transmitter.connectionMapContainsSide(currentAcceptorConnections, side) ? getConnectedAcceptor(side) : LazyOptional.empty();
+    public Optional<ACCEPTOR> getCachedAcceptor(Direction side) {
+        return Transmitter.connectionMapContainsSide(currentAcceptorConnections, side) ? getConnectedAcceptor(side) : Optional.empty();
     }
 
     /**
@@ -73,19 +68,19 @@ public abstract class AbstractAcceptorCache<ACCEPTOR, INFO extends AbstractAccep
         return acceptors;
     }
 
-    protected abstract LazyOptional<ACCEPTOR> getConnectedAcceptor(Direction side);
+    protected abstract Optional<ACCEPTOR> getConnectedAcceptor(Direction side);
 
     /**
      * Gets the listener that will refresh connections on a given side.
      */
-    protected NonNullConsumer<LazyOptional<ACCEPTOR>> getRefreshListener(@Nonnull Direction side) {
+    protected Consumer<Optional<ACCEPTOR>> getRefreshListener(@Nonnull Direction side) {
         return cachedListeners.computeIfAbsent(side, this::getUncachedRefreshListener);
     }
 
     /**
      * Computes the listener that will refresh connections on a given side.
      */
-    private NonNullConsumer<LazyOptional<ACCEPTOR>> getUncachedRefreshListener(Direction side) {
+    private Consumer<Optional<ACCEPTOR>> getUncachedRefreshListener(Direction side) {
         return ignored -> {
             //Check to make sure the transmitter is still valid and that the position we are going to check is actually still loaded
             if (!transmitterTile.isRemoved() && transmitterTile.hasWorld() && transmitterTile.isLoaded() &&

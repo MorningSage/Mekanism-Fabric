@@ -1,6 +1,5 @@
 package mekanism.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -8,27 +7,27 @@ import javax.annotation.Nullable;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiWindow;
 import mekanism.common.Mekanism;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public interface IGuiWrapper {
 
-    default void displayTooltip(MatrixStack matrix, ITextComponent component, int x, int y, int maxWidth) {
+    default void displayTooltip(MatrixStack matrix, Text component, int x, int y, int maxWidth) {
         this.displayTooltips(matrix, Collections.singletonList(component), x, y, maxWidth);
     }
 
-    default void displayTooltip(MatrixStack matrix, ITextComponent component, int x, int y) {
+    default void displayTooltip(MatrixStack matrix, Text component, int x, int y) {
         this.displayTooltips(matrix, Collections.singletonList(component), x, y);
     }
 
-    default void displayTooltips(MatrixStack matrix, List<ITextComponent> components, int xAxis, int yAxis) {
+    default void displayTooltips(MatrixStack matrix, List<Text> components, int xAxis, int yAxis) {
         displayTooltips(matrix, components, xAxis, yAxis, -1);
     }
 
-    default void displayTooltips(MatrixStack matrix, List<ITextComponent> components, int xAxis, int yAxis, int maxWidth) {
+    default void displayTooltips(MatrixStack matrix, List<Text> components, int xAxis, int yAxis, int maxWidth) {
         net.minecraftforge.fml.client.gui.GuiUtils.drawHoveringText(matrix, components, xAxis, yAxis, getWidth(), getHeight(), maxWidth, getFont());
     }
 
@@ -75,7 +74,7 @@ public interface IGuiWrapper {
     }
 
     @Nullable
-    FontRenderer getFont();
+    TextRenderer getFont();
 
     default void renderItem(MatrixStack matrix, @Nonnull ItemStack stack, int xAxis, int yAxis) {
         renderItem(matrix, stack, xAxis, yAxis, 1);

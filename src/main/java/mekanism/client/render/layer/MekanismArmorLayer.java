@@ -1,6 +1,6 @@
 package mekanism.client.render.layer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.ParametersAreNonnullByDefault;
 import mekanism.client.render.armor.CustomArmor;
 import mekanism.common.item.interfaces.ISpecialGear;

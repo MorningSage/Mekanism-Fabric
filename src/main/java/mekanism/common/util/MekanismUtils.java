@@ -42,48 +42,24 @@ import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ILiquidContainer;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceContext.BlockMode;
-import net.minecraft.util.math.RayTraceContext.FluidMode;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.*;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.common.util.Constants.BlockFlags;
-import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
@@ -154,7 +130,7 @@ public final class MekanismUtils {
      * @return if machine is active
      */
     public static boolean isActive(IBlockReader world, BlockPos pos) {
-        TileEntity tile = getTileEntity(world, pos);
+        BlockEntity tile = getTileEntity(world, pos);
         if (tile instanceof IActiveState) {
             return ((IActiveState) tile).getActive();
         }
@@ -495,11 +471,11 @@ public final class MekanismUtils {
      * @param boundingLocation - coordinates of bounding block
      * @param orig             - original block position
      */
-    public static void makeAdvancedBoundingBlock(IWorld world, BlockPos boundingLocation, BlockPos orig) {
+    public static void makeAdvancedBoundingBlock(World world, BlockPos boundingLocation, BlockPos orig) {
         BlockBounding boundingBlock = MekanismBlocks.ADVANCED_BOUNDING_BLOCK.getBlock();
         BlockState newState = BlockStateHelper.getStateForPlacement(boundingBlock, boundingBlock.getDefaultState(), world, boundingLocation, null, Direction.NORTH);
         world.setBlockState(boundingLocation, newState, BlockFlags.DEFAULT);
-        if (!world.isRemote()) {
+        if (!world.isClient()) {
             TileEntityAdvancedBoundingBlock tile = getTileEntity(TileEntityAdvancedBoundingBlock.class, world, boundingLocation);
             if (tile != null) {
                 tile.setMainLocation(orig);
@@ -590,7 +566,7 @@ public final class MekanismUtils {
      *
      * @return the corresponding ResourceLocation
      */
-    public static ResourceLocation getResource(ResourceType type, String name) {
+    public static Identifier getResource(ResourceType type, String name) {
         return Mekanism.rl(type.getPrefix() + name);
     }
 
@@ -599,7 +575,7 @@ public final class MekanismUtils {
      *
      * @param tile - TileEntity to save
      */
-    public static void saveChunk(TileEntity tile) {
+    public static void saveChunk(BlockEntity tile) {
         if (tile != null && !tile.isRemoved() && tile.getWorld() != null) {
             markChunkDirty(tile.getWorld(), tile.getPos());
         }
@@ -625,7 +601,7 @@ public final class MekanismUtils {
      *
      * @return if the TileEntity can function with redstone logic
      */
-    public static boolean canFunction(TileEntity tile) {
+    public static boolean canFunction(BlockEntity tile) {
         if (!(tile instanceof IRedstoneControl)) {
             return true;
         }
@@ -650,23 +626,23 @@ public final class MekanismUtils {
      *
      * @return raytraced value
      */
-    public static BlockRayTraceResult rayTrace(PlayerEntity player) {
+    public static BlockHitResult rayTrace(PlayerEntity player) {
         return rayTrace(player, FluidMode.NONE);
     }
 
-    public static BlockRayTraceResult rayTrace(PlayerEntity player, FluidMode fluidMode) {
+    public static BlockHitResult rayTrace(PlayerEntity player, FluidMode fluidMode) {
         return rayTrace(player, Mekanism.proxy.getReach(player), fluidMode);
     }
 
-    public static BlockRayTraceResult rayTrace(PlayerEntity player, double reach) {
+    public static BlockHitResult rayTrace(PlayerEntity player, double reach) {
         return rayTrace(player, reach, FluidMode.NONE);
     }
 
-    public static BlockRayTraceResult rayTrace(PlayerEntity player, double reach, FluidMode fluidMode) {
-        Vector3d headVec = getHeadVec(player);
-        Vector3d lookVec = player.getLook(1);
-        Vector3d endVec = headVec.add(lookVec.x * reach, lookVec.y * reach, lookVec.z * reach);
-        return player.getEntityWorld().rayTraceBlocks(new RayTraceContext(headVec, endVec, BlockMode.OUTLINE, fluidMode, player));
+    public static BlockHitResult rayTrace(PlayerEntity player, double reach, RaycastContext.FluidHandling fluidMode) {
+        Vec3d headVec = getHeadVec(player);
+        Vec3d lookVec = player.getLook(1);
+        Vec3d endVec = headVec.add(lookVec.x * reach, lookVec.y * reach, lookVec.z * reach);
+        return player.getEntityWorld().raycast(new RaycastContext(headVec, endVec, RaycastContext.ShapeType.OUTLINE, fluidMode, player));
     }
 
     /**
@@ -676,15 +652,15 @@ public final class MekanismUtils {
      *
      * @return head location
      */
-    private static Vector3d getHeadVec(PlayerEntity player) {
-        double posY = player.getPosY() + player.getEyeHeight();
-        if (player.isCrouching()) {
+    private static Vec3d getHeadVec(PlayerEntity player) {
+        double posY = player.getY() + player.getEyeHeight();
+        if (player.isSneaking()) {
             posY -= 0.08;
         }
-        return new Vector3d(player.getPosX(), posY, player.getPosZ());
+        return new Vec3d(player.getX(), posY, player.getZ());
     }
 
-    public static ITextComponent getEnergyDisplayShort(FloatingLong energy) {
+    public static Text getEnergyDisplayShort(FloatingLong energy) {
         switch (MekanismConfig.general.energyUnit.get()) {
             case J:
                 return UnitDisplayUtils.getDisplayShort(energy, ElectricUnit.JOULES);
@@ -739,7 +715,7 @@ public final class MekanismUtils {
      *
      * @return rounded energy display
      */
-    public static ITextComponent getTemperatureDisplay(double T, TemperatureUnit unit, boolean shift) {
+    public static Text getTemperatureDisplay(double T, TemperatureUnit unit, boolean shift) {
         double TK = unit.convertToK(T, true);
         switch (MekanismConfig.general.tempUnit.get()) {
             case K:
@@ -899,20 +875,20 @@ public final class MekanismUtils {
      */
     @Nullable
     @Contract("null, _, _ -> null")
-    public static TileEntity getTileEntity(@Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
+    public static BlockEntity getTileEntity(@Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
         //Get the tile entity using the chunk we found/had cached
         return getTileEntity(getChunkForTile(world, chunkMap, pos), pos);
     }
 
     @Nullable
     @Contract("_, null, _, _ -> null")
-    public static <T extends TileEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
         return getTileEntity(clazz, world, chunkMap, pos, false);
     }
 
     @Nullable
     @Contract("_, null, _, _, _ -> null")
-    public static <T extends TileEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos,
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos,
           boolean logWrongType) {
         //Get the tile entity using the chunk we found/had cached
         return getTileEntity(clazz, getChunkForTile(world, chunkMap, pos), pos, logWrongType);
@@ -951,12 +927,12 @@ public final class MekanismUtils {
      */
     @Nullable
     @Contract("null, _ -> null")
-    public static TileEntity getTileEntity(@Nullable IBlockReader world, @Nonnull BlockPos pos) {
+    public static BlockEntity getTileEntity(@Nullable BlockView world, @Nonnull BlockPos pos) {
         if (!isBlockLoaded(world, pos)) {
             //If the world is null or its a world reader and the block is not loaded, return null
             return null;
         }
-        return world.getTileEntity(pos);
+        return world.getBlockEntity(pos);
     }
 
     /**
@@ -970,14 +946,14 @@ public final class MekanismUtils {
      */
     @Nullable
     @Contract("_, null, _ -> null")
-    public static <T extends TileEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IBlockReader world, @Nonnull BlockPos pos) {
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IBlockReader world, @Nonnull BlockPos pos) {
         return getTileEntity(clazz, world, pos, false);
     }
 
     @Nullable
     @Contract("_, null, _, _ -> null")
-    public static <T extends TileEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IBlockReader world, @Nonnull BlockPos pos, boolean logWrongType) {
-        TileEntity tile = getTileEntity(world, pos);
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IBlockReader world, @Nonnull BlockPos pos, boolean logWrongType) {
+        BlockEntity tile = getTileEntity(world, pos);
         if (tile == null) {
             return null;
         }
@@ -998,13 +974,13 @@ public final class MekanismUtils {
      * @return True if the position is loaded or the given world is of a superclass of IWorldReader that does not have a concept of being loaded.
      */
     @Contract("null, _ -> false")
-    public static boolean isBlockLoaded(@Nullable IBlockReader world, @Nonnull BlockPos pos) {
+    public static boolean isBlockLoaded(@Nullable BlockView world, @Nonnull BlockPos pos) {
         if (world == null) {
             return false;
         } else if (world instanceof World) {
             return ((World) world).isBlockPresent(pos);
-        } else if (world instanceof IWorldReader) {
-            return ((IWorldReader) world).isBlockLoaded(pos);
+        } else if (world instanceof WorldView) {
+            return ((WorldView) world).isBlockLoaded(pos);
         }
         return true;
     }
@@ -1016,7 +992,7 @@ public final class MekanismUtils {
         dismantleBlock(state, world, pos, getTileEntity(world, pos));
     }
 
-    public static void dismantleBlock(BlockState state, World world, BlockPos pos, TileEntity tile) {
+    public static void dismantleBlock(BlockState state, World world, BlockPos pos, BlockEntity tile) {
         Block.spawnDrops(state, world, pos, tile);
         world.removeBlock(pos, false);
     }

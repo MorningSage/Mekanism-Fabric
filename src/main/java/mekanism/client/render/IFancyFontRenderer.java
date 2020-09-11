@@ -1,20 +1,20 @@
 package mekanism.client.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import mekanism.client.SpecialColors;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.tuple.Pair;
 
 public interface IFancyFontRenderer {
 
     int getXSize();
 
-    FontRenderer getFont();
+    TextRenderer getFont();
 
     default int titleTextColor() {
         return SpecialColors.TEXT_TITLE.argb();
@@ -32,56 +32,56 @@ public interface IFancyFontRenderer {
         return SpecialColors.TEXT_SCREEN.argb();
     }
 
-    default int drawString(MatrixStack matrix, ITextComponent component, int x, int y, int color) {
-        return getFont().func_238422_b_(matrix, component, x, y, color);
+    default int drawString(MatrixStack matrix, Text component, int x, int y, int color) {
+        return getFont().draw(matrix, component, x, y, color);
     }
 
-    default int getStringWidth(ITextComponent component) {
-        return getFont().func_238414_a_(component);
+    default int getStringWidth(Text component) {
+        return getFont().getWidth(component);
     }
 
-    default void drawCenteredText(MatrixStack matrix, ITextComponent component, float x, float y, int color) {
+    default void drawCenteredText(MatrixStack matrix, Text component, float x, float y, int color) {
         drawCenteredText(matrix, component, x, 0, y, color);
     }
 
-    default void drawCenteredText(MatrixStack matrix, ITextComponent component, float xStart, float areaWidth, float y, int color) {
+    default void drawCenteredText(MatrixStack matrix, Text component, float xStart, float areaWidth, float y, int color) {
         int textWidth = getStringWidth(component);
         float centerX = xStart + (areaWidth / 2F) - (textWidth / 2F);
         drawTextExact(matrix, component, centerX, y, color);
     }
 
-    default void drawTitleText(MatrixStack matrix, ITextComponent text, float y) {
+    default void drawTitleText(MatrixStack matrix, Text text, float y) {
         drawCenteredTextScaledBound(matrix, text, getXSize() - 8, y, titleTextColor());
     }
 
-    default void drawScaledCenteredText(MatrixStack matrix, ITextComponent text, float left, float y, int color, float scale) {
+    default void drawScaledCenteredText(MatrixStack matrix, Text text, float left, float y, int color, float scale) {
         int textWidth = getStringWidth(text);
         float centerX = left - (textWidth / 2F) * scale;
         drawTextWithScale(matrix, text, centerX, y, color, scale);
     }
 
-    default void drawCenteredTextScaledBound(MatrixStack matrix, ITextComponent text, float maxLength, float y, int color) {
+    default void drawCenteredTextScaledBound(MatrixStack matrix, Text text, float maxLength, float y, int color) {
         float scale = Math.min(1, maxLength / getStringWidth(text));
         drawScaledCenteredText(matrix, text, getXSize() / 2F, y, color, scale);
     }
 
-    default void drawTextExact(MatrixStack matrix, ITextComponent text, float x, float y, int color) {
+    default void drawTextExact(MatrixStack matrix, Text text, float x, float y, int color) {
         matrix.push();
         matrix.translate(x, y, 0);
         drawString(matrix, text, 0, 0, color);
         matrix.pop();
     }
 
-    default float getNeededScale(ITextComponent text, float maxLength) {
+    default float getNeededScale(Text text, float maxLength) {
         int length = getStringWidth(text);
         return length <= maxLength ? 1 : maxLength / length;
     }
 
     default void drawTextScaledBound(MatrixStack matrix, String text, float x, float y, int color, float maxLength) {
-        drawTextScaledBound(matrix, new StringTextComponent(text), x, y, color, maxLength);
+        drawTextScaledBound(matrix, new LiteralText(text), x, y, color, maxLength);
     }
 
-    default void drawTextScaledBound(MatrixStack matrix, ITextComponent component, float x, float y, int color, float maxLength) {
+    default void drawTextScaledBound(MatrixStack matrix, Text component, float x, float y, int color, float maxLength) {
         int length = getStringWidth(component);
 
         if (length <= maxLength) {
@@ -93,13 +93,13 @@ public interface IFancyFontRenderer {
         MekanismRenderer.resetColor();
     }
 
-    default void drawScaledTextScaledBound(MatrixStack matrix, ITextComponent text, float x, float y, int color, float maxX, float textScale) {
+    default void drawScaledTextScaledBound(MatrixStack matrix, Text text, float x, float y, int color, float maxX, float textScale) {
         float width = getStringWidth(text) * textScale;
         float scale = Math.min(1, maxX / width) * textScale;
         drawTextWithScale(matrix, text, x, y, color, scale);
     }
 
-    default void drawTextWithScale(MatrixStack matrix, ITextComponent text, float x, float y, int color, float scale) {
+    default void drawTextWithScale(MatrixStack matrix, Text text, float x, float y, int color, float scale) {
         prepTextScale(matrix, m -> drawString(m, text, 0, 0, color), x, y, scale);
     }
 
@@ -113,7 +113,7 @@ public interface IFancyFontRenderer {
         MekanismRenderer.resetColor();
     }
 
-    default void drawWrappedCenteredText(MatrixStack matrix, ITextComponent text, float x, float y, int color, float maxLength) {
+    default void drawWrappedCenteredText(MatrixStack matrix, Text text, float x, float y, int color, float maxLength) {
         new WrappedTextRenderer(this).render(matrix, text.getString(), x, y, color, maxLength);
     }
 
@@ -121,14 +121,14 @@ public interface IFancyFontRenderer {
     class WrappedTextRenderer {
 
         final IFancyFontRenderer font;
-        final List<Pair<ITextComponent, Float>> linesToDraw = new ArrayList<>();
+        final List<Pair<Text, Float>> linesToDraw = new ArrayList<>();
         StringBuilder lineBuilder = new StringBuilder(), wordBuilder = new StringBuilder();
         float lineLength = 0, wordLength = 0;
         final float SPACE_LENGTH;
 
         WrappedTextRenderer(IFancyFontRenderer font) {
             this.font = font;
-            SPACE_LENGTH = font.getFont().getStringWidth(" ");
+            SPACE_LENGTH = font.getFont().getWidth(" ");
         }
 
         void render(MatrixStack matrix, String text, float x, float y, int color, float maxLength) {
@@ -138,16 +138,16 @@ public interface IFancyFontRenderer {
                     continue;
                 }
                 wordBuilder.append(c);
-                wordLength += font.getFont().getStringWidth(Character.toString(c));
+                wordLength += font.getFont().getWidth(Character.toString(c));
             }
             if (wordBuilder.length() > 0) {
                 addWord(maxLength);
             }
             if (lineBuilder.length() > 0) {
-                linesToDraw.add(Pair.of(new StringTextComponent(lineBuilder.toString()), lineLength));
+                linesToDraw.add(Pair.of(new LiteralText(lineBuilder.toString()), lineLength));
             }
             float startY = y;
-            for (Pair<ITextComponent, Float> p : linesToDraw) {
+            for (Pair<Text, Float> p : linesToDraw) {
                 font.drawTextExact(matrix, p.getLeft(), x - p.getRight() / 2, startY, color);
                 startY += 9;
             }
@@ -157,7 +157,7 @@ public interface IFancyFontRenderer {
             // ignore spacing if this is the first word of the line
             float spacingLength = lineBuilder.length() == 0 ? 0 : SPACE_LENGTH;
             if (lineLength + spacingLength + wordLength > maxLength) {
-                linesToDraw.add(Pair.of(new StringTextComponent(lineBuilder.toString()), lineLength));
+                linesToDraw.add(Pair.of(new LiteralText(lineBuilder.toString()), lineLength));
                 lineBuilder = new StringBuilder(wordBuilder);
                 lineLength = wordLength;
             } else {

@@ -3,7 +3,7 @@ package mekanism.client.gui.element.slot;
 import mekanism.common.tile.component.config.DataType;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public enum SlotType {
     NORMAL("normal.png", 18, 18),
@@ -19,7 +19,7 @@ public enum SlotType {
     ORE("ore.png", 18, 18),
     INNER_HOLDER_SLOT("inner_holder_slot.png", 18, 18);
 
-    private final ResourceLocation texture;
+    private final Identifier texture;
     private final int width;
     private final int height;
 
@@ -29,7 +29,7 @@ public enum SlotType {
         this.height = height;
     }
 
-    public ResourceLocation getTexture() {
+    public Identifier getTexture() {
         return texture;
     }
 

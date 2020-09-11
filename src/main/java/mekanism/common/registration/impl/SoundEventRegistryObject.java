@@ -3,7 +3,7 @@ package mekanism.common.registration.impl;
 import javax.annotation.Nonnull;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.registration.WrappedRegistryObject;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
 
@@ -13,7 +13,7 @@ public class SoundEventRegistryObject<SOUND extends SoundEvent> extends WrappedR
 
     public SoundEventRegistryObject(RegistryObject<SOUND> registryObject) {
         super(registryObject);
-        translationKey = Util.makeTranslationKey("sound_event", this.registryObject.getId());
+        translationKey = Util.createTranslationKey("sound_event", this.registryObject.getId());
     }
 
     @Nonnull

@@ -25,11 +25,9 @@ import mekanism.common.content.network.transmitter.UniversalCable;
 import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.text.EnergyDisplay;
-import net.minecraft.util.Direction;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraft.util.math.Direction;
 
 public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, EnergyNetwork, FloatingLong, UniversalCable> implements IMekanismStrictEnergyHandler {
 
@@ -203,17 +201,17 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
     }
 
     @Override
-    public ITextComponent getNeededInfo() {
+    public Text getNeededInfo() {
         return EnergyDisplay.of(energyContainer.getNeeded()).getTextComponent();
     }
 
     @Override
-    public ITextComponent getStoredInfo() {
+    public @Nullable Text getStoredInfo() {
         return EnergyDisplay.of(energyContainer.getEnergy()).getTextComponent();
     }
 
     @Override
-    public ITextComponent getFlowInfo() {
+    public @Nullable Text getFlowInfo() {
         return MekanismLang.GENERIC_PER_TICK.translate(EnergyDisplay.of(prevTransferAmount));
     }
 
@@ -223,7 +221,7 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
     }
 
     @Override
-    public ITextComponent getTextComponent() {
+    public Text getTextComponent() {
         return MekanismLang.NETWORK_DESCRIPTION.translate(MekanismLang.ENERGY_NETWORK, transmitters.size(), getAcceptorCount());
     }
 

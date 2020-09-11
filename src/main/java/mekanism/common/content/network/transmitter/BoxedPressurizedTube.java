@@ -42,6 +42,7 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -156,7 +157,7 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.read(nbtTags);
         if (nbtTags.contains(NBTConstants.BOXED_CHEMICAL, NBT.TAG_COMPOUND)) {
             saveShare = BoxedChemicalStack.read(nbtTags.getCompound(NBTConstants.BOXED_CHEMICAL));
@@ -177,7 +178,7 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public @Nonnull CompoundTag write(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.write(nbtTags);
         if (hasTransmitterNetwork()) {
             getTransmitterNetwork().validateSaveShares(getTransmitter());
@@ -352,7 +353,7 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
     }
 
     @Override
-    protected void handleContentsUpdateTag(@Nonnull BoxedChemicalNetwork network, @Nonnull CompoundNBT tag) {
+    protected void handleContentsUpdateTag(@Nonnull BoxedChemicalNetwork network, @Nonnull @Nonnull CompoundTag tag) {
         super.handleContentsUpdateTag(network, tag);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SCALE, scale -> network.currentScale = scale);
         NBTUtils.setBoxedChemicalIfPresent(tag, NBTConstants.BOXED_CHEMICAL, network::setLastChemical);

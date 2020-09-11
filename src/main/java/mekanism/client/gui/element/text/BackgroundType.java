@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.text;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.BiConsumer;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.element.GuiElementHolder;

@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.Action;
 import mekanism.api.NBTConstants;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.api.inventory.AutomationType;
@@ -24,13 +25,8 @@ import mekanism.common.tier.PipeTier;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraftforge.common.util.Constants.NBT;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.math.Direction;
 
 public class MechanicalPipe extends BufferedTransmitter<IFluidHandler, FluidNetwork, FluidStack, MechanicalPipe> implements IMekanismFluidHandler {
 
@@ -109,7 +105,7 @@ public class MechanicalPipe extends BufferedTransmitter<IFluidHandler, FluidNetw
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.read(nbtTags);
         if (nbtTags.contains(NBTConstants.FLUID_STORED, NBT.TAG_COMPOUND)) {
             saveShare = FluidStack.loadFluidStackFromNBT(nbtTags.getCompound(NBTConstants.FLUID_STORED));
@@ -121,7 +117,7 @@ public class MechanicalPipe extends BufferedTransmitter<IFluidHandler, FluidNetw
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public @Nonnull CompoundTag write(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.write(nbtTags);
         if (hasTransmitterNetwork()) {
             getTransmitterNetwork().validateSaveShares(this);
@@ -249,7 +245,7 @@ public class MechanicalPipe extends BufferedTransmitter<IFluidHandler, FluidNetw
     }
 
     @Override
-    protected void handleContentsUpdateTag(@Nonnull FluidNetwork network, @Nonnull CompoundNBT tag) {
+    protected void handleContentsUpdateTag(@Nonnull FluidNetwork network, @Nonnull @Nonnull CompoundTag tag) {
         super.handleContentsUpdateTag(network, tag);
         NBTUtils.setFluidStackIfPresent(tag, NBTConstants.FLUID_STORED, network::setLastFluid);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SCALE, scale -> network.currentScale = scale);

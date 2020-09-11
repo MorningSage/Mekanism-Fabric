@@ -1,11 +1,11 @@
 package mekanism.client.gui.element.button;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 /**
  * Extends our "Widget" class (GuiElement) instead of Button so that we can easier utilize common code
@@ -16,12 +16,12 @@ public class MekanismButton extends GuiElement {
     private final Runnable onLeftClick;
     private final Runnable onRightClick;
 
-    public MekanismButton(IGuiWrapper gui, int x, int y, int width, int height, ITextComponent text, Runnable onLeftClick, IHoverable onHover) {
+    public MekanismButton(IGuiWrapper gui, int x, int y, int width, int height, Text text, Runnable onLeftClick, IHoverable onHover) {
         this(gui, x, y, width, height, text, onLeftClick, onLeftClick, onHover);
         //TODO: Decide if default implementation for right clicking should be do nothing, or act as left click
     }
 
-    public MekanismButton(IGuiWrapper gui, int x, int y, int width, int height, ITextComponent text, Runnable onLeftClick, Runnable onRightClick, IHoverable onHover) {
+    public MekanismButton(IGuiWrapper gui, int x, int y, int width, int height, Text text, Runnable onLeftClick, Runnable onRightClick, IHoverable onHover) {
         super(gui, x, y, width, height, text);
         this.onHover = onHover;
         this.onLeftClick = onLeftClick;
@@ -46,7 +46,7 @@ public class MekanismButton extends GuiElement {
         //From AbstractButton
         if (this.active && this.visible && this.isFocused()) {
             if (keyCode == 257 || keyCode == 32 || keyCode == 335) {
-                playDownSound(Minecraft.getInstance().getSoundHandler());
+                playDownSound(MinecraftClient.getInstance().getSoundManager());
                 onLeftClick();
                 return true;
             }
@@ -69,7 +69,7 @@ public class MekanismButton extends GuiElement {
         if (this.active && this.visible && isHovered()) {
             if (button == 1) {
                 //Right clicked
-                playDownSound(Minecraft.getInstance().getSoundHandler());
+                playDownSound(MinecraftClient.getInstance().getSoundManager());
                 onRightClick();
                 return true;
             }

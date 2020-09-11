@@ -1,7 +1,7 @@
 package mekanism.client.render.transmitter;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.matrix.MatrixStack.Entry;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack.Entry;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Arrays;

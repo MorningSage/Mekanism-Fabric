@@ -1,6 +1,7 @@
 package mekanism.client.gui.element.custom;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -29,8 +30,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.sound.SoundEvents;
 
 public class GuiDictionaryTarget extends GuiRelativeElement implements IJEIGhostTarget {
 
@@ -71,7 +71,7 @@ public class GuiDictionaryTarget extends GuiRelativeElement implements IJEIGhost
         if (Screen.hasShiftDown()) {
             setTargetSlot(null, false);
         } else {
-            ItemStack stack = minecraft.player.inventory.getItemStack();
+            ItemStack stack = minecraft.player.inventory.getCursorStack();
             if (!stack.isEmpty()) {
                 setTargetSlot(stack, false);
             }

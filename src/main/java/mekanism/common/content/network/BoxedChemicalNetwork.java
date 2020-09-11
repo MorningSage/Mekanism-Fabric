@@ -43,11 +43,9 @@ import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.util.Direction;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraft.util.math.Direction;
 
 /**
  * A DynamicNetwork extension created specifically for the transfer of Chemicals.
@@ -329,12 +327,12 @@ public class BoxedChemicalNetwork extends DynamicBufferedNetwork<BoxedChemicalHa
     }
 
     @Override
-    public ITextComponent getNeededInfo() {
+    public Text getNeededInfo() {
         return TextComponentUtil.build(getCurrentTankWithFallback().getNeeded());
     }
 
     @Override
-    public ITextComponent getStoredInfo() {
+    public @Nullable Text getStoredInfo() {
         if (isTankEmpty()) {
             return MekanismLang.NONE.translate();
         }
@@ -343,7 +341,7 @@ public class BoxedChemicalNetwork extends DynamicBufferedNetwork<BoxedChemicalHa
     }
 
     @Override
-    public ITextComponent getFlowInfo() {
+    public @Nullable Text getFlowInfo() {
         return MekanismLang.NETWORK_MB_PER_TICK.translate(prevTransferAmount);
     }
 

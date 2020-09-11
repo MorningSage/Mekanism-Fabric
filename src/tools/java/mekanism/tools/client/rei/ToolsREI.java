@@ -24,7 +24,7 @@ public class ToolsREI implements REIPluginV0 {
 
     @Override
     public Identifier getPluginIdentifier() {
-        return MekanismTools.rl("jei_plugin");
+        return MekanismTools.rl("rei_plugin");
     }
 
     @Override

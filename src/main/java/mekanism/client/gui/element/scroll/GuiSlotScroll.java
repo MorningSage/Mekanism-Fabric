@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.scroll;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;

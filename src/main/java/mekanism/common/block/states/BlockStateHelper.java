@@ -9,24 +9,20 @@ import mekanism.common.block.attribute.AttributeState;
 import mekanism.common.tile.TileEntityCardboardBox;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 
 public class BlockStateHelper {
 
     //Cardboard Box storage
-    public static final BooleanProperty storageProperty = BooleanProperty.create("storage");
+    public static final BooleanProperty storageProperty = BooleanProperty.of("storage");
     //Fluid logged. TODO: We may eventually want to make this not be using the same exact property as WATERLOGGED but name it differently
     public static final BooleanProperty FLUID_LOGGED = BlockStateProperties.WATERLOGGED;
 
@@ -70,7 +66,7 @@ public class BlockStateHelper {
     }
 
     @Contract("_, null, _, _, _, _ -> null")
-    public static BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull IWorld world, @Nonnull BlockPos pos, @Nullable PlayerEntity player, @Nonnull Direction face) {
+    public static BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nullable PlayerEntity player, @Nonnull Direction face) {
         if (state == null) {
             return null;
         }
@@ -86,7 +82,7 @@ public class BlockStateHelper {
         return state;
     }
 
-    private static boolean isStoring(@Nonnull TileEntity tile) {
+    private static boolean isStoring(@Nonnull BlockEntity tile) {
         if (tile instanceof TileEntityCardboardBox) {
             return ((TileEntityCardboardBox) tile).storedData != null;
         }

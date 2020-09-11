@@ -46,6 +46,7 @@ import mekanism.common.util.StackUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Direction;
 
 public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends TileEntityMekanism implements ISideConfiguration, ISpecialConfigData,
@@ -282,8 +283,8 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         sorting = nbtTags.getBoolean(NBTConstants.SORTING);
         for (int i = 0; i < tier.processes; i++) {
             progress[i] = nbtTags.getInt(NBTConstants.PROGRESS + i);
@@ -292,8 +293,8 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putBoolean(NBTConstants.SORTING, isSorting());
         for (int i = 0; i < tier.processes; i++) {
             nbtTags.putInt(NBTConstants.PROGRESS + i, getProgress(i));

@@ -1,8 +1,6 @@
 package mekanism.client.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -11,6 +9,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.MekanismAPI;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.text.EnumColor;
@@ -33,19 +32,18 @@ import mekanism.common.lib.multiblock.IValveHandler.ValveData;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -53,7 +51,6 @@ import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.client.model.obj.OBJModel;
 import net.minecraftforge.client.model.obj.OBJModel.ModelSettings;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.lwjgl.opengl.GL11;
@@ -66,12 +63,12 @@ public class MekanismRenderer {
     public static final int FULL_LIGHT = 0xF000F0;
 
     public static OBJModel contentsModel;
-    public static TextureAtlasSprite energyIcon;
-    public static TextureAtlasSprite heatIcon;
-    public static TextureAtlasSprite whiteIcon;
-    public static TextureAtlasSprite redstoneTorch;
-    public static TextureAtlasSprite redstonePulse;
-    public static final Map<TransmissionType, TextureAtlasSprite> overlays = new EnumMap<>(TransmissionType.class);
+    public static Sprite energyIcon;
+    public static Sprite heatIcon;
+    public static Sprite whiteIcon;
+    public static Sprite redstoneTorch;
+    public static Sprite redstonePulse;
+    public static final Map<TransmissionType, Sprite> overlays = new EnumMap<>(TransmissionType.class);
 
     /**
      * Get a fluid texture when a stack does not exist.
@@ -81,8 +78,8 @@ public class MekanismRenderer {
      *
      * @return the sprite, or missing sprite if not found
      */
-    public static TextureAtlasSprite getBaseFluidTexture(@Nonnull Fluid fluid, @Nonnull FluidType type) {
-        ResourceLocation spriteLocation;
+    public static Sprite getBaseFluidTexture(@Nonnull Fluid fluid, @Nonnull FluidType type) {
+        Identifier spriteLocation;
         if (type == FluidType.STILL) {
             spriteLocation = fluid.getAttributes().getStillTexture();
         } else {
@@ -92,9 +89,9 @@ public class MekanismRenderer {
         return getSprite(spriteLocation);
     }
 
-    public static TextureAtlasSprite getFluidTexture(@Nonnull FluidStack fluidStack, @Nonnull FluidType type) {
+    public static Sprite getFluidTexture(@Nonnull FluidStack fluidStack, @Nonnull FluidType type) {
         Fluid fluid = fluidStack.getFluid();
-        ResourceLocation spriteLocation;
+        Identifier spriteLocation;
         if (type == FluidType.STILL) {
             spriteLocation = fluid.getAttributes().getStillTexture(fluidStack);
         } else {
@@ -103,17 +100,17 @@ public class MekanismRenderer {
         return getSprite(spriteLocation);
     }
 
-    public static TextureAtlasSprite getChemicalTexture(@Nonnull Chemical<?> chemical) {
+    public static Sprite getChemicalTexture(@Nonnull Chemical<?> chemical) {
         return getSprite(chemical.getIcon());
     }
 
-    public static TextureAtlasSprite getSprite(ResourceLocation spriteLocation) {
-        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(spriteLocation);
+    public static Sprite getSprite(Identifier spriteLocation) {
+        return MinecraftClient.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(spriteLocation);
     }
 
     public static void prepFlowing(Model3D model, @Nonnull FluidStack fluid) {
-        TextureAtlasSprite still = getFluidTexture(fluid, FluidType.STILL);
-        TextureAtlasSprite flowing = getFluidTexture(fluid, FluidType.FLOWING);
+        Sprite still = getFluidTexture(fluid, FluidType.STILL);
+        Sprite flowing = getFluidTexture(fluid, FluidType.FLOWING);
         model.setTextures(still, still, flowing, flowing, flowing, flowing);
     }
 
@@ -132,8 +129,8 @@ public class MekanismRenderer {
         }
     }
 
-    public static void bindTexture(ResourceLocation texture) {
-        Minecraft.getInstance().textureManager.bindTexture(texture);
+    public static void bindTexture(Identifier texture) {
+        MinecraftClient.getInstance().getTextureManager().bindTexture(texture);
     }
 
     //Color
@@ -272,12 +269,12 @@ public class MekanismRenderer {
         RenderSystem.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
-        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        Matrix4f matrix4f = matrix.getLast().getMatrix();
-        bufferbuilder.pos(matrix4f, width, y, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.pos(matrix4f, x, y, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.pos(matrix4f, x, height, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.pos(matrix4f, width, height, 0).color(r, g, b, a).endVertex();
+        bufferbuilder.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+        Matrix4f matrix4f = matrix.peek().getModel();
+        bufferbuilder.vertex(matrix4f, width, y, 0).color(r, g, b, a).next();
+        bufferbuilder.vertex(matrix4f, x, y, 0).color(r, g, b, a).next();
+        bufferbuilder.vertex(matrix4f, x, height, 0).color(r, g, b, a).next();
+        bufferbuilder.vertex(matrix4f, width, height, 0).color(r, g, b, a).next();
         tessellator.draw();
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
@@ -286,22 +283,22 @@ public class MekanismRenderer {
     }
 
     public static float getPartialTick() {
-        return Minecraft.getInstance().getRenderPartialTicks();
+        return MinecraftClient.getInstance().getTickDelta();
     }
 
     public static void rotate(MatrixStack matrix, Direction facing, float north, float south, float west, float east) {
         switch (facing) {
             case NORTH:
-                matrix.rotate(Vector3f.YP.rotationDegrees(north));
+                matrix.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(north));
                 break;
             case SOUTH:
-                matrix.rotate(Vector3f.YP.rotationDegrees(south));
+                matrix.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(south));
                 break;
             case WEST:
-                matrix.rotate(Vector3f.YP.rotationDegrees(west));
+                matrix.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(west));
                 break;
             case EAST:
-                matrix.rotate(Vector3f.YP.rotationDegrees(east));
+                matrix.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(east));
                 break;
         }
     }
@@ -360,7 +357,7 @@ public class MekanismRenderer {
         SpecialColors.GUI_TEXT.parse(Mekanism.rl("textures/colormap/gui_text.png"));
     }
 
-    private static void parseColorAtlas(ResourceLocation rl) {
+    private static void parseColorAtlas(Identifier rl) {
         EnumColor[] colors = EnumColor.values();
         List<Color> parsed = ColorAtlas.load(rl, colors.length);
         if (parsed.size() < colors.length) {
@@ -415,7 +412,7 @@ public class MekanismRenderer {
         public double minX, minY, minZ;
         public double maxX, maxY, maxZ;
 
-        public final TextureAtlasSprite[] textures = new TextureAtlasSprite[6];
+        public final Sprite[] textures = new Sprite[6];
 
         public final boolean[] renderSides = new boolean[]{true, true, true, true, true, true, false};
 
@@ -439,11 +436,11 @@ public class MekanismRenderer {
             return renderSides[side.ordinal()];
         }
 
-        public void setTexture(TextureAtlasSprite tex) {
+        public void setTexture(Sprite tex) {
             Arrays.fill(textures, tex);
         }
 
-        public void setTextures(TextureAtlasSprite down, TextureAtlasSprite up, TextureAtlasSprite north, TextureAtlasSprite south, TextureAtlasSprite west, TextureAtlasSprite east) {
+        public void setTextures(Sprite down, Sprite up, Sprite north, Sprite south, Sprite west, Sprite east) {
             textures[0] = down;
             textures[1] = up;
             textures[2] = north;

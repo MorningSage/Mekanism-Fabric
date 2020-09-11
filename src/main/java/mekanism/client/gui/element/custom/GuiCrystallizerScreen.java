@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.custom;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -19,8 +19,8 @@ import mekanism.common.MekanismLang;
 import mekanism.common.tags.MekanismTags;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.tag.Tag;
+import net.minecraft.text.Text;
 
 public class GuiCrystallizerScreen extends GuiTexturedElement {
 
@@ -39,7 +39,7 @@ public class GuiCrystallizerScreen extends GuiTexturedElement {
     public GuiCrystallizerScreen(IGuiWrapper gui, int x, int y, IOreInfo oreInfo) {
         super(SLOT.getTexture(), gui, x, y, 115, 42);
         innerScreen = new GuiInnerScreen(gui, x, y, width, height, () -> {
-            List<ITextComponent> ret = new ArrayList<>();
+            List<Text> ret = new ArrayList<>();
             BoxedChemicalStack boxedChemical = oreInfo.getInputChemical();
             if (!boxedChemical.isEmpty()) {
                 ret.add(TextComponentUtil.build(boxedChemical));
@@ -71,8 +71,8 @@ public class GuiCrystallizerScreen extends GuiTexturedElement {
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
         innerScreen.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        minecraft.textureManager.bindTexture(getResource());
-        blit(matrix, slotX, y, 0, 0, SLOT.getWidth(), SLOT.getHeight(), SLOT.getWidth(), SLOT.getHeight());
+        minecraft.getTextureManager().bindTexture(getResource());
+        drawTexture(matrix, slotX, y, 0, 0, SLOT.getWidth(), SLOT.getHeight(), SLOT.getWidth(), SLOT.getHeight());
         if (!renderStack.isEmpty()) {
             guiObj.renderItem(matrix, renderStack, slotX + 1, y + 1);
         }
@@ -88,9 +88,9 @@ public class GuiCrystallizerScreen extends GuiTexturedElement {
                 prevSlurry = inputSlurry;
                 iterStacks.clear();
                 if (!prevSlurry.isEmptyType() && !prevSlurry.isIn(MekanismTags.Slurries.DIRTY)) {
-                    ITag<Item> oreTag = prevSlurry.getOreTag();
+                    Tag<Item> oreTag = prevSlurry.getOreTag();
                     if (oreTag != null) {
-                        for (Item ore : oreTag.getAllElements()) {
+                        for (Item ore : oreTag.values()) {
                             iterStacks.add(new ItemStack(ore));
                         }
                     }

@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.bar;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,12 +21,12 @@ import mekanism.common.item.ItemGaugeDropper;
 import mekanism.common.network.PacketDropperUse;
 import mekanism.common.network.PacketDropperUse.DropperAction;
 import mekanism.common.network.PacketDropperUse.TankType;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
 
 public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends GuiBar<ChemicalInfoProvider<STACK>>
       implements IJEIIngredientHelper {
@@ -35,7 +34,7 @@ public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends C
     private final boolean horizontal;
 
     public GuiChemicalBar(IGuiWrapper gui, ChemicalInfoProvider<STACK> infoProvider, int x, int y, int width, int height, boolean horizontal) {
-        super(AtlasTexture.LOCATION_BLOCKS_TEXTURE, gui, infoProvider, x, y, width, height);
+        super(SpriteAtlasTexture.BLOCK_ATLAS_TEX, gui, infoProvider, x, y, width, height);
         this.horizontal = horizontal;
     }
 
@@ -47,7 +46,7 @@ public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends C
             if (level > 0) {
                 CHEMICAL type = stored.getType();
                 MekanismRenderer.color(type);
-                TextureAtlasSprite icon = MekanismRenderer.getChemicalTexture(type);
+                Sprite icon = MekanismRenderer.getChemicalTexture(type);
                 if (horizontal) {
                     drawTiledSprite(matrix, x + 1, y + 1, height - 2, (int) (level * (width - 2)), height - 2, icon);
                 } else {
@@ -61,7 +60,7 @@ public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends C
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isMouseOver(mouseX, mouseY)) {
-            ItemStack stack = Minecraft.getInstance().player.inventory.getItemStack();
+            ItemStack stack = MinecraftClient.getInstance().player.inventory.getCursorStack();
             if (guiObj instanceof GuiMekanismTile && !stack.isEmpty() && stack.getItem() instanceof ItemGaugeDropper) {
                 TankType tankType = null;
                 CHEMICAL type = getHandler().getStack().getType();

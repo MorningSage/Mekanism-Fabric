@@ -1,6 +1,6 @@
 package mekanism.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
 import mekanism.api.math.FloatingLong;

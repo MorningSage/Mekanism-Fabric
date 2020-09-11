@@ -16,13 +16,13 @@ import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.TransporterUtils;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Contract;
@@ -45,19 +45,19 @@ public class TransporterStack {
     private Path pathType;
     private List<BlockPos> pathToTarget = new ArrayList<>();
 
-    public static TransporterStack readFromNBT(CompoundNBT nbtTags) {
+    public static TransporterStack readFromNBT(CompoundTag nbtTags) {
         TransporterStack stack = new TransporterStack();
         stack.read(nbtTags);
         return stack;
     }
 
-    public static TransporterStack readFromUpdate(CompoundNBT nbtTags) {
+    public static TransporterStack readFromUpdate(CompoundTag nbtTags) {
         TransporterStack stack = new TransporterStack();
         stack.readFromUpdateTag(nbtTags);
         return stack;
     }
 
-    public static TransporterStack readFromPacket(PacketBuffer dataStream) {
+    public static TransporterStack readFromPacket(PacketByteBuf dataStream) {
         TransporterStack stack = new TransporterStack();
         stack.read(dataStream);
         if (stack.progress == 0) {
@@ -66,11 +66,11 @@ public class TransporterStack {
         return stack;
     }
 
-    public void write(LogisticalTransporterBase transporter, PacketBuffer buf) {
+    public void write(LogisticalTransporterBase transporter, PacketByteBuf buf) {
         buf.writeVarInt(TransporterUtils.getColorIndex(color));
         buf.writeVarInt(progress);
         buf.writeBlockPos(originalLocation);
-        buf.writeEnumValue(pathType);
+        buf.writeEnumConstant(pathType);
         if (pathToTarget.indexOf(transporter.getTilePos()) > 0) {
             buf.writeBoolean(true);
             buf.writeBlockPos(getNext(transporter));
@@ -81,11 +81,11 @@ public class TransporterStack {
         buf.writeItemStack(itemStack);
     }
 
-    public void read(PacketBuffer dataStream) {
+    public void read(PacketByteBuf dataStream) {
         color = TransporterUtils.readColor(dataStream.readVarInt());
         progress = dataStream.readVarInt();
         originalLocation = dataStream.readBlockPos();
-        pathType = dataStream.readEnumValue(Path.class);
+        pathType = dataStream.readEnumConstant(Path.class);
         if (dataStream.readBoolean()) {
             clientNext = dataStream.readBlockPos();
         }
@@ -93,52 +93,52 @@ public class TransporterStack {
         itemStack = dataStream.readItemStack();
     }
 
-    public void writeToUpdateTag(LogisticalTransporterBase transporter, CompoundNBT updateTag) {
+    public void writeToUpdateTag(LogisticalTransporterBase transporter, CompoundTag updateTag) {
         updateTag.putInt(NBTConstants.COLOR, TransporterUtils.getColorIndex(color));
         updateTag.putInt(NBTConstants.PROGRESS, progress);
-        updateTag.put(NBTConstants.ORIGINAL_LOCATION, NBTUtil.writeBlockPos(originalLocation));
+        updateTag.put(NBTConstants.ORIGINAL_LOCATION, NbtHelper.fromBlockPos(originalLocation));
         updateTag.putInt(NBTConstants.PATH_TYPE, pathType.ordinal());
         if (pathToTarget.indexOf(transporter.getTilePos()) > 0) {
-            updateTag.put(NBTConstants.CLIENT_NEXT, NBTUtil.writeBlockPos(getNext(transporter)));
+            updateTag.put(NBTConstants.CLIENT_NEXT, NbtHelper.fromBlockPos(getNext(transporter)));
         }
-        updateTag.put(NBTConstants.CLIENT_PREVIOUS, NBTUtil.writeBlockPos(getPrev(transporter)));
-        itemStack.write(updateTag);
+        updateTag.put(NBTConstants.CLIENT_PREVIOUS, NbtHelper.fromBlockPos(getPrev(transporter)));
+        itemStack.toTag(updateTag);
     }
 
-    public void readFromUpdateTag(CompoundNBT updateTag) {
+    public void readFromUpdateTag(CompoundTag updateTag) {
         NBTUtils.setEnumIfPresent(updateTag, NBTConstants.COLOR, TransporterUtils::readColor, color -> this.color = color);
         progress = updateTag.getInt(NBTConstants.PROGRESS);
         NBTUtils.setBlockPosIfPresent(updateTag, NBTConstants.ORIGINAL_LOCATION, coord -> originalLocation = coord);
         NBTUtils.setEnumIfPresent(updateTag, NBTConstants.PATH_TYPE, Path::byIndexStatic, type -> pathType = type);
         NBTUtils.setBlockPosIfPresent(updateTag, NBTConstants.CLIENT_NEXT, coord -> clientNext = coord);
         NBTUtils.setBlockPosIfPresent(updateTag, NBTConstants.CLIENT_PREVIOUS, coord -> clientPrev = coord);
-        itemStack = ItemStack.read(updateTag);
+        itemStack = ItemStack.fromTag(updateTag);
     }
 
-    public void write(CompoundNBT nbtTags) {
+    public void write(CompoundTag nbtTags) {
         nbtTags.putInt(NBTConstants.COLOR, TransporterUtils.getColorIndex(color));
 
         nbtTags.putInt(NBTConstants.PROGRESS, progress);
-        nbtTags.put(NBTConstants.ORIGINAL_LOCATION, NBTUtil.writeBlockPos(originalLocation));
+        nbtTags.put(NBTConstants.ORIGINAL_LOCATION, NbtHelper.fromBlockPos(originalLocation));
 
         if (idleDir != null) {
             nbtTags.putInt(NBTConstants.IDLE_DIR, idleDir.ordinal());
         }
         if (homeLocation != null) {
-            nbtTags.put(NBTConstants.HOME_LOCATION, NBTUtil.writeBlockPos(homeLocation));
+            nbtTags.put(NBTConstants.HOME_LOCATION, NbtHelper.fromBlockPos(homeLocation));
         }
         nbtTags.putInt(NBTConstants.PATH_TYPE, pathType.ordinal());
-        itemStack.write(nbtTags);
+        itemStack.toTag(nbtTags);
     }
 
-    public void read(CompoundNBT nbtTags) {
+    public void read(CompoundTag nbtTags) {
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.COLOR, TransporterUtils::readColor, color -> this.color = color);
         progress = nbtTags.getInt(NBTConstants.PROGRESS);
         NBTUtils.setBlockPosIfPresent(nbtTags, NBTConstants.ORIGINAL_LOCATION, coord -> originalLocation = coord);
-        NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.IDLE_DIR, Direction::byIndex, dir -> idleDir = dir);
+        NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.IDLE_DIR, Direction::byId, dir -> idleDir = dir);
         NBTUtils.setBlockPosIfPresent(nbtTags, NBTConstants.HOME_LOCATION, coord -> homeLocation = coord);
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.PATH_TYPE, Path::byIndexStatic, type -> pathType = type);
-        itemStack = ItemStack.read(nbtTags);
+        itemStack = ItemStack.fromTag(nbtTags);
     }
 
     private void setPath(World world, List<BlockPos> path, Path type) {
@@ -248,20 +248,20 @@ public class TransporterStack {
     }
 
     @Contract("null, _, _ -> false")
-    public boolean canInsertToTransporter(TileEntity tile, Direction from, @Nullable TileEntity tileFrom) {
+    public boolean canInsertToTransporter(BlockEntity tile, Direction from, @Nullable BlockEntity tileFrom) {
         return tile instanceof TileEntityLogisticalTransporterBase && canInsertToTransporterNN((TileEntityLogisticalTransporterBase) tile, from, tileFrom);
     }
 
     @Contract("null, _, _ -> false")
-    public boolean canInsertToTransporter(@Nullable TileEntityLogisticalTransporterBase transporter, Direction from, @Nullable TileEntity tileFrom) {
+    public boolean canInsertToTransporter(@Nullable TileEntityLogisticalTransporterBase transporter, Direction from, @Nullable BlockEntity tileFrom) {
         return transporter != null && canInsertToTransporterNN(transporter, from, tileFrom);
     }
 
-    public boolean canInsertToTransporterNN(@Nonnull TileEntityLogisticalTransporterBase transporter, Direction from, @Nullable TileEntity tileFrom) {
+    public boolean canInsertToTransporterNN(@Nonnull TileEntityLogisticalTransporterBase transporter, Direction from, @Nullable BlockEntity tileFrom) {
         return canInsertToTransporterNN(transporter.getTransmitter(), from, tileFrom);
     }
 
-    public boolean canInsertToTransporterNN(@Nonnull LogisticalTransporterBase transporter, Direction from, @Nullable TileEntity tileFrom) {
+    public boolean canInsertToTransporterNN(@Nonnull LogisticalTransporterBase transporter, Direction from, @Nullable BlockEntity tileFrom) {
         //If the color is valid, make sure that the connection is valid
         return (transporter.getColor() == null || transporter.getColor() == color) && transporter.canConnectMutual(from.getOpposite(), tileFrom);
     }

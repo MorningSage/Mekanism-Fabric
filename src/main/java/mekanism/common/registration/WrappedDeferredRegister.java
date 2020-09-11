@@ -2,6 +2,8 @@ package mekanism.common.registration;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -13,7 +15,7 @@ public class WrappedDeferredRegister<T/* extends IForgeRegistryEntry<T>*/> {
 
     protected final DeferredRegister<T> internal;
 
-    protected WrappedDeferredRegister(String modid, IForgeRegistry<T> registry) {
+    protected WrappedDeferredRegister(String modid, Registry<T> registry) {
         internal = DeferredRegister.create(registry, modid);
     }
 

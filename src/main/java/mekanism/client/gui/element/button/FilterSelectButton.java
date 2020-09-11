@@ -1,27 +1,26 @@
 package mekanism.client.gui.element.button;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nonnull;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Identifier;
 
 public class FilterSelectButton extends MekanismButton {
 
-    private static final ResourceLocation ARROWS = MekanismUtils.getResource(ResourceType.GUI_BUTTON, "filter_arrows.png");
+    private static final Identifier ARROWS = MekanismUtils.getResource(ResourceType.GUI_BUTTON, "filter_arrows.png");
     private static final int TEXTURE_WIDTH = 22;
     private static final int TEXTURE_HEIGHT = 14;
 
     private final boolean down;
 
     public FilterSelectButton(IGuiWrapper gui, int x, int y, boolean down, Runnable onPress, IHoverable onHover) {
-        super(gui, x, y, 11, 7, StringTextComponent.EMPTY, onPress, onHover);
+        super(gui, x, y, 11, 7, LiteralText.EMPTY, onPress, onHover);
         this.down = down;
     }
 
@@ -31,14 +30,14 @@ public class FilterSelectButton extends MekanismButton {
             MekanismRenderer.resetColor();
         }
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
-        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         int width = getButtonWidth();
         int height = getButtonHeight();
         int x = getButtonX();
         int y = getButtonY();
         MekanismRenderer.bindTexture(ARROWS);
-        blit(matrix, x, y, isMouseOverCheckWindows(mouseX, mouseY) ? width : 0, down ? 7 : 0, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, x, y, isMouseOverCheckWindows(mouseX, mouseY) ? width : 0, down ? 7 : 0, width, height, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         RenderSystem.disableBlend();
     }
 

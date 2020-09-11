@@ -15,6 +15,7 @@ import mekanism.api.DataHandlerUtils;
 import mekanism.api.IMekWrench;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
+import mekanism.api._helpers_pls_remove.NBT;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.gas.attribute.GasAttributes;
@@ -105,28 +106,26 @@ import mekanism.common.util.NBTUtils;
 import mekanism.common.util.SecurityUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.sound.Sound;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.Tickable;
 import net.minecraft.util.Util;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 //TODO: We need to move the "supports" methods into the source interfaces so that we make sure they get checked before being used
-public abstract class TileEntityMekanism extends CapabilityTileEntity implements IFrequencyHandler, ITickableTileEntity, ITileDirectional,
+public abstract class TileEntityMekanism extends CapabilityTileEntity implements IFrequencyHandler, Tickable, ITileDirectional,
       ITileActive, ITileSound, ITileRedstone, ISecurityTile, IMekanismInventory, ISustainedInventory, ITileUpgradable, ITierUpgradable, IComparatorSupport,
       ITrackableContainer, IMekanismFluidHandler, IMekanismStrictEnergyHandler, ITileHeatHandler, IGasTile, IInfusionTile, IPigmentTile, ISlurryTile {
 
@@ -227,12 +226,12 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     /**
      * Only used on the client
      */
-    private ISound activeSound;
+    private Sound activeSound;
     private int playSoundCooldown = 0;
     //End variables ITileSound
 
     public TileEntityMekanism(IBlockProvider blockProvider) {
-        super(((IHasTileEntity<? extends TileEntity>) blockProvider.getBlock()).getTileType());
+        super(((IHasTileEntity<? extends BlockEntity>) blockProvider.getBlock()).getTileType());
         this.blockProvider = blockProvider;
         setSupportedTypes(this.blockProvider.getBlock());
         presetVariables();
@@ -395,14 +394,14 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     @Nonnull
-    public ITextComponent getName() {
-        return TextComponentUtil.translate(Util.makeTranslationKey("container", getBlockType().getRegistryName()));
+    public Text getName() {
+        return TextComponentUtil.translate(Util.createTranslationKey("container", getBlockType().getRegistryName()));
     }
 
     @Override
     public void markDirtyComparator() {
         //Only update the comparator state if we support comparators
-        if (supportsComparator() && !getBlockState().isAir(world, pos)) {
+        if (supportsComparator() && !getCachedState().isAir()) {
             int newRedstoneLevel = getRedstoneLevel();
             if (newRedstoneLevel != currentRedstoneLevel) {
                 currentRedstoneLevel = newRedstoneLevel;
@@ -411,12 +410,12 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
         }
     }
 
-    public WrenchResult tryWrench(BlockState state, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
-        ItemStack stack = player.getHeldItem(hand);
+    public WrenchResult tryWrench(BlockState state, PlayerEntity player, Hand hand, BlockHitResult rayTrace) {
+        ItemStack stack = player.getStackInHand(hand);
         if (!stack.isEmpty()) {
             IMekWrench wrenchHandler = MekanismUtils.getWrench(stack);
             if (wrenchHandler != null) {
-                if (wrenchHandler.canUseWrench(stack, player, rayTrace.getPos())) {
+                if (wrenchHandler.canUseWrench(stack, player, rayTrace.getBlockPos())) {
                     if (hasSecurity() && !SecurityUtils.canAccess(player, this)) {
                         SecurityUtils.displayNoAccess(player);
                         return WrenchResult.NO_SECURITY;
@@ -436,25 +435,25 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
         return WrenchResult.PASS;
     }
 
-    public ActionResultType openGui(PlayerEntity player) {
+    public ActionResult openGui(PlayerEntity player) {
         //Everything that calls this has isRemote being false but add the check just in case anyways
         if (hasGui() && !isRemote() && !player.isSneaking()) {
             if (hasSecurity() && !SecurityUtils.canAccess(player, this)) {
                 SecurityUtils.displayNoAccess(player);
-                return ActionResultType.FAIL;
+                return ActionResult.FAIL;
             }
             //Pass on this activation if the player is rotating with a configurator
-            ItemStack stack = player.getHeldItemMainhand();
+            ItemStack stack = player.getMainHandStack();
             if (isDirectional() && !stack.isEmpty() && stack.getItem() instanceof ItemConfigurator) {
                 ItemConfigurator configurator = (ItemConfigurator) stack.getItem();
                 if (configurator.getMode(stack) == ItemConfigurator.ConfiguratorMode.ROTATE) {
-                    return ActionResultType.PASS;
+                    return ActionResult.PASS;
                 }
             }
             //Pass on this activation if the player is using a configuration card (and this tile supports the capability)
             if (CapabilityUtils.getCapability(this, Capabilities.CONFIG_CARD_CAPABILITY, null).isPresent()) {
                 if (!stack.isEmpty() && stack.getItem() instanceof ItemConfigurationCard) {
-                    return ActionResultType.PASS;
+                    return ActionResult.PASS;
                 }
             }
 
@@ -485,7 +484,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
                     updateDelay--;
                     if (updateDelay == 0 && getClientActive() != currentActive) {
                         //If it doesn't match and we are done with the delay period, then update it
-                        world.setBlockState(pos, Attribute.setActive(getBlockState(), currentActive));
+                        world.setBlockState(pos, Attribute.setActive(getCachedState(), currentActive));
                     }
                 }
             }
@@ -565,8 +564,8 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
-        super.read(state, nbtTags);
+    public void fromTag(@Nonnull BlockState state, @Nonnull CompoundTag nbtTags) {
+        super.fromTag(state, nbtTags);
         NBTUtils.setBooleanIfPresent(nbtTags, NBTConstants.REDSTONE, value -> redstone = value);
         for (ITileComponent component : components) {
             component.read(nbtTags);
@@ -575,7 +574,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
             NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.CONTROL_TYPE, RedstoneControl::byIndexStatic, type -> controlType = type);
         }
         if (hasInventory() && persistInventory()) {
-            DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, NBT.TAG_COMPOUND));
+            DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, NBT.COMPOUND));
         }
         for (SubstanceType type : EnumUtils.SUBSTANCES) {
             if (type.canHandle(this) && persists(type)) {
@@ -593,8 +592,8 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
-        super.write(nbtTags);
+    public CompoundTag toTag(@Nonnull CompoundTag nbtTags) {
+        super.toTag(nbtTags);
         nbtTags.putBoolean(NBTConstants.REDSTONE, redstone);
         for (ITileComponent component : components) {
             component.write(nbtTags);
@@ -690,8 +689,8 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
 
     @Nonnull
     @Override
-    public CompoundNBT getReducedUpdateTag() {
-        CompoundNBT updateTag = super.getReducedUpdateTag();
+    public CompoundTag getReducedUpdateTag() {
+        CompoundTag updateTag = super.getReducedUpdateTag();
         for (ITileComponent component : components) {
             component.addToUpdateTag(updateTag);
         }
@@ -699,7 +698,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, @Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(BlockState state, @Nonnull CompoundTag tag) {
         super.handleUpdateTag(state, tag);
         for (ITileComponent component : components) {
             component.readFromUpdateTag(tag);
@@ -737,7 +736,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     @Override
     public Direction getDirection() {
         if (isDirectional()) {
-            return Attribute.getFacing(getBlockState());
+            return Attribute.getFacing(getCachedState());
         }
         //TODO: Remove, give it some better default, or allow it to be null
         return Direction.NORTH;
@@ -746,7 +745,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     @Override
     public void setFacing(@Nonnull Direction direction) {
         if (isDirectional()) {
-            BlockState state = Attribute.setFacing(getBlockState(), direction);
+            BlockState state = Attribute.setFacing(getCachedState(), direction);
             if (world != null && state != null) {
                 world.setBlockState(pos, state);
             }
@@ -779,7 +778,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     private void updatePower() {
-        boolean power = world.isBlockPowered(getPos());
+        boolean power = world.isReceivingRedstonePower(getPos());
         if (redstone != power) {
             redstone = power;
             onPowerChange();
@@ -858,14 +857,14 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     @Override
-    public void setInventory(ListNBT nbtTags, Object... data) {
+    public void setInventory(ListTag nbtTags, Object... data) {
         if (nbtTags != null && !nbtTags.isEmpty() && persistInventory()) {
             DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags);
         }
     }
 
     @Override
-    public ListNBT getInventory(Object... data) {
+    public ListTag getInventory(Object... data) {
         return persistInventory() ? DataHandlerUtils.writeContainers(getInventorySlots(null)) : new ListNBT();
     }
 

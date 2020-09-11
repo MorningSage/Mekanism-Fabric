@@ -58,7 +58,7 @@ public class Pos3D extends Vector3d {
     /**
      * Returns a new Pos3D from a tag compound.
      *
-     * @param tag - tag compound to read from
+     * @param tag - tag compound to fromTag from
      *
      * @return the Pos3D from the tag compound
      */

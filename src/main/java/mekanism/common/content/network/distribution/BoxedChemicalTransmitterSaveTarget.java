@@ -10,7 +10,7 @@ import mekanism.common.content.network.transmitter.BoxedPressurizedTube;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import mekanism.common.util.ChemicalUtil;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public class BoxedChemicalTransmitterSaveTarget<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>>
       extends Target<BoxedPressurizedTube, Long, @NonNull STACK> {

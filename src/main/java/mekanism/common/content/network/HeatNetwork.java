@@ -10,7 +10,10 @@ import mekanism.common.content.network.transmitter.ThermodynamicConductor;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
+import net.minecraft.text.Text;
 import net.minecraft.util.text.ITextComponent;
+
+import javax.annotation.Nullable;
 
 public class HeatNetwork extends DynamicNetwork<IHeatHandler, HeatNetwork, ThermodynamicConductor> {
 
@@ -36,12 +39,12 @@ public class HeatNetwork extends DynamicNetwork<IHeatHandler, HeatNetwork, Therm
     }
 
     @Override
-    public ITextComponent getStoredInfo() {
+    public @Nullable Text getStoredInfo() {
         return MekanismLang.HEAT_NETWORK_STORED.translate(MekanismUtils.getTemperatureDisplay(meanTemp, TemperatureUnit.KELVIN, true));
     }
 
     @Override
-    public ITextComponent getFlowInfo() {
+    public @Nullable Text getFlowInfo() {
         ITextComponent transferred = MekanismUtils.getTemperatureDisplay(heatTransferred, TemperatureUnit.KELVIN, false);
         ITextComponent lost = MekanismUtils.getTemperatureDisplay(heatLost, TemperatureUnit.KELVIN, false);
         return heatTransferred + heatLost == 0 ? MekanismLang.HEAT_NETWORK_FLOW.translate(transferred, lost)

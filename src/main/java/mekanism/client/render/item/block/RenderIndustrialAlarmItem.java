@@ -1,6 +1,6 @@
 package mekanism.client.render.item.block;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.client.model.ModelIndustrialAlarm;
 import net.minecraft.client.renderer.IRenderTypeBuffer;

@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.filter.transporter;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.util.math.MatrixStack;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.filter.GuiModIDFilter;
 import mekanism.common.content.transporter.SorterModIDFilter;

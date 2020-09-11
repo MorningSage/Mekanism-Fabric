@@ -25,6 +25,7 @@ import mekanism.common.tier.CableTier;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.util.Constants.NBT;
@@ -112,7 +113,7 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.read(nbtTags);
         if (nbtTags.contains(NBTConstants.ENERGY_STORED, NBT.TAG_STRING)) {
             try {
@@ -128,7 +129,7 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public @Nonnull CompoundTag write(@Nonnull @Nonnull CompoundTag nbtTags) {
         super.write(nbtTags);
         if (hasTransmitterNetwork()) {
             getTransmitterNetwork().validateSaveShares(this);
@@ -223,7 +224,7 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     }
 
     @Override
-    protected void handleContentsUpdateTag(@Nonnull EnergyNetwork network, @Nonnull CompoundNBT tag) {
+    protected void handleContentsUpdateTag(@Nonnull EnergyNetwork network, @Nonnull @Nonnull CompoundTag tag) {
         super.handleContentsUpdateTag(network, tag);
         NBTUtils.setFloatingLongIfPresent(tag, NBTConstants.ENERGY_STORED, network.energyContainer::setEnergy);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SCALE, scale -> network.currentScale = scale);

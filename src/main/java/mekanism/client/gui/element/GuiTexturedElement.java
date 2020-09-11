@@ -2,24 +2,24 @@ package mekanism.client.gui.element;
 
 import java.util.List;
 import mekanism.client.gui.IGuiWrapper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public abstract class GuiTexturedElement extends GuiRelativeElement {
 
-    protected final ResourceLocation resource;
+    protected final Identifier resource;
 
-    public GuiTexturedElement(ResourceLocation resource, IGuiWrapper gui, int x, int y, int width, int height) {
+    public GuiTexturedElement(Identifier resource, IGuiWrapper gui, int x, int y, int width, int height) {
         super(gui, x, y, width, height);
         this.resource = resource;
     }
 
-    protected ResourceLocation getResource() {
+    protected Identifier getResource() {
         return resource;
     }
 
     public interface IInfoHandler {
 
-        List<ITextComponent> getInfo();
+        List<Text> getInfo();
     }
 }
