@@ -5,7 +5,7 @@ import net.minecraft.nbt.Tag;
 
 /**
  * An interface designed to unify various things in the Minecraft
- * code base that can be serialized to and from a NBT tag.
+ * code base that can be serialized to and from a NBTFlags tag.
  */
 public interface INBTSerializable<T extends Tag>
 {

@@ -56,7 +56,7 @@ public class GuiSideConfiguration extends GuiWindow {
         addSideDataButton(RelativeSide.LEFT, 56, 59);
         addSideDataButton(RelativeSide.RIGHT, 86, 59);
         Mekanism.packetHandler.sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_TRACK_SIDE_CONFIG, tile, 1));
-        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getContainer()).startTracking(1, ((ISideConfiguration) tile).getConfig());
+        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getScreenHandler()).startTracking(1, ((ISideConfiguration) tile).getConfig());
     }
 
     private void addSideDataButton(RelativeSide side, int xPos, int yPos) {
@@ -71,7 +71,7 @@ public class GuiSideConfiguration extends GuiWindow {
     public void close() {
         super.close();
         Mekanism.packetHandler.sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_STOP_TRACKING, tile, 1));
-        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getContainer()).stopTracking(1);
+        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getScreenHandler()).stopTracking(1);
     }
 
     public <TILE extends TileEntityMekanism & ISideConfiguration> TILE getTile() {

@@ -20,13 +20,15 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
 public class GuiModuleScreen extends GuiRelativeElement {
 
-    private static final ResourceLocation RADIO = MekanismUtils.getResource(ResourceType.GUI, "radio_button.png");
-    private static final ResourceLocation SLIDER = MekanismUtils.getResource(ResourceType.GUI, "slider.png");
+    private static final Identifier RADIO = MekanismUtils.getResource(ResourceType.GUI, "radio_button.png");
+    private static final Identifier SLIDER = MekanismUtils.getResource(ResourceType.GUI, "slider.png");
 
     private final int TEXT_COLOR = screenTextColor();
 
@@ -114,7 +116,7 @@ public class GuiModuleScreen extends GuiRelativeElement {
         if (currentModule != null) {
             int startY = relativeY + 5;
             if (currentModule.getData().isExclusive()) {
-                ITextComponent comp = MekanismLang.MODULE_EXCLUSIVE.translate();
+                Text comp = MekanismLang.MODULE_EXCLUSIVE.translate();
                 drawTextWithScale(matrix, comp, relativeX + 5, startY, 0x635BD4, 0.8F);
                 startY += 13;
             }
@@ -175,19 +177,19 @@ public class GuiModuleScreen extends GuiRelativeElement {
 
         @Override
         public void renderBackground(MatrixStack matrix, int mouseX, int mouseY) {
-            minecraft.textureManager.bindTexture(RADIO);
+            minecraft.getTextureManager().bindTexture(RADIO);
 
             boolean hover = mouseX >= getX() + 4 && mouseX < getX() + 12 && mouseY >= getY() + 11 && mouseY < getY() + 19;
             if (data.get()) {
-                blit(matrix, getX() + 4, getY() + 11, 0, 8, 8, 8, 16, 16);
+                drawTexture(matrix, getX() + 4, getY() + 11, 0, 8, 8, 8, 16, 16);
             } else {
-                blit(matrix, getX() + 4, getY() + 11, hover ? 8 : 0, 0, 8, 8, 16, 16);
+                drawTexture(matrix, getX() + 4, getY() + 11, hover ? 8 : 0, 0, 8, 8, 16, 16);
             }
             hover = mouseX >= getX() + 50 && mouseX < getX() + 58 && mouseY >= getY() + 11 && mouseY < getY() + 19;
             if (!data.get()) {
-                blit(matrix, getX() + 50, getY() + 11, 8, 8, 8, 8, 16, 16);
+                drawTexture(matrix, getX() + 50, getY() + 11, 8, 8, 8, 8, 16, 16);
             } else {
-                blit(matrix, getX() + 50, getY() + 11, hover ? 8 : 0, 0, 8, 8, 16, 16);
+                drawTexture(matrix, getX() + 50, getY() + 11, hover ? 8 : 0, 0, 8, 8, 16, 16);
             }
         }
 
@@ -202,12 +204,12 @@ public class GuiModuleScreen extends GuiRelativeElement {
         public void click(double mouseX, double mouseY) {
             if (!data.get() && mouseX >= getX() + 4 && mouseX < getX() + 12 && mouseY >= getY() + 11 && mouseY < getY() + 19) {
                 data.set(true, callback);
-                minecraft.getSoundHandler().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
+                minecraft.getSoundManager().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
             }
 
             if (data.get() && mouseX >= getX() + 50 && mouseX < getX() + 58 && mouseY >= getY() + 11 && mouseY < getY() + 19) {
                 data.set(false, callback);
-                minecraft.getSoundHandler().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
+                minecraft.getSoundManager().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
             }
         }
     }

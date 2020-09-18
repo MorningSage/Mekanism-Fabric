@@ -1,10 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "mekanism.mixins",
+  "package": "mekanism.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ItemRendererMixin"
+    "LivingEntityAccessor",
+    "MinecraftClientMixin",
+    "WorldAccessor"
   ],
   "client": [
   ],

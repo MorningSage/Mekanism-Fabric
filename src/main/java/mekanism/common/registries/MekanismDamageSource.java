@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.text.IHasTranslationKey;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.vector.Vector3d;
 

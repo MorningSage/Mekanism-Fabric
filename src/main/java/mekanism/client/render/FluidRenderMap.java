@@ -5,7 +5,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 
 /**
- * Map which uses FluidStacks as keys, ignoring amount. Primary use: caching FluidStack aware fluid rendering (NBT, yay)
+ * Map which uses FluidStacks as keys, ignoring amount. Primary use: caching FluidStack aware fluid rendering (NBTFlags, yay)
  */
 public class FluidRenderMap<V> extends Object2ObjectOpenCustomHashMap<FluidStack, V> {
 

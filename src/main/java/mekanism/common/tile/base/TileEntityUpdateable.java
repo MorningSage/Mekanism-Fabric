@@ -72,8 +72,8 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
 
     @Override
     public void handleUpdateTag(BlockState state, @Nonnull CompoundTag tag) {
-        //We don't want to do a full fromTag from NBT so simply call the super's fromTag method to let Forge do whatever
-        // it wants, but don't treat this as if it was the full saved NBT data as not everything has to be synced to the client
+        //We don't want to do a full fromTag from NBTFlags so simply call the super's fromTag method to let Forge do whatever
+        // it wants, but don't treat this as if it was the full saved NBTFlags data as not everything has to be synced to the client
         super.read(state, tag);
     }
 

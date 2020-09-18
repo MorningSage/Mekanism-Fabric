@@ -25,7 +25,7 @@ import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiTransporterConfig extends GuiWindow {
 
@@ -49,7 +49,7 @@ public class GuiTransporterConfig extends GuiWindow {
         addSideDataButton(RelativeSide.LEFT, 29, 49);
         addSideDataButton(RelativeSide.RIGHT, 59, 49);
         Mekanism.packetHandler.sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_TRACK_EJECTOR, tile, 0));
-        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getContainer()).startTracking(0, ((ISideConfiguration) tile).getEjector());
+        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getScreenHandler()).startTracking(0, ((ISideConfiguration) tile).getEjector());
     }
 
     private void addSideDataButton(RelativeSide side, int xPos, int yPos) {
@@ -62,7 +62,7 @@ public class GuiTransporterConfig extends GuiWindow {
     public void close() {
         super.close();
         Mekanism.packetHandler.sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_STOP_TRACKING, tile, 0));
-        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getContainer()).stopTracking(0);
+        ((MekanismContainer) ((GuiMekanism<?>) guiObj).getScreenHandler()).stopTracking(0);
     }
 
     public <TILE extends TileEntityMekanism & ISideConfiguration> TILE getTile() {
@@ -76,7 +76,7 @@ public class GuiTransporterConfig extends GuiWindow {
                 DataType dataType = button.getDataType();
                 if (dataType != null) {
                     EnumColor color = button.getColor();
-                    ITextComponent colorComponent = color == null ? MekanismLang.NONE.translate() : color.getColoredName();
+                    Text colorComponent = color == null ? MekanismLang.NONE.translate() : color.getColoredName();
                     displayTooltip(matrix, MekanismLang.GENERIC_WITH_PARENTHESIS.translate(colorComponent, side), xAxis, yAxis);
                 }
             }

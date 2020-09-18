@@ -13,7 +13,7 @@ public interface IFluidProvider extends IBaseProvider {
     @Nonnull
     Fluid getFluid();
 
-    //Note: Uses FluidStack in case we want to check NBT or something
+    //Note: Uses FluidStack in case we want to check NBTFlags or something
     default boolean fluidMatches(FluidStack other) {
         return getFluid() == other.getFluid();
     }

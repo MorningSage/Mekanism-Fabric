@@ -11,13 +11,13 @@ import mekanism.common.block.interfaces.ITypeBlock;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public interface Attribute {
 
     interface TileAttribute<TILE extends TileEntityMekanism> extends Attribute {}
 
-    default void adjustProperties(Block.Properties props) {
+    default void adjustProperties(Block.Settings props) {
     }
 
     static boolean has(Block block, Class<? extends Attribute> type) {

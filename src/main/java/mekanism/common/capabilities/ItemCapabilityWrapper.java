@@ -50,9 +50,9 @@ public class ItemCapabilityWrapper implements ICapabilityProvider {
                     //Note: Currently no item capabilities have toggleable capabilities, but check anyways to properly support our API
                     return LazyOptional.empty();
                 } else if (cap.capabilityCache.canResolve(capability)) {
-                    //Make sure that we load any data the cap needs from the stack, as it doesn't have any NBT set when it is initially initialized
-                    // This also allows us to update to any direct changes on the NBT of the stack that someone may have made
-                    //TODO: Potentially move the loading to the capability initializing spot, as NBT shouldn't be randomly changing anyways
+                    //Make sure that we load any data the cap needs from the stack, as it doesn't have any NBTFlags set when it is initially initialized
+                    // This also allows us to update to any direct changes on the NBTFlags of the stack that someone may have made
+                    //TODO: Potentially move the loading to the capability initializing spot, as NBTFlags shouldn't be randomly changing anyways
                     // and then that may allow us to better cache the capabilities
                     cap.load();
                     return cap.capabilityCache.getCapabilityUnchecked(capability, null);

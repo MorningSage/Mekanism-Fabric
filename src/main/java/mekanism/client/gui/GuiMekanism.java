@@ -1,5 +1,11 @@
 package mekanism.client.gui;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.text.NumberFormat;
@@ -29,27 +35,21 @@ import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 
 //TODO: Add our own "addButton" type thing for elements that are just "drawn" but don't actually have any logic behind them
-public abstract class GuiMekanism<CONTAINER extends Container> extends ContainerScreen<CONTAINER> implements IGuiWrapper, IFancyFontRenderer {
+public abstract class GuiMekanism<CONTAINER extends ScreenHandler> extends HandledScreen<CONTAINER> implements IGuiWrapper, IFancyFontRenderer {
 
     private static final NumberFormat intFormatter = NumberFormat.getIntegerInstance();
-    public static final ResourceLocation BASE_BACKGROUND = MekanismUtils.getResource(ResourceType.GUI, "base.png");
-    public static final ResourceLocation SHADOW = MekanismUtils.getResource(ResourceType.GUI, "shadow.png");
-    public static final ResourceLocation BLUR = MekanismUtils.getResource(ResourceType.GUI, "blur.png");
+    public static final Identifier BASE_BACKGROUND = MekanismUtils.getResource(ResourceType.GUI, "base.png");
+    public static final Identifier SHADOW = MekanismUtils.getResource(ResourceType.GUI, "shadow.png");
+    public static final Identifier BLUR = MekanismUtils.getResource(ResourceType.GUI, "blur.png");
     //TODO: Look into defaulting this to true
     protected boolean dynamicSlots;
     protected final LRU<GuiWindow> windows = new LRU<>();
@@ -59,7 +59,7 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
 
     public static int maxZOffset;
 
-    protected GuiMekanism(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    protected GuiMekanism(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
     }
 
@@ -82,14 +82,14 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
     }
 
     protected IHoverable getOnHover(ILangEntry translationHelper) {
-        return getOnHover((Supplier<ITextComponent>) translationHelper::translate);
+        return getOnHover((Supplier<Text>) translationHelper::translate);
     }
 
-    protected IHoverable getOnHover(Supplier<ITextComponent> componentSupplier) {
+    protected IHoverable getOnHover(Supplier<Text> componentSupplier) {
         return (onHover, matrix, xAxis, yAxis) -> displayTooltip(matrix, componentSupplier.get(), xAxis, yAxis);
     }
 
-    protected ResourceLocation getButtonLocation(String name) {
+    protected Identifier getButtonLocation(String name) {
         return MekanismUtils.getResource(ResourceType.GUI_BUTTON, name + ".png");
     }
 
@@ -119,32 +119,32 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
     }
 
     @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
-        return getWindowHovering(mouseX, mouseY) == null && super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton);
+    protected boolean isClickOutsideBounds(double mouseX, double mouseY, int left, int top, int button) {
+        return getWindowHovering(mouseX, mouseY) == null && super.isClickOutsideBounds(mouseX, mouseY, left, top, button);
     }
 
     @Override
-    public void resize(@Nonnull Minecraft minecraft, int sizeX, int sizeY) {
+    public void resize(@Nonnull MinecraftClient minecraft, int sizeX, int sizeY) {
         List<Pair<Integer, GuiElement>> prevElements = new ArrayList<>();
         for (int i = 0; i < buttons.size(); i++) {
-            Widget widget = buttons.get(i);
+            AbstractButtonWidget widget = buttons.get(i);
             if (widget instanceof GuiElement && ((GuiElement) widget).hasPersistentData()) {
                 prevElements.add(Pair.of(i, (GuiElement) widget));
             }
         }
         // flush the focus listeners list unless it's an overlay
         focusListeners.removeIf(element -> !element.isOverlay);
-        int prevLeft = getGuiLeft(), prevTop = getGuiTop();
+        int prevLeft = getLeft(), prevTop = getTop();
         super.resize(minecraft, sizeX, sizeY);
 
         windows.forEach(window -> {
-            window.resize(prevLeft, prevTop, getGuiLeft(), getGuiTop());
+            window.resize(prevLeft, prevTop, getLeft(), getTop());
             children.add(window);
         });
 
         prevElements.forEach(e -> {
             if (e.getLeft() < buttons.size()) {
-                Widget widget = buttons.get(e.getLeft());
+                AbstractButtonWidget widget = buttons.get(e.getLeft());
                 // we're forced to assume that the children list is the same before and after the resize.
                 // for verification, we run a lightweight class equality check
                 // Note: We do not perform an instance check on widget to ensure it is a GuiElement, as that is
@@ -156,23 +156,24 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
         });
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    protected void drawGuiContainerForegroundLayer(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
-        matrix.translate(0, 0, 300);
-        RenderSystem.translatef(-guiLeft, -guiTop, 0);
-        children().stream().filter(c -> c instanceof GuiElement).forEach(c -> ((GuiElement) c).onDrawBackground(matrix, mouseX, mouseY, MekanismRenderer.getPartialTick()));
-        RenderSystem.translatef(guiLeft, guiTop, 0);
-        drawForegroundText(matrix, mouseX, mouseY);
-        int xAxis = mouseX - getGuiLeft();
-        int yAxis = mouseY - getGuiTop();
+    protected void drawForeground(@Nonnull MatrixStack matrices, int mouseX, int mouseY) {
+        matrices.translate(0, 0, 300);
+        RenderSystem.translatef(-x, -y, 0);
+        children().stream().filter(c -> c instanceof GuiElement).forEach(c -> ((GuiElement) c).onDrawBackground(matrices, mouseX, mouseY, MekanismRenderer.getPartialTick()));
+        RenderSystem.translatef(x, y, 0);
+        drawForegroundText(matrices, mouseX, mouseY);
+        int xAxis = mouseX - getLeft();
+        int yAxis = mouseY - getTop();
         // first render general foregrounds
         maxZOffset = 200;
         int zOffset = 200;
-        for (Widget widget : this.buttons) {
+        for (AbstractButtonWidget widget : this.buttons) {
             if (widget instanceof GuiElement) {
-                matrix.push();
-                ((GuiElement) widget).onRenderForeground(matrix, mouseX, mouseY, zOffset, zOffset);
-                matrix.pop();
+                matrices.push();
+                ((GuiElement) widget).onRenderForeground(matrices, mouseX, mouseY, zOffset, zOffset);
+                matrices.pop();
             }
         }
 
@@ -181,19 +182,19 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
         for (LRU<GuiWindow>.LRUIterator iter = getWindowsDescendingIterator(); iter.hasNext(); ) {
             GuiWindow overlay = iter.next();
             zOffset += 150;
-            matrix.push();
-            overlay.onRenderForeground(matrix, mouseX, mouseY, zOffset, zOffset);
+            matrices.push();
+            overlay.onRenderForeground(matrices, mouseX, mouseY, zOffset, zOffset);
             if (iter.hasNext()) {
                 // if this isn't the focused window, render a 'blur' effect over it
-                overlay.renderBlur(matrix);
+                overlay.renderBlur(matrices);
             }
-            matrix.pop();
+            matrices.pop();
         }
         // then render tooltips, translating above max z offset to prevent clashing
         GuiElement tooltipElement = getWindowHovering(mouseX, mouseY);
         if (tooltipElement == null) {
             for (int i = buttons.size() - 1; i >= 0; i--) {
-                Widget widget = buttons.get(i);
+                AbstractButtonWidget widget = buttons.get(i);
                 if (widget instanceof GuiElement && widget.isMouseOver(mouseX, mouseY)) {
                     tooltipElement = (GuiElement) widget;
                     break;
@@ -207,13 +208,13 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
         RenderSystem.translatef(0, 0, maxZOffset);
 
         if (tooltipElement != null) {
-            tooltipElement.renderToolTip(matrix, xAxis, yAxis);
+            tooltipElement.renderToolTip(matrices, xAxis, yAxis);
         }
 
         // render item tooltips
-        RenderSystem.translatef(-guiLeft, -guiTop, 0);
-        func_230459_a_(matrix, mouseX, mouseY);
-        RenderSystem.translatef(guiLeft, guiTop, 0);
+        RenderSystem.translatef(-x, -y, 0);
+        drawMouseoverTooltip(matrices, mouseX, mouseY);
+        RenderSystem.translatef(x, y, 0);
 
         // IMPORTANT: additional hacky translation so held items render okay. re-evaluate as discussed above
         RenderSystem.translatef(0, 0, 200);
@@ -224,9 +225,9 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
 
     @Nonnull
     @Override
-    public Optional<IGuiEventListener> getEventListenerForPos(double mouseX, double mouseY) {
+    public Optional<Element> hoveredElement(double mouseX, double mouseY) {
         GuiWindow window = getWindowHovering(mouseX, mouseY);
-        return window != null ? Optional.of(window) : super.getEventListenerForPos(mouseX, mouseY);
+        return window != null ? Optional.of(window) : super.hoveredElement(mouseX, mouseY);
     }
 
     @Override
@@ -236,7 +237,7 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
         GuiWindow top = windows.size() > 0 ? windows.iterator().next() : null;
         GuiWindow focused = windows.stream().filter(overlay -> overlay.mouseClicked(mouseX, mouseY, button)).findFirst().orElse(null);
         if (focused != null) {
-            setListener(focused);
+            setFocused(focused);
             if (button == 0) {
                 setDragging(true);
             }
@@ -248,9 +249,9 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
         }
         // otherwise we send it to the current element
         for (int i = buttons.size() - 1; i >= 0; i--) {
-            IGuiEventListener listener = buttons.get(i);
+            Element listener = buttons.get(i);
             if (listener.mouseClicked(mouseX, mouseY, button)) {
-                setListener(listener);
+                setFocused(listener);
                 if (button == 0) {
                     setDragging(true);
                 }
@@ -290,25 +291,25 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double mouseXOld, double mouseYOld) {
         super.mouseDragged(mouseX, mouseY, button, mouseXOld, mouseYOld);
-        return getListener() != null && isDragging() && button == 0 && getListener().mouseDragged(mouseX, mouseY, button, mouseXOld, mouseYOld);
+        return getFocused() != null && isDragging() && button == 0 && getFocused().mouseDragged(mouseX, mouseY, button, mouseXOld, mouseYOld);
     }
 
     protected boolean isMouseOverSlot(Slot slot, double mouseX, double mouseY) {
-        return isPointInRegion(slot.xPos, slot.yPos, 16, 16, mouseX, mouseY);
+        return isPointWithinBounds(slot.x, slot.y, 16, 16, mouseX, mouseY);
     }
 
     @Override
-    protected boolean isPointInRegion(int x, int y, int width, int height, double mouseX, double mouseY) {
+    protected boolean isPointWithinBounds(int xPosition, int yPosition, int width, int height, double pointX, double pointY) {
         // overridden to prevent slot interactions when a GuiElement is blocking
-        return super.isPointInRegion(x, y, width, height, mouseX, mouseY) &&
-               getWindowHovering(mouseX, mouseY) == null &&
-               buttons.stream().noneMatch(button -> button.isMouseOver(mouseX, mouseY));
+        return super.isPointWithinBounds(x, y, width, height, pointX, pointY) &&
+            getWindowHovering(pointX, pointY) == null &&
+            buttons.stream().noneMatch(button -> button.isMouseOver(pointX, pointY));
     }
 
     protected void addSlots() {
-        int size = container.inventorySlots.size();
+        int size = handler.slots.size();
         for (int i = 0; i < size; i++) {
-            Slot slot = container.inventorySlots.get(i);
+            Slot slot = handler.slots.get(i);
             if (slot instanceof InventoryContainerSlot) {
                 InventoryContainerSlot containerSlot = (InventoryContainerSlot) slot;
                 ContainerSlotType slotType = containerSlot.getSlotType();
@@ -326,7 +327,7 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
                 } else {//slotType == ContainerSlotType.IGNORED: don't do anything
                     continue;
                 }
-                GuiSlot guiSlot = new GuiSlot(type, this, slot.xPos - 1, slot.yPos - 1);
+                GuiSlot guiSlot = new GuiSlot(type, this, slot.x - 1, slot.y - 1);
                 SlotOverlay slotOverlay = containerSlot.getSlotOverlay();
                 if (slotOverlay != null) {
                     guiSlot.with(slotOverlay);
@@ -337,15 +338,15 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
                 }
                 addButton(guiSlot);
             } else {
-                addButton(new GuiSlot(SlotType.NORMAL, this, slot.xPos - 1, slot.yPos - 1));
+                addButton(new GuiSlot(SlotType.NORMAL, this, slot.x - 1, slot.y - 1));
             }
         }
     }
 
     @Nullable
     protected DataType findDataType(InventoryContainerSlot slot) {
-        if (container instanceof MekanismTileContainer) {
-            TileEntityMekanism tileEntity = ((MekanismTileContainer<?>) container).getTileEntity();
+        if (handler instanceof MekanismTileContainer) {
+            TileEntityMekanism tileEntity = ((MekanismTileContainer<?>) handler).getTileEntity();
             if (tileEntity instanceof ISideConfiguration) {
                 return ((ISideConfiguration) tileEntity).getActiveDataType(slot.getInventorySlot());
             }
@@ -358,23 +359,24 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(@Nonnull MatrixStack matrix, float partialTick, int mouseX, int mouseY) {
-        //Ensure the GL color is white as mods adding an overlay (such as JEI for bookmarks), might have left
+    protected void drawBackground(@Nonnull MatrixStack matrices, float delta, int mouseX, int mouseY) {
+        //Ensure the GL color is white as mods adding an overlay (such as REI for bookmarks), might have left
         // it in an unexpected state.
         MekanismRenderer.resetColor();
         if (width < 8 || height < 8) {
             Mekanism.logger.warn("Gui: {}, was too small to draw the background of. Unable to draw a background for a gui smaller than 8 by 8.", getClass().getSimpleName());
             return;
         }
-        GuiUtils.renderBackgroundTexture(matrix, BASE_BACKGROUND, 4, 4, getGuiLeft(), getGuiTop(), getXSize(), getYSize(), 256, 256);
+        GuiUtils.renderBackgroundTexture(matrices, BASE_BACKGROUND, 4, 4, getLeft(), getTop(), backgroundWidth, backgroundHeight, 256, 256);
     }
 
     @Override
-    public FontRenderer getFont() {
-        return font;
+    public TextRenderer getFont() {
+        return textRenderer;
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void render(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         // shift back a whole lot so we can stack more windows
         RenderSystem.translated(0, 0, -500);
@@ -422,21 +424,11 @@ public abstract class GuiMekanism<CONTAINER extends Container> extends Container
         return windows;
     }
 
-    public List<IGuiEventListener> children() {
+    public List<Element> children() {
         return children;
     }
 
     public LRU<GuiWindow>.LRUIterator getWindowsDescendingIterator() {
         return windows.descendingIterator();
     }
-
-    //Some blit param namings
-    //blit(matrix, int x, int y, int textureX, int textureY, int width, int height);
-    //blit(matrix, int x, int y, TextureAtlasSprite icon, int width, int height);
-    //blit(matrix, int x, int y, int textureX, int textureY, int width, int height, int textureWidth, int textureHeight);
-    //blit(matrix, int x, int y, int zLevel, float textureX, float textureY, int width, int height, int textureWidth, int textureHeight);
-    //blit(matrix, int x, int y, int desiredWidth, int desiredHeight, int textureX, int textureY, int width, int height, int textureWidth, int textureHeight);
-    //innerblit(matrix, int x, int endX, int y, int endY, int zLevel, int width, int height, float textureX, float textureY, int textureWidth, int textureHeight);
-    //    * calls innerblit(matrix, x, endX, y, endY, zLevel, (textureX + 0.0F) / textureWidth, (textureX + width) / textureWidth, (textureY + 0.0F) / textureHeight, (textureY + height) / textureHeight);
-    //innerblit(matrix, int x, int endX, int y, int endY, int zLevel, float uMin, float uMax, float vMin, float vMax);
 }

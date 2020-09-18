@@ -2,7 +2,7 @@ package mekanism.api.chemical;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mekanism.api.NBTConstants;
-import mekanism.api._helpers_pls_remove.NBT;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.pigment.Pigment;
@@ -60,7 +60,7 @@ public enum ChemicalType implements StringIdentifiable {
 
     @Nullable
     public static ChemicalType fromNBT(@Nullable CompoundTag nbt) {
-        if (nbt != null && nbt.contains(NBTConstants.CHEMICAL_TYPE, NBT.STRING)) {
+        if (nbt != null && nbt.contains(NBTConstants.CHEMICAL_TYPE, NBTFlags.STRING)) {
             return fromString(nbt.getString(NBTConstants.CHEMICAL_TYPE));
         }
         return null;

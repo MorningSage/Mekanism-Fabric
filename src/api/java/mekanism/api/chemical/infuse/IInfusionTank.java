@@ -1,7 +1,7 @@
 package mekanism.api.chemical.infuse;
 
 import mekanism.api.NBTConstants;
-import mekanism.api._helpers_pls_remove.NBT;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.chemical.IChemicalTank;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +22,7 @@ public interface IInfusionTank extends IChemicalTank<InfuseType, InfusionStack>,
 
     @Override
     default void deserializeNBT(CompoundTag nbt) {
-        if (nbt.contains(NBTConstants.STORED, NBT.COMPOUND)) {
+        if (nbt.contains(NBTConstants.STORED, NBTFlags.COMPOUND)) {
             setStackUnchecked(InfusionStack.readFromNBT(nbt.getCompound(NBTConstants.STORED)));
         }
     }

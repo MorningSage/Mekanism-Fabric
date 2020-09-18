@@ -4,29 +4,29 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.NBTConstants;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 //TODO - V11: Rewrite this into a helper object that gets made for a stack so that we can easier make sure it doesn't add any extra data when we don't want it
-// And then for some things we may want when they go back to a full empty state make the NBT go away
+// And then for some things we may want when they go back to a full empty state make the NBTFlags go away
 public final class ItemDataUtils {
 
     @Nonnull
-    public static CompoundNBT getDataMap(ItemStack stack) {
+    public static CompoundTag getDataMap(ItemStack stack) {
         initStack(stack);
         return stack.getTag().getCompound(NBTConstants.MEK_DATA);
     }
 
     @Nullable
-    public static CompoundNBT getDataMapIfPresent(ItemStack stack) {
+    public static CompoundTag getDataMapIfPresent(ItemStack stack) {
         return hasDataTag(stack) ? getDataMap(stack) : null;
     }
 
     @Nonnull
-    public static CompoundNBT getDataMapIfPresentNN(ItemStack stack) {
-        return hasDataTag(stack) ? getDataMap(stack) : new CompoundNBT();
+    public static CompoundTag getDataMapIfPresentNN(ItemStack stack) {
+        return hasDataTag(stack) ? getDataMap(stack) : new CompoundTag();
     }
 
     public static boolean hasData(ItemStack stack, String key, int type) {
@@ -34,12 +34,12 @@ public final class ItemDataUtils {
     }
 
     public static boolean hasUUID(ItemStack stack, String key) {
-        return hasDataTag(stack) && getDataMap(stack).hasUniqueId(key);
+        return hasDataTag(stack) && getDataMap(stack).containsUuid(key);
     }
 
     public static void removeData(ItemStack stack, String key) {
         if (hasDataTag(stack)) {
-            CompoundNBT dataMap = getDataMap(stack);
+            CompoundTag dataMap = getDataMap(stack);
             dataMap.remove(key);
             if (dataMap.isEmpty()) {
                 //If our data map no longer has any elements after removing a piece of stored data
@@ -69,17 +69,17 @@ public final class ItemDataUtils {
         return hasDataTag(stack) ? getDataMap(stack).getString(key) : "";
     }
 
-    public static CompoundNBT getCompound(ItemStack stack, String key) {
-        return hasDataTag(stack) ? getDataMap(stack).getCompound(key) : new CompoundNBT();
+    public static CompoundTag getCompound(ItemStack stack, String key) {
+        return hasDataTag(stack) ? getDataMap(stack).getCompound(key) : new CompoundTag();
     }
 
     @Nullable
     public static UUID getUniqueID(ItemStack stack, String key) {
-        return hasDataTag(stack) ? getDataMap(stack).getUniqueId(key) : null;
+        return hasDataTag(stack) ? getDataMap(stack).getUuid(key) : null;
     }
 
-    public static ListNBT getList(ItemStack stack, String key) {
-        return hasDataTag(stack) ? getDataMap(stack).getList(key, NBT.TAG_COMPOUND) : new ListNBT();
+    public static ListTag getList(ItemStack stack, String key) {
+        return hasDataTag(stack) ? getDataMap(stack).getList(key, NBTFlags.COMPOUND) : new ListTag();
     }
 
     public static void setInt(ItemStack stack, String key, int i) {
@@ -107,29 +107,29 @@ public final class ItemDataUtils {
         getDataMap(stack).putString(key, s);
     }
 
-    public static void setCompound(ItemStack stack, String key, CompoundNBT tag) {
+    public static void setCompound(ItemStack stack, String key, CompoundTag tag) {
         initStack(stack);
         getDataMap(stack).put(key, tag);
     }
 
     public static void setUUID(ItemStack stack, String key, UUID uuid) {
         initStack(stack);
-        getDataMap(stack).putUniqueId(key, uuid);
+        getDataMap(stack).putUuid(key, uuid);
     }
 
-    public static void setList(ItemStack stack, String key, ListNBT tag) {
+    public static void setList(ItemStack stack, String key, ListTag tag) {
         initStack(stack);
         getDataMap(stack).put(key, tag);
     }
 
     private static boolean hasDataTag(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().contains(NBTConstants.MEK_DATA, NBT.TAG_COMPOUND);
+        return stack.getTag() != null && stack.getTag().contains(NBTConstants.MEK_DATA, NBTFlags.COMPOUND);
     }
 
     private static void initStack(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateTag();
-        if (!tag.contains(NBTConstants.MEK_DATA, NBT.TAG_COMPOUND)) {
-            tag.put(NBTConstants.MEK_DATA, new CompoundNBT());
+        CompoundTag tag = stack.getOrCreateTag();
+        if (!tag.contains(NBTConstants.MEK_DATA, NBTFlags.COMPOUND)) {
+            tag.put(NBTConstants.MEK_DATA, new CompoundTag());
         }
     }
 }

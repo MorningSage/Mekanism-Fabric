@@ -151,7 +151,7 @@ public class SerializerHelper {
                     nbt = StringNbtReader.parse(JsonHelper.asString(jsonNBT, JsonConstants.NBT));
                 }
             } catch (CommandSyntaxException e) {
-                throw new JsonSyntaxException("Invalid NBT entry for fluid '" + resourceLocation + "'");
+                throw new JsonSyntaxException("Invalid NBTFlags entry for fluid '" + resourceLocation + "'");
             }
         }
         return new FluidStack(fluid, amount, nbt);

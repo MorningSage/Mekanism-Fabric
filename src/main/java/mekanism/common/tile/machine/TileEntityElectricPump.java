@@ -242,7 +242,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
     }
 
     private void suck(@Nonnull FluidStack fluidStack, BlockPos pos, boolean addRecurring) {
-        //Size doesn't matter, but we do want to take the NBT into account
+        //Size doesn't matter, but we do want to take the NBTFlags into account
         activeType = new FluidStack(fluidStack, 1);
         if (addRecurring) {
             recurringNodes.add(pos);

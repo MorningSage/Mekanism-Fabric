@@ -59,7 +59,7 @@ public class MultiblockCache<T extends MultiblockData> implements IMekanismInven
                 List<? extends INBTSerializable<CompoundNBT>> cacheContainers = type.getContainerList(this);
                 for (int i = 0; i < cacheContainers.size(); i++) {
                     if (i < containers.size()) {
-                        //Copy it via NBT to ensure that we set it using the "unsafe" method in case there is a problem with the types somehow
+                        //Copy it via NBTFlags to ensure that we set it using the "unsafe" method in case there is a problem with the types somehow
                         containers.get(i).deserializeNBT(cacheContainers.get(i).serializeNBT());
                     }
                 }

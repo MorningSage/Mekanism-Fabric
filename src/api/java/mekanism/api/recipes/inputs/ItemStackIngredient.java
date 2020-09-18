@@ -30,9 +30,9 @@ public abstract class ItemStackIngredient implements InputIngredient<@NonNull It
     }
 
     public static ItemStackIngredient from(@Nonnull ItemStack stack, int amount) {
-        //Support NBT that is on the stack in case it matters
+        //Support NBTFlags that is on the stack in case it matters
         //It is a protected constructor so pretend we are extending it and implementing it via the {}
-        // Note: Only bother making it an NBT ingredient if the stack has NBT, otherwise there is no point in doing the extra checks
+        // Note: Only bother making it an NBTFlags ingredient if the stack has NBTFlags, otherwise there is no point in doing the extra checks
         Ingredient ingredient = stack.hasTag() ? new NBTIngredient(stack) {} : Ingredient.ofStacks(stack);
         return from(ingredient, amount);
     }

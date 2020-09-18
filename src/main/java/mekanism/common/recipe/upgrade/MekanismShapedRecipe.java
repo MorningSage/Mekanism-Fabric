@@ -41,7 +41,7 @@ public class MekanismShapedRecipe implements ICraftingRecipe, IShapedRecipe<Craf
 
     @Override
     public boolean matches(CraftingInventory inv, World world) {
-        //Note: We do not override the matches method if it matches ignoring NBT,
+        //Note: We do not override the matches method if it matches ignoring NBTFlags,
         // to ensure that we return the proper value for if there is a match that gives a proper output
         return internal.matches(inv, world) && !getCraftingResult(inv).isEmpty();
     }
@@ -60,7 +60,7 @@ public class MekanismShapedRecipe implements ICraftingRecipe, IShapedRecipe<Craf
             }
         }
         if (nbtInputs.isEmpty()) {
-            //If none of our items have NBT we can skip checking what data can be transferred
+            //If none of our items have NBTFlags we can skip checking what data can be transferred
             return toReturn;
         }
         Set<RecipeUpgradeType> supportedTypes = RecipeUpgradeData.getSupportedTypes(toReturn);
@@ -69,7 +69,7 @@ public class MekanismShapedRecipe implements ICraftingRecipe, IShapedRecipe<Craf
             return toReturn;
         }
         Map<RecipeUpgradeType, List<RecipeUpgradeData<?>>> upgradeInfo = new EnumMap<>(RecipeUpgradeType.class);
-        //Only bother checking input items that have NBT as ones that do not, don't have any data they may need to transfer
+        //Only bother checking input items that have NBTFlags as ones that do not, don't have any data they may need to transfer
         for (ItemStack stack : nbtInputs) {
             Set<RecipeUpgradeType> stackSupportedTypes = RecipeUpgradeData.getSupportedTypes(stack);
             for (RecipeUpgradeType supportedType : stackSupportedTypes) {

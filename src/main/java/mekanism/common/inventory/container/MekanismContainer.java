@@ -48,16 +48,12 @@ import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.util.StackUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IntReferenceHolder;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fluids.FluidStack;
 
-public abstract class MekanismContainer extends Container {
+public abstract class MekanismContainer extends ScreenHandler {
 
     public static final int BASE_Y_OFFSET = 84;
 
@@ -82,9 +78,9 @@ public abstract class MekanismContainer extends Container {
         //Manually handle the code that is in super.addSlot so that we do not end up adding extra elements to
         // inventoryItemStacks as we handle the tracking/sync changing via the below track call. This way we are
         // able to minimize the amount of overhead that we end up with due to keeping track of the stack in SyncableItemStack
-        slot.slotNumber = inventorySlots.size();
-        inventorySlots.add(slot);
-        track(SyncableItemStack.create(slot::getStack, slot::putStack));
+        slot.id = slots.size();
+        slots.add(slot);
+        track(SyncableItemStack.create(slot::getStack, slot::setStack));
         if (slot instanceof InventoryContainerSlot) {
             inventoryContainerSlots.add((InventoryContainerSlot) slot);
         } else if (slot instanceof ArmorSlot) {
@@ -126,14 +122,14 @@ public abstract class MekanismContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(@Nonnull PlayerEntity player) {
+    public boolean canUse(PlayerEntity player) {
         //Is this the proper default
         return true;
     }
 
     @Override
-    public void onContainerClosed(@Nonnull PlayerEntity player) {
-        super.onContainerClosed(player);
+    public void close(@Nonnull PlayerEntity player) {
+        super.close(player);
         closeInventory(player);
     }
 

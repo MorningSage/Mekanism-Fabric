@@ -1,6 +1,6 @@
 package mekanism.api.chemical.slurry;
 
-import mekanism.api._helpers_pls_remove.NBT;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.IChemicalTank;
@@ -22,7 +22,7 @@ public interface ISlurryTank extends IChemicalTank<Slurry, SlurryStack>, IEmptyS
 
     @Override
     default void deserializeNBT(CompoundTag nbt) {
-        if (nbt.contains(NBTConstants.STORED, NBT.COMPOUND)) {
+        if (nbt.contains(NBTConstants.STORED, NBTFlags.COMPOUND)) {
             setStackUnchecked(SlurryStack.readFromNBT(nbt.getCompound(NBTConstants.STORED)));
         }
     }

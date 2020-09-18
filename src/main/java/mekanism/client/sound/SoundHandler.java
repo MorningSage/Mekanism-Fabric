@@ -143,7 +143,7 @@ public class SoundHandler {
     public static SoundInstance startTileSound(SoundEvent soundEvent, SoundCategory category, float volume, BlockPos pos) {
         // First, check to see if there's already a sound playing at the desired location
         SoundInstance s = soundMap.get(pos.asLong());
-        if (s == null || !Minecraft.getInstance().getSoundHandler().isPlaying(s)) {
+        if (s == null || !MinecraftClient.getInstance().getSoundManager().isPlaying(s)) {
             // No sound playing, start one up - we assume that tile sounds will play until explicitly stopped
             // The TileTickableSound will then periodically poll to see if the volume should be adjusted
             s = new TileTickableSound(soundEvent, category, pos, volume);
@@ -153,7 +153,7 @@ public class SoundHandler {
 
             // N.B. By the time playSound returns, our expectation is that our wrapping-detector handler has fired
             // and dealt with any muting interceptions and, CRITICALLY, updated the soundMap with the final ISound.
-            s = soundMap.get(pos.toLong());
+            s = soundMap.get(pos.asLong());
         }
         return s;
     }

@@ -3,3 +3,4 @@ accessWidener	v1	named
 extendable    class    net/minecraft/recipe/Ingredient
 accessible	  method   net/minecraft/recipe/Ingredient <init> (Ljava/util/stream/Stream;)V
 accessible	  method   net/minecraft/recipe/Ingredient$StackEntry <init> (Lnet/minecraft/item/ItemStack;)V
+accessible	  method   net/minecraft/screen/ScreenHandler <init> (Lnet/minecraft/screen/ScreenHandlerType;I)V

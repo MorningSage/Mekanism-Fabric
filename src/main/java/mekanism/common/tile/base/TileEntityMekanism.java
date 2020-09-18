@@ -15,7 +15,7 @@ import mekanism.api.DataHandlerUtils;
 import mekanism.api.IMekWrench;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
-import mekanism.api._helpers_pls_remove.NBT;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.gas.attribute.GasAttributes;
@@ -107,7 +107,8 @@ import mekanism.common.util.SecurityUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.sound.Sound;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -122,6 +123,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 //TODO: We need to move the "supports" methods into the source interfaces so that we make sure they get checked before being used
@@ -226,7 +228,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     /**
      * Only used on the client
      */
-    private Sound activeSound;
+    private SoundInstance activeSound;
     private int playSoundCooldown = 0;
     //End variables ITileSound
 
@@ -395,7 +397,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
 
     @Nonnull
     public Text getName() {
-        return TextComponentUtil.translate(Util.createTranslationKey("container", getBlockType().getRegistryName()));
+        return TextComponentUtil.translate(Util.createTranslationKey("container", Registry.BLOCK.getId(getBlockType())));
     }
 
     @Override
@@ -405,7 +407,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
             int newRedstoneLevel = getRedstoneLevel();
             if (newRedstoneLevel != currentRedstoneLevel) {
                 currentRedstoneLevel = newRedstoneLevel;
-                world.updateComparatorOutputLevel(pos, getBlockType());
+                world.updateComparators(pos, getBlockType());
             }
         }
     }
@@ -426,7 +428,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
                     }
                     //Special ITileDirectional handling
                     if (isDirectional() && Attribute.get(getBlockType(), AttributeStateFacing.class).canRotate()) {
-                        setFacing(getDirection().rotateY());
+                        setFacing(getDirection().rotateYClockwise());
                     }
                     return WrenchResult.SUCCESS;
                 }
@@ -458,9 +460,9 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
             }
 
             NetworkHooks.openGui((ServerPlayerEntity) player, Attribute.get(blockProvider.getBlock(), AttributeGui.class).getProvider(this), pos);
-            return ActionResultType.SUCCESS;
+            return ActionResult.SUCCESS;
         }
-        return ActionResultType.PASS;
+        return ActionResult.PASS;
     }
 
     @Override
@@ -511,8 +513,8 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     @Override
-    public void remove() {
-        super.remove();
+    public void markRemoved() {
+        super.markRemoved();
         for (ITileComponent component : components) {
             component.invalidate();
         }
@@ -574,7 +576,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
             NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.CONTROL_TYPE, RedstoneControl::byIndexStatic, type -> controlType = type);
         }
         if (hasInventory() && persistInventory()) {
-            DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, NBT.COMPOUND));
+            DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, NBTFlags.COMPOUND));
         }
         for (SubstanceType type : EnumUtils.SUBSTANCES) {
             if (type.canHandle(this) && persists(type)) {
@@ -865,7 +867,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
 
     @Override
     public ListTag getInventory(Object... data) {
-        return persistInventory() ? DataHandlerUtils.writeContainers(getInventorySlots(null)) : new ListNBT();
+        return persistInventory() ? DataHandlerUtils.writeContainers(getInventorySlots(null)) : new ListTag();
     }
 
     /**
@@ -962,11 +964,13 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
         return null;
     }
 
+
+
     @Nullable
     @Override
     public IHeatHandler getAdjacent(Direction side) {
         if (canHandleHeat() && getHeatCapacitorCount(side) > 0) {
-            TileEntity adj = MekanismUtils.getTileEntity(getWorld(), getPos().offset(side));
+            BlockEntity adj = MekanismUtils.getTileEntity(getWorld(), getPos().offset(side));
             return MekanismUtils.toOptional(CapabilityUtils.getCapability(adj, Capabilities.HEAT_HANDLER_CAPABILITY, side.getOpposite())).orElse(null);
         }
         return null;
@@ -997,7 +1001,8 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
                     for (PlayerEntity player : new ObjectOpenHashSet<>(playersUsing)) {
                         if (!SecurityUtils.canAccess(player, this)) {
                             //and if they can't then boot them out
-                            player.closeScreen();
+                            // Todo: Accessor? player.closeHandledScreen
+                            player.currentScreenHandler = player.playerScreenHandler;
                         }
                     }
                 }
@@ -1013,13 +1018,13 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
     }
 
     private boolean getClientActive() {
-        return Attribute.isActive(getBlockState());
+        return Attribute.isActive(getCachedState());
     }
 
     @Override
     public void setActive(boolean active) {
         if (isActivatable()) {
-            BlockState state = getBlockState();
+            BlockState state = getCachedState();
             Block block = state.getBlock();
             if (active != currentActive && Attribute.has(block, AttributeStateActive.class)) {
                 currentActive = active;
@@ -1031,7 +1036,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
                     } else {
                         // if the update delay is already zero, we can go ahead and set the state
                         if (updateDelay == 0) {
-                            world.setBlockState(pos, Attribute.setActive(getBlockState(), currentActive));
+                            world.setBlockState(pos, Attribute.setActive(getCachedState(), currentActive));
                         }
                         // we always reset the update delay when turning off
                         updateDelay = delaySupplier.getAsInt();
@@ -1069,7 +1074,7 @@ public abstract class TileEntityMekanism extends CapabilityTileEntity implements
 
             // If this machine isn't fully muffled and we don't seem to be playing a sound for it, go ahead and
             // play it
-            if (!isFullyMuffled() && (activeSound == null || !Minecraft.getInstance().getSoundHandler().isPlaying(activeSound))) {
+            if (!isFullyMuffled() && (activeSound == null || !MinecraftClient.getInstance().getSoundManager().isPlaying(activeSound))) {
                 activeSound = SoundHandler.startTileSound(soundEvent, getSoundCategory(), getInitialVolume(), getPos());
             }
             // Always reset the cooldown; either we just attempted to play a sound or we're fully muffled; either way

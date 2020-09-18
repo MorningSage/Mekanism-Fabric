@@ -70,7 +70,7 @@ public class ItemBlockEnergyCube extends ItemBlockTooltip<BlockEnergyCube> imple
             EnergyCubeTier tier = Attribute.getTier(getBlock(), EnergyCubeTier.class);
             ItemStack stack = StorageUtils.getFilledEnergyVariant(new ItemStack(this), tier.getMaxEnergy());
             if (tier == EnergyCubeTier.CREATIVE) {
-                //TODO: Add side specific NBT configuration here rather than in BlockEnergyCube
+                //TODO: Add side specific NBTFlags configuration here rather than in BlockEnergyCube
             }
             items.add(stack);
         }

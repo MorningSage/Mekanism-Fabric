@@ -17,6 +17,7 @@ import mekanism.common.capabilities.proxy.ProxyStrictEnergyHandler;
 import mekanism.common.capabilities.resolver.basic.EnergyCapabilityResolver;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 

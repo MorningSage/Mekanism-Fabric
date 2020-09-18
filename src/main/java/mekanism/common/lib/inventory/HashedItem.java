@@ -5,7 +5,7 @@ import mekanism.common.util.StackUtils;
 import net.minecraft.item.ItemStack;
 
 /**
- * A wrapper of an ItemStack which tests equality and hashes based on item type, damage and NBT data, ignoring stack size.
+ * A wrapper of an ItemStack which tests equality and hashes based on item type, damage and NBTFlags data, ignoring stack size.
  *
  * @author aidancbrady
  */

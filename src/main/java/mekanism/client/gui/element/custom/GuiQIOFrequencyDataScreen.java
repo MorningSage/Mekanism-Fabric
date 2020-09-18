@@ -10,7 +10,7 @@ import mekanism.client.gui.element.bar.GuiDigitalBar;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.util.text.TextUtils;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiQIOFrequencyDataScreen extends GuiInnerScreen {
 
@@ -28,7 +28,7 @@ public class GuiQIOFrequencyDataScreen extends GuiInnerScreen {
             }
 
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 QIOFrequency freq = frequencySupplier.get();
                 return freq == null ? null : MekanismLang.QIO_ITEMS_DETAIL.translateColored(EnumColor.GRAY, EnumColor.INDIGO,
                       TextUtils.format(freq.getTotalItemCount()), TextUtils.format(freq.getTotalItemCountCapacity()));
@@ -42,7 +42,7 @@ public class GuiQIOFrequencyDataScreen extends GuiInnerScreen {
             }
 
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 QIOFrequency freq = frequencySupplier.get();
                 return freq == null ? null : MekanismLang.QIO_ITEMS_DETAIL.translateColored(EnumColor.GRAY, EnumColor.INDIGO,
                       TextUtils.format(freq.getTotalItemTypes(true)), TextUtils.format(freq.getTotalItemTypeCapacity()));

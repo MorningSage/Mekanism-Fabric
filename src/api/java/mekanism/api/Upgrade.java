@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
 
-import mekanism.api._helpers_pls_remove.NBT;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.api.math.MathUtils;
 import mekanism.api.text.APILang;
 import mekanism.api.text.EnumColor;
@@ -42,8 +42,8 @@ public enum Upgrade implements IHasTranslationKey {
 
     public static Map<Upgrade, Integer> buildMap(@Nullable CompoundTag nbtTags) {
         Map<Upgrade, Integer> upgrades = new EnumMap<>(Upgrade.class);
-        if (nbtTags != null && nbtTags.contains(NBTConstants.UPGRADES, NBT.LIST)) {
-            ListTag list = nbtTags.getList(NBTConstants.UPGRADES, NBT.COMPOUND);
+        if (nbtTags != null && nbtTags.contains(NBTConstants.UPGRADES, NBTFlags.LIST)) {
+            ListTag list = nbtTags.getList(NBTConstants.UPGRADES, NBTFlags.COMPOUND);
             for (int tagCount = 0; tagCount < list.size(); tagCount++) {
                 CompoundTag compound = list.getCompound(tagCount);
                 Upgrade upgrade = byIndexStatic(compound.getInt(NBTConstants.TYPE));

@@ -28,10 +28,10 @@ import mekanism.common.tile.qio.TileEntityQIORedstoneAdapter;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.UpgradeUtils;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
@@ -48,11 +48,11 @@ public class PacketGuiInteract {
     private int extra;
     private ItemStack extraItem;
 
-    public PacketGuiInteract(GuiInteraction interaction, TileEntity tile) {
+    public PacketGuiInteract(GuiInteraction interaction, BlockEntity tile) {
         this(interaction, tile.getPos());
     }
 
-    public PacketGuiInteract(GuiInteraction interaction, TileEntity tile, int extra) {
+    public PacketGuiInteract(GuiInteraction interaction, BlockEntity tile, int extra) {
         this(interaction, tile.getPos(), extra);
     }
 
@@ -67,7 +67,7 @@ public class PacketGuiInteract {
         this.extra = extra;
     }
 
-    public PacketGuiInteract(GuiInteractionItem interaction, TileEntity tile, ItemStack stack) {
+    public PacketGuiInteract(GuiInteractionItem interaction, BlockEntity tile, ItemStack stack) {
         this(interaction, tile.getPos(), stack);
     }
 
@@ -96,25 +96,25 @@ public class PacketGuiInteract {
         context.get().setPacketHandled(true);
     }
 
-    public static void encode(PacketGuiInteract pkt, PacketBuffer buf) {
-        buf.writeEnumValue(pkt.interactionType);
+    public static void encode(PacketGuiInteract pkt, PacketByteBuf buf) {
+        buf.writeEnumConstant(pkt.interactionType);
         if (pkt.interactionType == Type.INT) {
-            buf.writeEnumValue(pkt.interaction);
+            buf.writeEnumConstant(pkt.interaction);
             buf.writeBlockPos(pkt.tilePosition);
             buf.writeVarInt(pkt.extra);
         } else if (pkt.interactionType == Type.ITEM) {
-            buf.writeEnumValue(pkt.itemInteraction);
+            buf.writeEnumConstant(pkt.itemInteraction);
             buf.writeBlockPos(pkt.tilePosition);
             buf.writeItemStack(pkt.extraItem);
         }
     }
 
-    public static PacketGuiInteract decode(PacketBuffer buf) {
-        Type type = buf.readEnumValue(Type.class);
+    public static PacketGuiInteract decode(PacketByteBuf buf) {
+        Type type = buf.readEnumConstant(Type.class);
         if (type == Type.INT) {
-            return new PacketGuiInteract(buf.readEnumValue(GuiInteraction.class), buf.readBlockPos(), buf.readVarInt());
+            return new PacketGuiInteract(buf.readEnumConstant(GuiInteraction.class), buf.readBlockPos(), buf.readVarInt());
         } else if (type == Type.ITEM) {
-            return new PacketGuiInteract(buf.readEnumValue(GuiInteractionItem.class), buf.readBlockPos(), buf.readItemStack());
+            return new PacketGuiInteract(buf.readEnumConstant(GuiInteractionItem.class), buf.readBlockPos(), buf.readItemStack());
         }
         Mekanism.logger.error("Received malformed GUI interaction packet.");
         return null;
@@ -140,7 +140,7 @@ public class PacketGuiInteract {
 
     public enum GuiInteraction {//TODO: Cleanup this enum/the elements in it as it is rather disorganized order wise currently
         CONTAINER_STOP_TRACKING((tile, player, extra) -> {
-            if (player.openContainer instanceof MekanismContainer) {
+            if (player.currentScreenHandler instanceof MekanismContainer) {
                 ((MekanismContainer) player.openContainer).stopTracking(extra);
             }
         }),

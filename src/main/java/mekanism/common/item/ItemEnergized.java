@@ -90,13 +90,13 @@ public class ItemEnergized extends Item {
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        //Ignore NBT for energized items causing re-equip animations
+        //Ignore NBTFlags for energized items causing re-equip animations
         return oldStack.getItem() != newStack.getItem();
     }
 
     @Override
     public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
-        //Ignore NBT for energized items causing block break reset
+        //Ignore NBTFlags for energized items causing block break reset
         return oldStack.getItem() != newStack.getItem();
     }
 }

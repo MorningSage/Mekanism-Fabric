@@ -101,9 +101,9 @@ public abstract class Module {
     }
 
     /**
-     * Save this module on the container ItemStack. Will create proper NBT structure if it does not yet exist.
+     * Save this module on the container ItemStack. Will create proper NBTFlags structure if it does not yet exist.
      *
-     * @param callback - will run after the NBT data is saved
+     * @param callback - will run after the NBTFlags data is saved
      */
     public final void save(Consumer<ItemStack> callback) {
         CompoundNBT modulesTag = ItemDataUtils.getCompound(container, NBTConstants.MODULES);

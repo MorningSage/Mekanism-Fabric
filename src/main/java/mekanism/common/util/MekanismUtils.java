@@ -17,6 +17,9 @@ import javax.annotation.Nullable;
 import mekanism.api.IMekWrench;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
+import mekanism.api._helpers_pls_remove.FluidStack;
+import mekanism.api._helpers_pls_remove.NBTFlags;
+import mekanism.api._helpers_pls_remove.BlockFlags;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.fluid.IExtendedFluidTank;
@@ -39,29 +42,44 @@ import mekanism.common.tile.interfaces.IRedstoneControl;
 import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.UnitDisplayUtils.ElectricUnit;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
+import mekanism.mixin.LivingEntityAccessor;
+import mekanism.mixin.WorldAccessor;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FluidFillable;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FlowableFluid;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.LavaFluid;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.*;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.items.IItemHandler;
@@ -107,14 +125,16 @@ public final class MekanismUtils {
     }
 
     /**
-     * Converts a {@link LazyOptional} to a normal {@link Optional}. This is useful for if we are going to resolve the value anyways if it is present.
+     * ToDo: I don't expect to need this at all since Fabric doesn't have LazyOptionals
+     *
+     * Converts a LazyOptional to a normal {@link Optional}. This is useful for if we are going to resolve the value anyways if it is present.
      *
      * @param lazyOptional The lazy optional to convert
      * @param <T>          The type of the optional
      *
      * @return A normal {@link Optional} or {@link Optional#empty()} if the lazy optional is not present.
      */
-    public static <T> Optional<T> toOptional(@Nonnull LazyOptional<T> lazyOptional) {
+    public static <T> Optional<T> toOptional(@Nonnull Optional<T> lazyOptional) {
         if (lazyOptional.isPresent()) {
             return Optional.of(lazyOptional.orElseThrow(() -> new RuntimeException("Failed to retrieve value of lazy optional when it claimed it was present.")));
         }
@@ -129,7 +149,7 @@ public final class MekanismUtils {
      *
      * @return if machine is active
      */
-    public static boolean isActive(IBlockReader world, BlockPos pos) {
+    public static boolean isActive(BlockView world, BlockPos pos) {
         BlockEntity tile = getTileEntity(world, pos);
         if (tile instanceof IActiveState) {
             return ((IActiveState) tile).getActive();
@@ -145,7 +165,7 @@ public final class MekanismUtils {
      * @return left side
      */
     public static Direction getLeft(Direction orientation) {
-        return orientation.rotateY();
+        return orientation.rotateYClockwise();
     }
 
     /**
@@ -156,7 +176,7 @@ public final class MekanismUtils {
      * @return right side
      */
     public static Direction getRight(Direction orientation) {
-        return orientation.rotateYCCW();
+        return orientation.rotateYCounterclockwise();
     }
 
     public static float fractionUpgrades(IUpgradeTile tile, Upgrade type) {
@@ -211,12 +231,12 @@ public final class MekanismUtils {
 
     //Vanilla copy of ClientWorld#getSunBrightness used to be World#getSunBrightness
     public static float getSunBrightness(World world, float partialTicks) {
-        float f = world.getCelestialAngle(partialTicks);
+        float f = world.getSkyAngle(partialTicks);
         float f1 = 1.0F - (MathHelper.cos(f * ((float) Math.PI * 2F)) * 2.0F + 0.2F);
         f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
         f1 = 1.0F - f1;
-        f1 = (float) (f1 * (1.0D - world.getRainStrength(partialTicks) * 5.0F / 16.0D));
-        f1 = (float) (f1 * (1.0D - world.getThunderStrength(partialTicks) * 5.0F / 16.0D));
+        f1 = (float) (f1 * (1.0D - world.getRainGradient(partialTicks) * 5.0F / 16.0D));
+        f1 = (float) (f1 * (1.0D - world.getThunderGradient(partialTicks) * 5.0F / 16.0D));
         return f1 * 0.8F + 0.2F;
     }
 
@@ -293,7 +313,7 @@ public final class MekanismUtils {
      */
     public static FloatingLong getMaxEnergy(ItemStack itemStack, FloatingLong def) {
         float numUpgrades = 0;
-        if (ItemDataUtils.hasData(itemStack, NBTConstants.UPGRADES, NBT.TAG_LIST)) {
+        if (ItemDataUtils.hasData(itemStack, NBTConstants.UPGRADES, NBTFlags.LIST)) {
             Map<Upgrade, Integer> upgrades = Upgrade.buildMap(ItemDataUtils.getDataMap(itemStack));
             if (upgrades.containsKey(Upgrade.ENERGY)) {
                 numUpgrades = upgrades.get(Upgrade.ENERGY);
@@ -315,10 +335,10 @@ public final class MekanismUtils {
             BlockPos offset = pos.offset(side);
             if (isBlockLoaded(world, pos) && isBlockLoaded(world, offset)) {
                 BlockState blockState = world.getBlockState(offset);
-                boolean weakPower = blockState.getBlock().shouldCheckWeakPower(blockState, world, pos, side);
+                boolean weakPower = blockState.isSolidBlock(world, pos);
                 if (weakPower && isDirectlyGettingPowered(world, offset)) {
                     return true;
-                } else if (!weakPower && blockState.getWeakPower(world, offset, side) > 0) {
+                } else if (!weakPower && blockState.getBlock().getWeakRedstonePower(blockState, world, offset, side) > 0) {
                     return true;
                 }
             }
@@ -338,7 +358,7 @@ public final class MekanismUtils {
         for (Direction side : EnumUtils.DIRECTIONS) {
             BlockPos offset = pos.offset(side);
             if (isBlockLoaded(world, offset)) {
-                if (world.getRedstonePower(pos, side) > 0) {
+                if (world.getEmittedRedstonePower(pos, side) > 0) {
                     return true;
                 }
             }
@@ -351,7 +371,7 @@ public final class MekanismUtils {
      *
      * @return True if the blocks can be replaced and is within the world's bounds.
      */
-    public static boolean areBlocksValidAndReplaceable(@Nonnull IBlockReader world, @Nonnull BlockPos... positions) {
+    public static boolean areBlocksValidAndReplaceable(@Nonnull BlockView world, @Nonnull BlockPos... positions) {
         return areBlocksValidAndReplaceable(world, Arrays.stream(positions));
     }
 
@@ -360,7 +380,7 @@ public final class MekanismUtils {
      *
      * @return True if the blocks can be replaced and is within the world's bounds.
      */
-    public static boolean areBlocksValidAndReplaceable(@Nonnull IBlockReader world, @Nonnull Collection<BlockPos> positions) {
+    public static boolean areBlocksValidAndReplaceable(@Nonnull BlockView world, @Nonnull Collection<BlockPos> positions) {
         //TODO: Potentially move more block placement over to these methods
         return areBlocksValidAndReplaceable(world, positions.stream());
     }
@@ -370,7 +390,7 @@ public final class MekanismUtils {
      *
      * @return True if the blocks can be replaced and is within the world's bounds.
      */
-    public static boolean areBlocksValidAndReplaceable(@Nonnull IBlockReader world, @Nonnull Stream<BlockPos> positions) {
+    public static boolean areBlocksValidAndReplaceable(@Nonnull BlockView world, @Nonnull Stream<BlockPos> positions) {
         return positions.allMatch(pos -> isValidReplaceableBlock(world, pos));
     }
 
@@ -379,8 +399,8 @@ public final class MekanismUtils {
      *
      * @return True if the block can be replaced and is within the world's bounds.
      */
-    public static boolean isValidReplaceableBlock(@Nonnull IBlockReader world, @Nonnull BlockPos pos) {
-        return World.isValid(pos) && world.getBlockState(pos).getMaterial().isReplaceable();
+    public static boolean isValidReplaceableBlock(@Nonnull BlockView world, @Nonnull BlockPos pos) {
+        return WorldAccessor.isValid(pos) && world.getBlockState(pos).getMaterial().isReplaceable();
     }
 
     /**
@@ -395,13 +415,21 @@ public final class MekanismUtils {
             BlockPos offset = pos.offset(dir);
             if (isBlockLoaded(world, offset)) {
                 notifyNeighborOfChange(world, offset, pos);
-                if (world.getBlockState(offset).isNormalCube(world, offset)) {
+                if (world.getBlockState(offset).isSolidBlock(world, offset)) {
                     offset = offset.offset(dir);
                     if (isBlockLoaded(world, offset)) {
-                        Block block1 = world.getBlockState(offset).getBlock();
-                        //TODO: Make sure this is passing the correct state
-                        if (block1.getWeakChanges(state, world, offset)) {
-                            block1.onNeighborChange(state, world, offset, pos);
+                        /*
+                         * ToDo: In Fabric, there's no equivalent to this:
+                         *  Block block1 = world.getBlockState(offset).getBlock();
+                         *  // TO DO: Make sure this is passing the correct state
+                         *  if (block1.getWeakChanges(state, world, offset)) {
+                         *      block1.onNeighborChange(state, world, offset, pos);
+                         *  }
+                         *  Replaced with this for now:
+                         */
+
+                        if (state.isOf(Blocks.COMPARATOR)) {
+                            state.neighborUpdate(world, offset, world.getBlockState(pos).getBlock(), pos, false);
                         }
                     }
                 }
@@ -447,14 +475,14 @@ public final class MekanismUtils {
      * @param boundingLocation - coordinates of bounding block
      * @param orig             - original block position
      */
-    public static void makeBoundingBlock(@Nullable IWorld world, BlockPos boundingLocation, BlockPos orig) {
+    public static void makeBoundingBlock(@Nullable WorldAccess world, BlockPos boundingLocation, BlockPos orig) {
         if (world == null) {
             return;
         }
         BlockBounding boundingBlock = MekanismBlocks.BOUNDING_BLOCK.getBlock();
         BlockState newState = BlockStateHelper.getStateForPlacement(boundingBlock, boundingBlock.getDefaultState(), world, boundingLocation, null, Direction.NORTH);
         world.setBlockState(boundingLocation, newState, BlockFlags.DEFAULT);
-        if (!world.isRemote()) {
+        if (!world.isClient()) {
             TileEntityBoundingBlock tile = getTileEntity(TileEntityBoundingBlock.class, world, boundingLocation);
             if (tile != null) {
                 tile.setMainLocation(orig);
@@ -504,8 +532,8 @@ public final class MekanismUtils {
         BlockState blockState = world.getBlockState(pos);
         //TODO: Fix this as it is not ideal to just pretend the block was previously air to force it to update
         // Maybe should use notifyUpdate
-        world.markBlockRangeForRenderUpdate(pos, Blocks.AIR.getDefaultState(), blockState);
-        TileEntity tile = getTileEntity(world, pos);
+        world.scheduleBlockRerenderIfNeeded(pos, Blocks.AIR.getDefaultState(), blockState);
+        BlockEntity tile = getTileEntity(world, pos);
         if (!(tile instanceof IActiveState) || ((IActiveState) tile).lightUpdate() && MekanismConfig.client.machineEffects.get()) {
             //Update all light types at the position
             recheckLighting(world, pos);
@@ -518,8 +546,8 @@ public final class MekanismUtils {
      * @param world - world the block is in
      * @param pos   - coordinates
      */
-    public static void recheckLighting(@Nonnull IBlockDisplayReader world, @Nonnull BlockPos pos) {
-        world.getLightManager().checkBlock(pos);
+    public static void recheckLighting(@Nonnull BlockRenderView world, @Nonnull BlockPos pos) {
+        world.getLightingProvider().checkBlock(pos);
     }
 
     public static boolean tryPlaceContainedLiquid(@Nullable PlayerEntity player, World world, BlockPos pos, @Nonnull FluidStack fluidStack, @Nullable Direction side) {
@@ -529,18 +557,18 @@ public final class MekanismUtils {
             return false;
         }
         BlockState state = world.getBlockState(pos);
-        boolean isReplaceable = state.isReplaceable(fluid);
-        boolean canContainFluid = state.getBlock() instanceof ILiquidContainer && ((ILiquidContainer) state.getBlock()).canContainFluid(world, pos, state, fluid);
-        if (world.isAirBlock(pos) || isReplaceable || canContainFluid) {
-            if (world.func_230315_m_().func_236040_e_() && fluid.getAttributes().doesVaporize(world, pos, fluidStack)) {
+        boolean isReplaceable = state.canBucketPlace(fluid);
+        boolean canContainFluid = state.getBlock() instanceof FluidFillable && ((FluidFillable) state.getBlock()).canFillWithFluid(world, pos, state, fluid);
+        if (world.isAir(pos) || isReplaceable || canContainFluid) {
+            if (world.getDimension().isUltrawarm() && fluid.getAttributes().doesVaporize(world, pos, fluidStack)) {
                 fluid.getAttributes().vaporize(player, world, pos, fluidStack);
             } else if (canContainFluid) {
-                if (((ILiquidContainer) state.getBlock()).receiveFluid(world, pos, state, ((FlowingFluid) fluid).getStillFluidState(false))) {
+                if (((FluidFillable) state.getBlock()).tryFillWithFluid(world, pos, state, ((FlowableFluid) fluid).getStill(false))) {
                     playEmptySound(player, world, pos, fluidStack);
                 }
             } else {
-                if (!world.isRemote() && isReplaceable && !state.getMaterial().isLiquid()) {
-                    world.destroyBlock(pos, true);
+                if (!world.isClient() && isReplaceable && !state.getMaterial().isLiquid()) {
+                    world.breakBlock(pos, true);
                 }
                 playEmptySound(player, world, pos, fluidStack);
                 world.setBlockState(pos, fluid.getDefaultState().getBlockState(), BlockFlags.DEFAULT_AND_RERENDER);
@@ -550,7 +578,7 @@ public final class MekanismUtils {
         return side != null && tryPlaceContainedLiquid(player, world, pos.offset(side), fluidStack, null);
     }
 
-    private static void playEmptySound(@Nullable PlayerEntity player, IWorld world, BlockPos pos, @Nonnull FluidStack fluidStack) {
+    private static void playEmptySound(@Nullable PlayerEntity player, WorldAccess world, BlockPos pos, @Nonnull FluidStack fluidStack) {
         SoundEvent soundevent = fluidStack.getFluid().getAttributes().getEmptySound(world, pos);
         if (soundevent == null) {
             soundevent = fluidStack.getFluid().isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
@@ -571,7 +599,7 @@ public final class MekanismUtils {
     }
 
     /**
-     * Marks the chunk this TileEntity is in as modified. Call this method to be sure NBT is written by the defined tile entity.
+     * Marks the chunk this TileEntity is in as modified. Call this method to be sure NBTFlags is written by the defined tile entity.
      *
      * @param tile - TileEntity to save
      */
@@ -586,7 +614,7 @@ public final class MekanismUtils {
      */
     public static void markChunkDirty(World world, BlockPos pos) {
         if (isBlockLoaded(world, pos)) {
-            world.getChunkAt(pos).markDirty();
+            world.getWorldChunk(pos).markDirty();
         }
         //TODO: This line below is now (1.16+) called by the mark chunk dirty method (without even validating if it is loaded).
         // And with it causes issues where chunks are easily ghost loaded. Why was it added like that and do we need to somehow
@@ -627,20 +655,20 @@ public final class MekanismUtils {
      * @return raytraced value
      */
     public static BlockHitResult rayTrace(PlayerEntity player) {
-        return rayTrace(player, FluidMode.NONE);
+        return rayTrace(player, RaycastContext.FluidHandling.NONE);
     }
 
-    public static BlockHitResult rayTrace(PlayerEntity player, FluidMode fluidMode) {
+    public static BlockHitResult rayTrace(PlayerEntity player, RaycastContext.FluidHandling fluidMode) {
         return rayTrace(player, Mekanism.proxy.getReach(player), fluidMode);
     }
 
     public static BlockHitResult rayTrace(PlayerEntity player, double reach) {
-        return rayTrace(player, reach, FluidMode.NONE);
+        return rayTrace(player, reach, RaycastContext.FluidHandling.NONE);
     }
 
     public static BlockHitResult rayTrace(PlayerEntity player, double reach, RaycastContext.FluidHandling fluidMode) {
         Vec3d headVec = getHeadVec(player);
-        Vec3d lookVec = player.getLook(1);
+        Vec3d lookVec = player.getRotationVec(1);
         Vec3d endVec = headVec.add(lookVec.x * reach, lookVec.y * reach, lookVec.z * reach);
         return player.getEntityWorld().raycast(new RaycastContext(headVec, endVec, RaycastContext.ShapeType.OUTLINE, fluidMode, player));
     }
@@ -653,7 +681,7 @@ public final class MekanismUtils {
      * @return head location
      */
     private static Vec3d getHeadVec(PlayerEntity player) {
-        double posY = player.getY() + player.getEyeHeight();
+        double posY = player.getY() + player.getStandingEyeHeight();
         if (player.isSneaking()) {
             posY -= 0.08;
         }
@@ -733,9 +761,9 @@ public final class MekanismUtils {
     }
 
     public static CraftingInventory getDummyCraftingInv() {
-        Container tempContainer = new Container(ContainerType.CRAFTING, 1) {
+        ScreenHandler tempContainer = new ScreenHandler(ScreenHandlerType.CRAFTING, 1) {
             @Override
-            public boolean canInteractWith(@Nonnull PlayerEntity player) {
+            public boolean canUse(@Nonnull PlayerEntity player) {
                 return false;
             }
         };
@@ -751,14 +779,14 @@ public final class MekanismUtils {
      * @return output ItemStack
      */
     public static ItemStack findRepairRecipe(CraftingInventory inv, World world) {
-        NonNullList<ItemStack> dmgItems = NonNullList.withSize(2, ItemStack.EMPTY);
+        DefaultedList<ItemStack> dmgItems = DefaultedList.ofSize(2, ItemStack.EMPTY);
         ItemStack leftStack = dmgItems.get(0);
-        for (int i = 0; i < inv.getSizeInventory(); i++) {
-            if (!inv.getStackInSlot(i).isEmpty()) {
+        for (int i = 0; i < inv.size(); i++) {
+            if (!inv.getStack(i).isEmpty()) {
                 if (leftStack.isEmpty()) {
-                    dmgItems.set(0, leftStack = inv.getStackInSlot(i));
+                    dmgItems.set(0, leftStack = inv.getStack(i));
                 } else {
-                    dmgItems.set(1, inv.getStackInSlot(i));
+                    dmgItems.set(1, inv.getStack(i));
                     break;
                 }
             }
@@ -768,14 +796,20 @@ public final class MekanismUtils {
             return ItemStack.EMPTY;
         }
 
+        /*
+         * ToDo: The original if statement included "leftStack.getItem().isRepairable(leftStack)".
+         *
+         * This appears to be a construct of Forge.  Replaced with: "leftStack.getItem().isDamageable()"
+         */
+
         ItemStack rightStack = dmgItems.get(1);
         if (!rightStack.isEmpty() && leftStack.getItem() == rightStack.getItem() && leftStack.getCount() == 1 && rightStack.getCount() == 1 &&
-            leftStack.getItem().isRepairable(leftStack)) {
+            leftStack.getItem().isDamageable()) {
             Item theItem = leftStack.getItem();
-            int dmgDiff0 = theItem.getMaxDamage(leftStack) - leftStack.getDamage();
-            int dmgDiff1 = theItem.getMaxDamage(leftStack) - rightStack.getDamage();
-            int value = dmgDiff0 + dmgDiff1 + theItem.getMaxDamage(leftStack) * 5 / 100;
-            int solve = Math.max(0, theItem.getMaxDamage(leftStack) - value);
+            int dmgDiff0 = theItem.getMaxDamage() - leftStack.getDamage();
+            int dmgDiff1 = theItem.getMaxDamage() - rightStack.getDamage();
+            int value = dmgDiff0 + dmgDiff1 + theItem.getMaxDamage() * 5 / 100;
+            int solve = Math.max(0, theItem.getMaxDamage() - value);
             ItemStack repaired = new ItemStack(leftStack.getItem());
             repaired.setDamage(solve);
             return repaired;
@@ -791,7 +825,12 @@ public final class MekanismUtils {
      * @return if the chunk is being vibrated
      */
     public static boolean isChunkVibrated(ChunkPos chunk, World world) {
-        return Mekanism.activeVibrators.stream().anyMatch(coord -> coord.dimension == world.func_234923_W_() && coord.getX() >> 4 == chunk.x && coord.getZ() >> 4 == chunk.z);
+        return Mekanism.activeVibrators.stream()
+            .anyMatch(coord ->
+                coord.dimension == world.getRegistryKey() &&
+                coord.getX() >> 4 == chunk.x &&
+                coord.getZ() >> 4 == chunk.z
+            );
     }
 
     /**
@@ -804,7 +843,7 @@ public final class MekanismUtils {
     public static boolean isOp(PlayerEntity p) {
         if (p instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity) p;
-            return MekanismConfig.general.opsBypassRestrictions.get() && player.server.getPlayerList().canSendCommands(player.getGameProfile());
+            return MekanismConfig.general.opsBypassRestrictions.get() && player.server.getPlayerManager().isOperator(player.getGameProfile());
         }
         return false;
     }
@@ -824,10 +863,12 @@ public final class MekanismUtils {
     }
 
     @Nonnull
-    public static String getLastKnownUsername(UUID uuid) {
-        String ret = UsernameCache.getLastKnownUsername(uuid);
-        if (ret == null && !warnedFails.contains(uuid) && EffectiveSide.get().isServer()) { // see if MC/Yggdrasil knows about it?!
-            GameProfile gp = ServerLifecycleHooks.getCurrentServer().getPlayerProfileCache().getProfileByUUID(uuid);
+    public static String getLastKnownUsername(UUID uuid, MinecraftServer server) {
+        // ToDo: Fabric does not keep track of usernames like this...
+
+        String ret = null;// = UsernameCache.getLastKnownUsername(uuid);
+        if (/*ret == null && */ !warnedFails.contains(uuid) && FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) { // see if MC/Yggdrasil knows about it?!
+            GameProfile gp = server.getUserCache().getByUuid(uuid);
             if (gp != null) {
                 ret = gp.getName();
             }
@@ -847,7 +888,7 @@ public final class MekanismUtils {
     public static Direction sideDifference(BlockPos pos, BlockPos other) {
         BlockPos diff = pos.subtract(other);
         for (Direction side : EnumUtils.DIRECTIONS) {
-            if (side.getXOffset() == diff.getX() && side.getYOffset() == diff.getY() && side.getZOffset() == diff.getZ()) {
+            if (side.getOffsetX() == diff.getX() && side.getOffsetY() == diff.getY() && side.getOffsetZ() == diff.getZ()) {
                 return side;
             }
         }
@@ -860,7 +901,7 @@ public final class MekanismUtils {
      * @return the distance to the defined Coord4D
      */
     public static double distanceBetween(BlockPos start, BlockPos end) {
-        return MathHelper.sqrt(start.distanceSq(end));
+        return MathHelper.sqrt(start.getSquaredDistance(end));
     }
 
     /**
@@ -875,20 +916,20 @@ public final class MekanismUtils {
      */
     @Nullable
     @Contract("null, _, _ -> null")
-    public static BlockEntity getTileEntity(@Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
+    public static BlockEntity getTileEntity(@Nullable WorldAccess world, @Nonnull Long2ObjectMap<Chunk> chunkMap, @Nonnull BlockPos pos) {
         //Get the tile entity using the chunk we found/had cached
         return getTileEntity(getChunkForTile(world, chunkMap, pos), pos);
     }
 
     @Nullable
     @Contract("_, null, _, _ -> null")
-    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable WorldAccess world, @Nonnull Long2ObjectMap<Chunk> chunkMap, @Nonnull BlockPos pos) {
         return getTileEntity(clazz, world, chunkMap, pos, false);
     }
 
     @Nullable
     @Contract("_, null, _, _, _ -> null")
-    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos,
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable WorldAccess world, @Nonnull Long2ObjectMap<Chunk> chunkMap, @Nonnull BlockPos pos,
           boolean logWrongType) {
         //Get the tile entity using the chunk we found/had cached
         return getTileEntity(clazz, getChunkForTile(world, chunkMap, pos), pos, logWrongType);
@@ -896,7 +937,7 @@ public final class MekanismUtils {
 
     @Nullable
     @Contract("null, _, _ -> null")
-    private static IChunk getChunkForTile(@Nullable IWorld world, @Nonnull Long2ObjectMap<IChunk> chunkMap, @Nonnull BlockPos pos) {
+    private static Chunk getChunkForTile(@Nullable WorldAccess world, @Nonnull Long2ObjectMap<Chunk> chunkMap, @Nonnull BlockPos pos) {
         if (world == null) {
             //Allow the world to be nullable to remove warnings when we are calling things from a place that world could be null
             return null;
@@ -906,7 +947,7 @@ public final class MekanismUtils {
         long combinedChunk = (((long) chunkX) << 32) | (chunkZ & 0xFFFFFFFFL);
         //We get the chunk rather than the world so we can cache the chunk improving the overall
         // performance for retrieving a bunch of chunks in the general vicinity
-        IChunk chunk = chunkMap.get(combinedChunk);
+        Chunk chunk = chunkMap.get(combinedChunk);
         if (chunk == null) {
             //Get the chunk but don't force load it
             chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
@@ -946,13 +987,13 @@ public final class MekanismUtils {
      */
     @Nullable
     @Contract("_, null, _ -> null")
-    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IBlockReader world, @Nonnull BlockPos pos) {
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable BlockView world, @Nonnull BlockPos pos) {
         return getTileEntity(clazz, world, pos, false);
     }
 
     @Nullable
     @Contract("_, null, _, _ -> null")
-    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable IBlockReader world, @Nonnull BlockPos pos, boolean logWrongType) {
+    public static <T extends BlockEntity> T getTileEntity(@Nonnull Class<T> clazz, @Nullable BlockView world, @Nonnull BlockPos pos, boolean logWrongType) {
         BlockEntity tile = getTileEntity(world, pos);
         if (tile == null) {
             return null;
@@ -978,9 +1019,9 @@ public final class MekanismUtils {
         if (world == null) {
             return false;
         } else if (world instanceof World) {
-            return ((World) world).isBlockPresent(pos);
+            return ((World) world).canSetBlock(pos);
         } else if (world instanceof WorldView) {
-            return ((WorldView) world).isBlockLoaded(pos);
+            return ((WorldView) world).isChunkLoaded(pos);
         }
         return true;
     }
@@ -993,20 +1034,23 @@ public final class MekanismUtils {
     }
 
     public static void dismantleBlock(BlockState state, World world, BlockPos pos, BlockEntity tile) {
-        Block.spawnDrops(state, world, pos, tile);
+        Block.dropStacks(state, world, pos, tile);
         world.removeBlock(pos, false);
     }
 
     /**
      * Copy of LivingEntity#onChangedPotionEffect(EffectInstance, boolean) due to not being able to AT the field.
      */
-    public static void onChangedPotionEffect(LivingEntity entity, EffectInstance id, boolean reapply) {
-        entity.potionsNeedUpdate = true;
-        if (reapply && !entity.world.isRemote) {
-            Effect effect = id.getPotion();
-            effect.removeAttributesModifiersFromEntity(entity, entity.getAttributeManager(), id.getAmplifier());
-            effect.applyAttributesModifiersToEntity(entity, entity.getAttributeManager(), id.getAmplifier());
-        }
+    public static void onChangedPotionEffect(LivingEntity entity, StatusEffectInstance id, boolean reapply) {
+        // ToDo: Considering that we are using Fabric, we don't need things like this
+        //entity.potionsNeedUpdate = true;
+        //if (reapply && !entity.world.isRemote) {
+        //    Effect effect = id.getPotion();
+        //    effect.removeAttributesModifiersFromEntity(entity, entity.getAttributeManager(), id.getAmplifier());
+        //    effect.applyAttributesModifiersToEntity(entity, entity.getAttributeManager(), id.getAmplifier());
+        //}
+
+        ((LivingEntityAccessor) entity).onStatusEffectUpgraded(id, reapply);
     }
 
     /**
@@ -1015,25 +1059,25 @@ public final class MekanismUtils {
      * @implNote Only returns that we failed if all the tested actions failed.
      */
     @SafeVarargs
-    public static ActionResultType performActions(ActionResultType firstAction, Supplier<ActionResultType>... secondaryActions) {
-        if (firstAction == ActionResultType.SUCCESS) {
-            return ActionResultType.SUCCESS;
+    public static ActionResult performActions(ActionResult firstAction, Supplier<ActionResult>... secondaryActions) {
+        if (firstAction == ActionResult.SUCCESS) {
+            return ActionResult.SUCCESS;
         }
-        ActionResultType result = firstAction;
-        boolean hasFailed = result == ActionResultType.FAIL;
-        for (Supplier<ActionResultType> secondaryAction : secondaryActions) {
+        ActionResult result = firstAction;
+        boolean hasFailed = result == ActionResult.FAIL;
+        for (Supplier<ActionResult> secondaryAction : secondaryActions) {
             result = secondaryAction.get();
-            if (result == ActionResultType.SUCCESS) {
+            if (result == ActionResult.SUCCESS) {
                 //If we were successful
-                return ActionResultType.SUCCESS;
+                return ActionResult.SUCCESS;
             }
-            hasFailed &= result == ActionResultType.FAIL;
+            hasFailed &= result == ActionResult.FAIL;
         }
         if (hasFailed) {
             //If at least one step failed, consider ourselves unsuccessful
-            return ActionResultType.FAIL;
+            return ActionResult.FAIL;
         }
-        return ActionResultType.PASS;
+        return ActionResult.PASS;
     }
 
     /**
@@ -1063,8 +1107,8 @@ public final class MekanismUtils {
     }
 
     /**
-     * Calculates the redstone level based on the percentage of amount stored. Like {@link net.minecraftforge.items.ItemHandlerHelper#calcRedstoneFromInventory(IItemHandler)}
-     * except without limiting slots to the max stack size of the item to allow for better support for bins
+     * Calculates the redstone level based on the percentage of amount stored without limiting slots
+     * to the max stack size of the item to allow for better support for bins
      *
      * @return A redstone level based on the percentage of the amount stored.
      */

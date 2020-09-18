@@ -11,10 +11,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import mekanism._helpers.EntityHasPickableItem;
 import mekanism.api.Action;
 import mekanism.api.Coord4D;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
@@ -58,36 +61,35 @@ import mekanism.common.tile.TileEntityChargepad;
 import mekanism.common.tile.interfaces.ISustainedInventory;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
-import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.ai.goal.LookAroundGoal;
+import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.common.util.ITeleporter;
@@ -96,13 +98,13 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 //TODO: When Galacticraft gets ported make it so the robit can "breath" without a mask
-public class EntityRobit extends CreatureEntity implements IMekanismInventory, ISustainedInventory, ICachedRecipeHolder<ItemStackToItemStackRecipe>,
-      IMekanismStrictEnergyHandler {
+public class EntityRobit extends PathAwareEntity implements IMekanismInventory, ISustainedInventory, ICachedRecipeHolder<ItemStackToItemStackRecipe>,
+      IMekanismStrictEnergyHandler, EntityHasPickableItem {
 
-    private static final DataParameter<String> OWNER_UUID = EntityDataManager.createKey(EntityRobit.class, DataSerializers.STRING);
-    private static final DataParameter<String> OWNER_NAME = EntityDataManager.createKey(EntityRobit.class, DataSerializers.STRING);
-    private static final DataParameter<Boolean> FOLLOW = EntityDataManager.createKey(EntityRobit.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> DROP_PICKUP = EntityDataManager.createKey(EntityRobit.class, DataSerializers.BOOLEAN);
+    private static final TrackedData<String> OWNER_UUID = DataTracker.registerData(EntityRobit.class, TrackedDataHandlerRegistry.STRING);
+    private static final TrackedData<String> OWNER_NAME = DataTracker.registerData(EntityRobit.class, TrackedDataHandlerRegistry.STRING);
+    private static final TrackedData<Boolean> FOLLOW = DataTracker.registerData(EntityRobit.class, TrackedDataHandlerRegistry.BOOLEAN);
+    private static final TrackedData<Boolean> DROP_PICKUP = DataTracker.registerData(EntityRobit.class, TrackedDataHandlerRegistry.BOOLEAN);
     public static final FloatingLong MAX_ENERGY = FloatingLong.createConst(100_000);
     private static final FloatingLong DISTANCE_MULTIPLIER = FloatingLong.createConst(1.5);
     public Coord4D homeLocation;
@@ -133,7 +135,7 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
 
     public EntityRobit(EntityType<EntityRobit> type, World world) {
         super(type, world);
-        getNavigator().setCanSwim(false);
+        getNavigation().setCanSwim(false);
         setCustomNameVisible(true);
         energyContainers = Collections.singletonList(energyContainer = BasicEnergyContainer.input(MAX_ENERGY, this));
 
@@ -161,55 +163,55 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
 
     public EntityRobit(World world, double x, double y, double z) {
         this(MekanismEntityTypes.ROBIT.getEntityType(), world);
-        setPosition(x, y, z);
-        prevPosX = x;
-        prevPosY = y;
-        prevPosZ = z;
+        setPos(x, y, z);
+        prevX = x;
+        prevY = y;
+        prevZ = z;
     }
 
     @Override
-    protected void registerGoals() {
-        super.registerGoals();
-        goalSelector.addGoal(1, new RobitAIPickup(this, 1));
-        goalSelector.addGoal(2, new RobitAIFollow(this, 1, 4, 2));
-        goalSelector.addGoal(3, new LookAtGoal(this, PlayerEntity.class, 8));
-        goalSelector.addGoal(3, new LookRandomlyGoal(this));
-        goalSelector.addGoal(4, new SwimGoal(this));
+    protected void initGoals() {
+        super.initGoals();
+        goalSelector.add(1, new RobitAIPickup(this, 1));
+        goalSelector.add(2, new RobitAIFollow(this, 1, 4, 2));
+        goalSelector.add(3, new LookAtEntityGoal(this, PlayerEntity.class, 8));
+        goalSelector.add(3, new LookAroundGoal(this));
+        goalSelector.add(4, new SwimGoal(this));
     }
 
-    public static AttributeModifierMap.MutableAttribute getDefaultAttributes() {
-        return MobEntity.func_233666_p_().createMutableAttribute(Attributes.MAX_HEALTH, 1.0D).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.3F);
+    public static DefaultAttributeContainer.Builder getDefaultAttributes() {
+        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 1.0D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3F);
     }
 
     @Override
-    public boolean canDespawn(double distanceToClosestPlayer) {
+    public boolean canImmediatelyDespawn(double distanceSquared) {
         return false;
     }
 
     @Override
-    protected void registerData() {
-        super.registerData();
-        dataManager.register(OWNER_UUID, "");
-        dataManager.register(OWNER_NAME, "");
-        dataManager.register(FOLLOW, false);
-        dataManager.register(DROP_PICKUP, false);
+    protected void initDataTracker() {
+        super.initDataTracker();
+        dataTracker.startTracking(OWNER_UUID, "");
+        dataTracker.startTracking(OWNER_NAME, "");
+        dataTracker.startTracking(FOLLOW, false);
+        dataTracker.startTracking(DROP_PICKUP, false);
     }
 
     private FloatingLong getRoundedTravelEnergy() {
-        return DISTANCE_MULTIPLIER.multiply(Math.sqrt(getDistanceSq(prevPosX, prevPosY, prevPosZ)));
+        return DISTANCE_MULTIPLIER.multiply(Math.sqrt(squaredDistanceTo(prevX, prevY, prevZ)));
     }
 
     @Override
     public void baseTick() {
-        if (!world.isRemote) {
-            if (getFollowing() && getOwner() != null && getDistanceSq(getOwner()) > 4 && !getNavigator().noPath() && !energyContainer.isEmpty()) {
+        if (!world.isClient) {
+            if (getFollowing() && getOwner() != null && squaredDistanceTo(getOwner()) > 4 && !getNavigation().isIdle() && !energyContainer.isEmpty()) {
                 energyContainer.extract(getRoundedTravelEnergy(), Action.EXECUTE, AutomationType.INTERNAL);
             }
         }
 
         super.baseTick();
 
-        if (!world.isRemote) {
+        if (!world.isClient) {
             if (getDropPickup()) {
                 collectItems();
             }
@@ -218,10 +220,11 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
                 return;
             }
 
-            if (ticksExisted % 20 == 0) {
-                World serverWorld = ServerLifecycleHooks.getCurrentServer().getWorld(homeLocation.dimension);
+            if (age % 20 == 0) {
+                // ToDo: Is this the best way to do this in Fabric?
+                World serverWorld = world.getServer().getWorld(homeLocation.dimension); /*ServerLifecycleHooks.getCurrentServer().getWorld(homeLocation.dimension)*/;
                 BlockPos homePos = homeLocation.getPos();
-                if (serverWorld.isBlockPresent(homePos)) {
+                if (serverWorld.canSetBlock(homePos)) {
                     if (MekanismUtils.getTileEntity(TileEntityChargepad.class, serverWorld, homePos) == null) {
                         drop();
                         remove();
@@ -242,32 +245,32 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     private void collectItems() {
-        List<ItemEntity> items = world.getEntitiesWithinAABB(ItemEntity.class, getBoundingBox().grow(1.5, 1.5, 1.5));
+        List<ItemEntity> items = world.getEntitiesWithinAABB(ItemEntity.class, getBoundingBox().expand(1.5, 1.5, 1.5));
         if (!items.isEmpty()) {
             for (ItemEntity item : items) {
-                if (item.cannotPickup() || item.getItem().getItem() instanceof ItemRobit || !item.isAlive()) {
+                if (item.cannotPickup() || item.getStack().getItem() instanceof ItemRobit || !item.isAlive()) {
                     continue;
                 }
                 for (IInventorySlot slot : inventoryContainerSlots) {
                     if (slot.isEmpty()) {
-                        slot.setStack(item.getItem());
-                        onItemPickup(item, item.getItem().getCount());
+                        slot.setStack(item.getStack());
+                        sendPickup(item, item.getStack().getCount());
                         item.remove();
-                        playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                        playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1, ((random.nextFloat() - random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                         break;
                     }
                     ItemStack itemStack = slot.getStack();
                     int maxSize = slot.getLimit(itemStack);
-                    if (ItemHandlerHelper.canItemStacksStack(itemStack, item.getItem()) && itemStack.getCount() < maxSize) {
+                    if (ItemHandlerHelper.canItemStacksStack(itemStack, item.getStack()) && itemStack.getCount() < maxSize) {
                         int needed = maxSize - itemStack.getCount();
-                        int toAdd = Math.min(needed, item.getItem().getCount());
+                        int toAdd = Math.min(needed, item.getStack().getCount());
                         MekanismUtils.logMismatchedStackSize(slot.growStack(toAdd, Action.EXECUTE), toAdd);
-                        item.getItem().shrink(toAdd);
-                        onItemPickup(item, toAdd);
-                        if (item.getItem().isEmpty()) {
+                        item.getStack().decrement(toAdd);
+                        sendPickup(item, toAdd);
+                        if (item.getStack().isEmpty()) {
                             item.remove();
                         }
-                        playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                        playSound(SoundEvents.ENTITY_ITEM_PICKUP, 1, ((random.nextFloat() - random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                         break;
                     }
                 }
@@ -276,11 +279,11 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     public void goHome() {
-        if (world.isRemote()) {
+        if (world.isClient()) {
             return;
         }
         setFollowing(false);
-        if (world.func_234923_W_() == homeLocation.dimension) {
+        if (world.getRegistryKey() == homeLocation.dimension) {
             setPositionAndUpdate(homeLocation.getX() + 0.5, homeLocation.getY() + 0.3, homeLocation.getZ() + 0.5);
         } else {
             ServerWorld newWorld = ((ServerWorld) world).getServer().getWorld(homeLocation.dimension);
@@ -295,34 +298,34 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
                 });
             }
         }
-        setMotion(0, 0, 0);
+        setVelocity(0, 0, 0);
     }
 
     private boolean isOnChargepad() {
-        return MekanismUtils.getTileEntity(TileEntityChargepad.class, world, getPosition()) != null;
+        return MekanismUtils.getTileEntity(TileEntityChargepad.class, world, getBlockPos()) != null;
     }
 
     @Nonnull
     @Override
-    public ActionResultType applyPlayerInteraction(PlayerEntity player, @Nonnull Vector3d vec, @Nonnull Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
+    public ActionResult interactAt(PlayerEntity player, @Nonnull Vec3d vec, @Nonnull Hand hand) {
+        ItemStack stack = player.getStackInHand(hand);
         if (player.isSneaking()) {
             if (!stack.isEmpty() && stack.getItem() instanceof ItemConfigurator) {
-                if (!world.isRemote) {
+                if (!world.isClient) {
                     drop();
                 }
                 remove();
-                player.swingArm(hand);
-                return ActionResultType.SUCCESS;
+                player.swingHand(hand);
+                return ActionResult.SUCCESS;
             }
         } else {
-            if (!world.isRemote) {
+            if (!world.isClient) {
                 NetworkHooks.openGui((ServerPlayerEntity) player, new ContainerProvider(MekanismLang.ROBIT, (i, inv, p) -> new MainRobitContainer(i, inv, this)),
                       buf -> buf.writeVarInt(getEntityId()));
             }
-            return ActionResultType.SUCCESS;
+            return ActionResult.SUCCESS;
         }
-        return ActionResultType.PASS;
+        return ActionResult.PASS;
     }
 
     private ItemStack getItemVariant() {
@@ -342,9 +345,9 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
 
     public void drop() {
         //TODO: Move this to loot table?
-        ItemEntity entityItem = new ItemEntity(world, getPosX(), getPosY() + 0.3, getPosZ(), getItemVariant());
-        entityItem.setMotion(0, rand.nextGaussian() * 0.05F + 0.2F, 0);
-        world.addEntity(entityItem);
+        ItemEntity entityItem = new ItemEntity(world, getX(), getY() + 0.3, getZ(), getItemVariant());
+        entityItem.setVelocity(0, random.nextGaussian() * 0.05F + 0.2F, 0);
+        world.spawnEntity(entityItem);
     }
 
     public double getScaledProgress() {
@@ -361,10 +364,10 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     @Override
-    public void writeAdditional(@Nonnull CompoundNBT nbtTags) {
-        super.writeAdditional(nbtTags);
+    public void writeCustomDataToTag(@Nonnull CompoundTag nbtTags) {
+        super.writeCustomDataToTag(nbtTags);
         if (getOwnerUUID() != null) {
-            nbtTags.putUniqueId(NBTConstants.OWNER_UUID, getOwnerUUID());
+            nbtTags.putUuid(NBTConstants.OWNER_UUID, getOwnerUUID());
         }
         nbtTags.putBoolean(NBTConstants.FOLLOW, getFollowing());
         nbtTags.putBoolean(NBTConstants.PICKUP_DROPS, getDropPickup());
@@ -377,14 +380,14 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     @Override
-    public void readAdditional(@Nonnull CompoundNBT nbtTags) {
-        super.readAdditional(nbtTags);
+    public void readCustomDataFromTag(@Nonnull CompoundTag nbtTags) {
+        super.readCustomDataFromTag(nbtTags);
         NBTUtils.setUUIDIfPresent(nbtTags, NBTConstants.OWNER_UUID, this::setOwnerUUID);
         setFollowing(nbtTags.getBoolean(NBTConstants.FOLLOW));
         setDropPickup(nbtTags.getBoolean(NBTConstants.PICKUP_DROPS));
         homeLocation = Coord4D.read(nbtTags);
-        DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, NBT.TAG_COMPOUND));
-        DataHandlerUtils.readContainers(getEnergyContainers(null), nbtTags.getList(NBTConstants.ENERGY_CONTAINERS, NBT.TAG_COMPOUND));
+        DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, NBTFlags.COMPOUND));
+        DataHandlerUtils.readContainers(getEnergyContainers(null), nbtTags.getList(NBTConstants.ENERGY_CONTAINERS, NBTFlags.COMPOUND));
         progress = nbtTags.getInt(NBTConstants.PROGRESS);
     }
 
@@ -394,21 +397,21 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     @Override
-    protected void damageEntity(@Nonnull DamageSource damageSource, float amount) {
+    protected void applyDamage(@Nonnull DamageSource damageSource, float amount) {
         amount = ForgeHooks.onLivingHurt(this, damageSource, amount);
         if (amount <= 0) {
             return;
         }
-        amount = applyArmorCalculations(damageSource, amount);
-        amount = applyPotionDamageCalculations(damageSource, amount);
+        amount = applyArmorToDamage(damageSource, amount);
+        amount = applyEnchantmentsToDamage(damageSource, amount);
         float j = getHealth();
 
         energyContainer.extract(FloatingLong.create(1_000 * amount), Action.EXECUTE, AutomationType.INTERNAL);
-        getCombatTracker().trackDamage(damageSource, j, amount);
+        getDamageTracker().onDamage(damageSource, j, amount);
     }
 
     @Override
-    protected void onDeathUpdate() {
+    protected void updatePostDeath() {
     }
 
     public void setHome(Coord4D home) {
@@ -416,7 +419,7 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     @Override
-    public boolean canBePushed() {
+    public boolean isPushable() {
         return !energyContainer.isEmpty();
     }
 
@@ -425,43 +428,43 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     public String getOwnerName() {
-        return dataManager.get(OWNER_NAME);
+        return dataTracker.get(OWNER_NAME);
     }
 
     public UUID getOwnerUUID() {
-        return UUID.fromString(dataManager.get(OWNER_UUID));
+        return UUID.fromString(dataTracker.get(OWNER_UUID));
     }
 
     public void setOwnerUUID(UUID uuid) {
-        dataManager.set(OWNER_UUID, uuid.toString());
-        dataManager.set(OWNER_NAME, MekanismUtils.getLastKnownUsername(uuid));
+        dataTracker.set(OWNER_UUID, uuid.toString());
+        dataTracker.set(OWNER_NAME, MekanismUtils.getLastKnownUsername(uuid));
     }
 
     public boolean getFollowing() {
-        return dataManager.get(FOLLOW);
+        return dataTracker.get(FOLLOW);
     }
 
     public void setFollowing(boolean follow) {
-        dataManager.set(FOLLOW, follow);
+        dataTracker.set(FOLLOW, follow);
     }
 
     public boolean getDropPickup() {
-        return dataManager.get(DROP_PICKUP);
+        return dataTracker.get(DROP_PICKUP);
     }
 
     public void setDropPickup(boolean pickup) {
-        dataManager.set(DROP_PICKUP, pickup);
+        dataTracker.set(DROP_PICKUP, pickup);
     }
 
     @Override
-    public void setInventory(ListNBT nbtTags, Object... data) {
+    public void setInventory(ListTag nbtTags, Object... data) {
         if (nbtTags != null && !nbtTags.isEmpty()) {
             DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags);
         }
     }
 
     @Override
-    public ListNBT getInventory(Object... data) {
+    public ListTag getInventory(Object... data) {
         return DataHandlerUtils.writeContainers(getInventorySlots(null));
     }
 
@@ -483,7 +486,7 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     @Nonnull
-    public List<IInventorySlot> getContainerInventorySlots(@Nonnull ContainerType<?> containerType) {
+    public List<IInventorySlot> getContainerInventorySlots(@Nonnull ScreenHandlerType<?> containerType) {
         if (!hasInventory()) {
             return Collections.emptyList();
         } else if (containerType == MekanismContainerTypes.INVENTORY_ROBIT.getContainerType()) {
@@ -533,7 +536,7 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
     }
 
     @Override
-    public ItemStack getPickedResult(RayTraceResult target) {
+    public ItemStack getPickedResult(HitResult target) {
         return getItemVariant();
     }
 
@@ -548,7 +551,7 @@ public class EntityRobit extends CreatureEntity implements IMekanismInventory, I
               .setOperatingTicksChanged(operatingTicks -> progress = operatingTicks);
     }
 
-    public void addContainerTrackers(@Nonnull ContainerType<?> containerType, MekanismContainer container) {
+    public void addContainerTrackers(@Nonnull ScreenHandlerType<?> containerType, MekanismContainer container) {
         if (containerType == MekanismContainerTypes.MAIN_ROBIT.getContainerType()) {
             container.track(SyncableFloatingLong.create(energyContainer::getEnergy, energyContainer::setEnergy));
         } else if (containerType == MekanismContainerTypes.SMELTING_ROBIT.getContainerType()) {

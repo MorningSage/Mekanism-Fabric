@@ -12,7 +12,7 @@ public final class NBTConstants {
     public static final String Y = "y";
     public static final String Z = "z";
 
-    //Server to Client specific sync NBT tags
+    //Server to Client specific sync NBTFlags tags
     public static final String ACTIVE = "active";
     public static final String CLIENT_NEXT = "clientNext";
     public static final String CLIENT_PREVIOUS = "clientPrevious";

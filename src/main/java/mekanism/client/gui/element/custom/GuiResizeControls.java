@@ -13,7 +13,7 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiResizeControls extends GuiSideHolder {
 
@@ -22,8 +22,8 @@ public class GuiResizeControls extends GuiSideHolder {
 
     private int tooltipTicks;
 
-    private static final ResourceLocation MINUS = MekanismUtils.getResource(ResourceType.GUI_BUTTON, "minus.png");
-    private static final ResourceLocation PLUS = MekanismUtils.getResource(ResourceType.GUI_BUTTON, "plus.png");
+    private static final Identifier MINUS = MekanismUtils.getResource(ResourceType.GUI_BUTTON, "minus.png");
+    private static final Identifier PLUS = MekanismUtils.getResource(ResourceType.GUI_BUTTON, "plus.png");
 
     public GuiResizeControls(IGuiWrapper gui, int y, Consumer<ResizeType> resizeHandler) {
         super(gui, -26, y, 39, true);
