@@ -38,8 +38,8 @@ import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.OwnerDisplay;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
-import net.minecraft.util.text.ITextComponent;
 
 public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContainer> {
 
@@ -56,11 +56,11 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
     private byte clientStatus;
     private boolean init = false;
 
-    public GuiPortableTeleporter(PortableTeleporterContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiPortableTeleporter(PortableTeleporterContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         currentHand = container.getHand();
         itemStack = container.getStack();
-        ySize = 175;
+        backgroundHeight = 175;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
         addButton(new GuiTeleporterStatus(this, () -> getFrequency() != null, () -> clientStatus));
         addButton(new GuiVerticalPowerBar(this, new IBarInfoHandler() {
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 IEnergyContainer container = StorageUtils.getEnergyContainer(itemStack, 0);
                 return container == null ? EnergyDisplay.ZERO.getTextComponent() : EnergyDisplay.of(container.getEnergy(), container.getMaxEnergy()).getTextComponent();
             }
@@ -105,7 +105,7 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
             int selection = scrollList.getSelection();
             if (selection != -1) {
                 TeleporterFrequency freq = privateMode ? getPrivateFrequencies().get(selection) : getPublicFrequencies().get(selection);
-                Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_ITEM, FrequencyType.TELEPORTER, freq.getIdentity(), container.getHand()));
+                Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_ITEM, FrequencyType.TELEPORTER, freq.getIdentity(), handler.getHand()));
                 scrollList.clearSelection();
             }
             updateButtons();
@@ -117,8 +117,8 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
               () -> sendColorUpdate(1)));
         addButton(teleportButton = new TranslationButton(this, getGuiLeft() + 42, getGuiTop() + 140, 92, 20, MekanismLang.BUTTON_TELEPORT, () -> {
             if (getFrequency() != null && clientStatus == 1) {
-                ClientTickHandler.portableTeleport(getMinecraft().player, currentHand, getFrequency());
-                getMinecraft().player.closeScreen();
+                ClientTickHandler.portableTeleport(client.player, currentHand, getFrequency());
+                client.player.closeScreen();
             }
             updateButtons();
         }));
@@ -136,7 +136,7 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
         clientStatus = status;
     }
 
-    public ITextComponent getSecurity(Frequency freq) {
+    public Text getSecurity(Frequency freq) {
         if (freq.isPrivate()) {
             return MekanismLang.PRIVATE.translateColored(EnumColor.DARK_RED);
         }
@@ -205,9 +205,9 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         drawTitleText(matrix, getName(), 4);
         drawString(matrix, OwnerDisplay.of(getOwnerUUID(), getOwnerUsername()).getTextComponent(), 8, !itemStack.isEmpty() ? getYSize() - 12 : (getYSize() - 96) + 4, titleTextColor());
-        ITextComponent frequencyComponent = MekanismLang.FREQUENCY.translate();
+        Text frequencyComponent = MekanismLang.FREQUENCY.translate();
         drawString(matrix, frequencyComponent, 32, 81, titleTextColor());
-        ITextComponent securityComponent = MekanismLang.SECURITY.translate("");
+        Text securityComponent = MekanismLang.SECURITY.translate("");
         drawString(matrix, securityComponent, 32, 91, titleTextColor());
         Frequency frequency = getFrequency();
         int frequencyOffset = getStringWidth(frequencyComponent) + 1;
@@ -215,7 +215,7 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
             drawString(matrix, MekanismLang.NONE.translateColored(EnumColor.DARK_RED), 32 + frequencyOffset, 81, subheadingTextColor());
             drawString(matrix, MekanismLang.NONE.translateColored(EnumColor.DARK_RED), 32 + getStringWidth(securityComponent), 91, subheadingTextColor());
         } else {
-            drawTextScaledBound(matrix, frequency.getName(), 32 + frequencyOffset, 81, subheadingTextColor(), xSize - 32 - frequencyOffset - 4);
+            drawTextScaledBound(matrix, frequency.getName(), 32 + frequencyOffset, 81, subheadingTextColor(), backgroundWidth - 32 - frequencyOffset - 4);
             drawString(matrix, getSecurity(frequency), 32 + getStringWidth(securityComponent), 91, subheadingTextColor());
         }
         drawTextScaledBound(matrix, MekanismLang.SET.translate(), 27, 104, titleTextColor(), 20);
@@ -223,40 +223,40 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
     }
 
     private UUID getOwnerUUID() {
-        return container.getOwnerUUID();
+        return handler.getOwnerUUID();
     }
 
     private String getOwnerUsername() {
-        return container.getOwnerUsername();
+        return handler.getOwnerUsername();
     }
 
     private void setFrequencyFromName(String name) {
         if (!name.isEmpty()) {
             Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_ITEM, FrequencyType.TELEPORTER,
-                  new FrequencyIdentity(name, !privateMode), container.getHand()));
+                  new FrequencyIdentity(name, !privateMode), handler.getHand()));
         }
     }
 
-    private ITextComponent getName() {
-        return itemStack.getDisplayName();
+    private Text getName() {
+        return itemStack.getName();
     }
 
     public TeleporterFrequency getFrequency() {
-        return container.getFrequency();
+        return handler.getFrequency();
     }
 
     private List<TeleporterFrequency> getPublicFrequencies() {
-        return container.getPublicCache();
+        return handler.getPublicCache();
     }
 
     private List<TeleporterFrequency> getPrivateFrequencies() {
-        return container.getPrivateCache();
+        return handler.getPrivateCache();
     }
 
     private void sendColorUpdate(int extra) {
         TeleporterFrequency freq = getFrequency();
         if (freq != null) {
-            Mekanism.packetHandler.sendToServer(PacketTeleporterSetColor.create(container.getHand(), freq, extra));
+            Mekanism.packetHandler.sendToServer(PacketTeleporterSetColor.create(handler.getHand(), freq, extra));
         }
     }
 }

@@ -6,9 +6,9 @@ import mekanism.client.render.lib.QuadTransformation.TextureFilteredTransformati
 import mekanism.client.render.lib.QuadUtils;
 import mekanism.common.Mekanism;
 import mekanism.common.base.HolidayManager;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
 import net.minecraftforge.client.event.TextureStitchEvent;
 
 public class DigitalMinerBakedModel extends ExtensionBakedModel<Void> {
@@ -19,9 +19,9 @@ public class DigitalMinerBakedModel extends ExtensionBakedModel<Void> {
     private final QuadTransformation MAY_4TH_TRANSFORM = TextureFilteredTransformation.of(QuadTransformation.texture(MAY_4TH),
           s -> s.getPath().contains("screen_hello"));
 
-    private static TextureAtlasSprite AFD_SAD, AFD_TEXT, MAY_4TH;
+    private static Sprite AFD_SAD, AFD_TEXT, MAY_4TH;
 
-    public DigitalMinerBakedModel(IBakedModel original) {
+    public DigitalMinerBakedModel(BakedModel original) {
         super(original);
     }
 
@@ -49,7 +49,7 @@ public class DigitalMinerBakedModel extends ExtensionBakedModel<Void> {
     }
 
     @Override
-    protected DigitalMinerBakedModel wrapModel(IBakedModel model) {
+    protected DigitalMinerBakedModel wrapModel(BakedModel model) {
         return new DigitalMinerBakedModel(model);
     }
 }

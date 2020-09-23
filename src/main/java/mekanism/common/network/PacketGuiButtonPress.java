@@ -28,13 +28,13 @@ import mekanism.common.tile.multiblock.TileEntityBoilerCasing;
 import mekanism.common.tile.multiblock.TileEntityInductionCasing;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
@@ -54,11 +54,11 @@ public class PacketGuiButtonPress {
     private int extra;
     private BlockPos tilePosition;
 
-    public PacketGuiButtonPress(ClickedTileButton buttonClicked, TileEntity tile) {
+    public PacketGuiButtonPress(ClickedTileButton buttonClicked, BlockEntity tile) {
         this(buttonClicked, tile.getPos());
     }
 
-    public PacketGuiButtonPress(ClickedTileButton buttonClicked, TileEntity tile, int extra) {
+    public PacketGuiButtonPress(ClickedTileButton buttonClicked, BlockEntity tile, int extra) {
         this(buttonClicked, tile.getPos(), extra);
     }
 
@@ -94,7 +94,7 @@ public class PacketGuiButtonPress {
             if (message.type == Type.ENTITY) {
                 Entity entity = player.world.getEntityByID(message.entityID);
                 if (entity != null) {
-                    INamedContainerProvider provider = message.entityButton.getProvider(entity);
+                    NamedScreenHandlerFactory provider = message.entityButton.getProvider(entity);
                     if (provider != null) {
                         //Ensure valid data
                         NetworkHooks.openGui((ServerPlayerEntity) player, provider, buf -> buf.writeVarInt(message.entityID));
@@ -103,7 +103,7 @@ public class PacketGuiButtonPress {
             } else if (message.type == Type.TILE) {
                 TileEntityMekanism tile = MekanismUtils.getTileEntity(TileEntityMekanism.class, player.world, message.tilePosition);
                 if (tile != null) {
-                    INamedContainerProvider provider = message.tileButton.getProvider(tile, message.extra);
+                    NamedScreenHandlerFactory provider = message.tileButton.getProvider(tile, message.extra);
                     if (provider != null) {
                         //Ensure valid data
                         NetworkHooks.openGui((ServerPlayerEntity) player, provider, buf -> {
@@ -113,9 +113,9 @@ public class PacketGuiButtonPress {
                     }
                 }
             } else if (message.type == Type.ITEM) {
-                ItemStack stack = player.getHeldItem(message.hand);
+                ItemStack stack = player.getStackInHand(message.hand);
                 if (stack.getItem() instanceof IGuiItem) {
-                    INamedContainerProvider provider = message.itemButton.getProvider(stack, message.hand);
+                    NamedScreenHandlerFactory provider = message.itemButton.getProvider(stack, message.hand);
                     if (provider != null) {
                         NetworkHooks.openGui((ServerPlayerEntity) player, provider, buf -> {
                             buf.writeEnumValue(message.hand);
@@ -128,30 +128,30 @@ public class PacketGuiButtonPress {
         context.get().setPacketHandled(true);
     }
 
-    public static void encode(PacketGuiButtonPress pkt, PacketBuffer buf) {
-        buf.writeEnumValue(pkt.type);
+    public static void encode(PacketGuiButtonPress pkt, PacketByteBuf buf) {
+        buf.writeEnumConstant(pkt.type);
         if (pkt.type == Type.ENTITY) {
-            buf.writeEnumValue(pkt.entityButton);
+            buf.writeEnumConstant(pkt.entityButton);
             buf.writeVarInt(pkt.entityID);
         } else if (pkt.type == Type.TILE) {
-            buf.writeEnumValue(pkt.tileButton);
+            buf.writeEnumConstant(pkt.tileButton);
             buf.writeBlockPos(pkt.tilePosition);
             buf.writeVarInt(pkt.extra);
         } else if (pkt.type == Type.ITEM) {
-            buf.writeEnumValue(pkt.itemButton);
-            buf.writeEnumValue(pkt.hand);
+            buf.writeEnumConstant(pkt.itemButton);
+            buf.writeEnumConstant(pkt.hand);
         }
     }
 
-    public static PacketGuiButtonPress decode(PacketBuffer buf) {
-        Type type = buf.readEnumValue(Type.class);
+    public static PacketGuiButtonPress decode(PacketByteBuf buf) {
+        Type type = buf.readEnumConstant(Type.class);
         switch (type) {
             case ENTITY:
-                return new PacketGuiButtonPress(buf.readEnumValue(ClickedEntityButton.class), buf.readVarInt());
+                return new PacketGuiButtonPress(buf.readEnumConstant(ClickedEntityButton.class), buf.readVarInt());
             case TILE:
-                return new PacketGuiButtonPress(buf.readEnumValue(ClickedTileButton.class), buf.readBlockPos(), buf.readVarInt());
+                return new PacketGuiButtonPress(buf.readEnumConstant(ClickedTileButton.class), buf.readBlockPos(), buf.readVarInt());
             case ITEM:
-                return new PacketGuiButtonPress(buf.readEnumValue(ClickedItemButton.class), buf.readEnumValue(Hand.class));
+                return new PacketGuiButtonPress(buf.readEnumConstant(ClickedItemButton.class), buf.readEnumConstant(Hand.class));
             default:
                 return null;
         }
@@ -166,13 +166,13 @@ public class PacketGuiButtonPress {
         }),
         QIO_FREQUENCY_SELECT((stack, hand) -> new ContainerProvider(MekanismLang.QIO_FREQUENCY_SELECT, (i, inv, player) -> new QIOFrequencySelectItemContainer(i, inv, hand, stack)));
 
-        private final BiFunction<ItemStack, Hand, INamedContainerProvider> providerFromItem;
+        private final BiFunction<ItemStack, Hand, NamedScreenHandlerFactory> providerFromItem;
 
-        ClickedItemButton(BiFunction<ItemStack, Hand, INamedContainerProvider> providerFromItem) {
+        ClickedItemButton(BiFunction<ItemStack, Hand, NamedScreenHandlerFactory> providerFromItem) {
             this.providerFromItem = providerFromItem;
         }
 
-        public INamedContainerProvider getProvider(ItemStack stack, Hand hand) {
+        public NamedScreenHandlerFactory getProvider(ItemStack stack, Hand hand) {
             return providerFromItem.apply(stack, hand);
         }
     }
@@ -212,13 +212,13 @@ public class PacketGuiButtonPress {
             return null;
         });
 
-        private final BiFunction<TileEntityMekanism, Integer, INamedContainerProvider> providerFromTile;
+        private final BiFunction<TileEntityMekanism, Integer, NamedScreenHandlerFactory> providerFromTile;
 
-        ClickedTileButton(BiFunction<TileEntityMekanism, Integer, INamedContainerProvider> providerFromTile) {
+        ClickedTileButton(BiFunction<TileEntityMekanism, Integer, NamedScreenHandlerFactory> providerFromTile) {
             this.providerFromTile = providerFromTile;
         }
 
-        public INamedContainerProvider getProvider(TileEntityMekanism tile, int extra) {
+        public NamedScreenHandlerFactory getProvider(TileEntityMekanism tile, int extra) {
             return providerFromTile.apply(tile, extra);
         }
     }
@@ -256,13 +256,13 @@ public class PacketGuiButtonPress {
             return null;
         });
 
-        private final Function<Entity, INamedContainerProvider> providerFromEntity;
+        private final Function<Entity, NamedScreenHandlerFactory> providerFromEntity;
 
-        ClickedEntityButton(Function<Entity, INamedContainerProvider> providerFromEntity) {
+        ClickedEntityButton(Function<Entity, NamedScreenHandlerFactory> providerFromEntity) {
             this.providerFromEntity = providerFromEntity;
         }
 
-        public INamedContainerProvider getProvider(Entity entity) {
+        public NamedScreenHandlerFactory getProvider(Entity entity) {
             return providerFromEntity.apply(entity);
         }
     }

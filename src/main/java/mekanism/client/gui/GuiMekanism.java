@@ -431,4 +431,9 @@ public abstract class GuiMekanism<CONTAINER extends ScreenHandler> extends Handl
     public LRU<GuiWindow>.LRUIterator getWindowsDescendingIterator() {
         return windows.descendingIterator();
     }
+
+    public int getGuiLeft() { return x; }
+    public int getGuiTop() { return y; }
+    public int getXSize() { return backgroundWidth; }
+    public int getYSize() { return backgroundHeight; }
 }

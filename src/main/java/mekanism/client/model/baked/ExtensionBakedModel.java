@@ -3,6 +3,13 @@ package mekanism.client.model.baked;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import mekanism._helpers.IModelData;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -17,20 +24,13 @@ import javax.annotation.Nullable;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.model.data.IModelData;
 
-public class ExtensionBakedModel<T> implements IBakedModel {
+public class ExtensionBakedModel<T> implements BakedModel {
 
-    protected final IBakedModel original;
+    protected final BakedModel original;
 
     private final LoadingCache<QuadsKey<T>, List<BakedQuad>> cache = CacheBuilder.newBuilder().build(new CacheLoader<QuadsKey<T>, List<BakedQuad>>() {
         @Override
@@ -38,9 +38,9 @@ public class ExtensionBakedModel<T> implements IBakedModel {
             return createQuads(key);
         }
     });
-    private final Map<List<Pair<IBakedModel, RenderType>>, List<Pair<IBakedModel, RenderType>>> cachedLayerRedirects = new Object2ObjectOpenHashMap<>();
+    private final Map<List<Pair<BakedModel, RenderLayer>>, List<Pair<BakedModel, RenderLayer>>> cachedLayerRedirects = new Object2ObjectOpenHashMap<>();
 
-    public ExtensionBakedModel(IBakedModel original) {
+    public ExtensionBakedModel(BakedModel original) {
         this.original = original;
     }
 
@@ -52,48 +52,43 @@ public class ExtensionBakedModel<T> implements IBakedModel {
     }
 
     @Override
-    public boolean isAmbientOcclusion() {
-        return original.isAmbientOcclusion();
+    public boolean useAmbientOcclusion() {
+        return original.useAmbientOcclusion();
     }
 
     @Override
-    public boolean isGui3d() {
-        return original.isGui3d();
+    public boolean hasDepth() {
+        return original.hasDepth();
     }
 
     @Override
-    public boolean func_230044_c_() {
-        return original.func_230044_c_();
+    public boolean isSideLit() {
+        return original.isSideLit();
     }
 
     @Override
-    public boolean isBuiltInRenderer() {
-        return original.isBuiltInRenderer();
+    public boolean isBuiltin() {
+        return original.isBuiltin();
     }
 
-    @Nonnull
-    @Override
-    @Deprecated
-    public TextureAtlasSprite getParticleTexture() {
-        return original.getParticleTexture();
+    public Sprite getSprite() {
+        return original.getSprite();
     }
 
     @Nonnull
     @Override
-    public ItemOverrideList getOverrides() {
+    public ModelOverrideList getOverrides() {
         return original.getOverrides();
     }
 
     @Override
-    public IBakedModel handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, MatrixStack mat) {
+    public BakedModel handlePerspective(ModelTransformation.Mode cameraTransformType, MatrixStack mat) {
         return original.handlePerspective(cameraTransformType, mat);
     }
 
-    @Nonnull
     @Override
-    @Deprecated
-    public ItemCameraTransforms getItemCameraTransforms() {
-        return original.getItemCameraTransforms();
+    public ModelTransformation getTransformation() {
+        return original.getTransformation();
     }
 
     @Override
@@ -124,6 +119,8 @@ public class ExtensionBakedModel<T> implements IBakedModel {
         return cache.getUnchecked(key);
     }
 
+
+
     @Override
     public boolean isLayered() {
         return original.isLayered();
@@ -131,29 +128,29 @@ public class ExtensionBakedModel<T> implements IBakedModel {
 
     @Nonnull
     @Override
-    public List<Pair<IBakedModel, RenderType>> getLayerModels(ItemStack stack, boolean fabulous) {
+    public List<Pair<BakedModel, RenderLayer>> getLayerModels(ItemStack stack, boolean fabulous) {
         //Cache the remappings so then the inner wrapped ones can cache their quads
         return cachedLayerRedirects.computeIfAbsent(original.getLayerModels(stack, fabulous), originalLayerModels -> {
-            List<Pair<IBakedModel, RenderType>> layerModels = new ArrayList<>();
-            for (Pair<IBakedModel, RenderType> layerModel : originalLayerModels) {
+            List<Pair<BakedModel, RenderLayer>> layerModels = new ArrayList<>();
+            for (Pair<BakedModel, RenderLayer> layerModel : originalLayerModels) {
                 layerModels.add(Pair.of(wrapModel(layerModel.getFirst()), layerModel.getSecond()));
             }
             return layerModels;
         });
     }
 
-    protected ExtensionBakedModel<T> wrapModel(IBakedModel model) {
+    protected ExtensionBakedModel<T> wrapModel(BakedModel model) {
         return new ExtensionBakedModel<>(model);
     }
 
     public static class LightedBakedModel extends TransformedBakedModel<Void> {
 
-        public LightedBakedModel(IBakedModel original) {
+        public LightedBakedModel(BakedModel original) {
             super(original, QuadTransformation.filtered_fullbright);
         }
 
         @Override
-        protected LightedBakedModel wrapModel(IBakedModel model) {
+        protected LightedBakedModel wrapModel(BakedModel model) {
             return new LightedBakedModel(model);
         }
     }
@@ -162,7 +159,7 @@ public class ExtensionBakedModel<T> implements IBakedModel {
 
         private final QuadTransformation transform;
 
-        public TransformedBakedModel(IBakedModel original, QuadTransformation transform) {
+        public TransformedBakedModel(BakedModel original, QuadTransformation transform) {
             super(original);
             this.transform = transform;
         }
@@ -175,7 +172,7 @@ public class ExtensionBakedModel<T> implements IBakedModel {
         }
 
         @Override
-        public IBakedModel handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, MatrixStack mat) {
+        public BakedModel handlePerspective(ModelTransformation.Mode cameraTransformType, MatrixStack mat) {
             // have the original model apply any perspective transforms onto the MatrixStack
             original.handlePerspective(cameraTransformType, mat);
             // return this model, as we want to draw the item variant quads ourselves
@@ -188,7 +185,7 @@ public class ExtensionBakedModel<T> implements IBakedModel {
         }
 
         @Override
-        protected TransformedBakedModel<T> wrapModel(IBakedModel model) {
+        protected TransformedBakedModel<T> wrapModel(BakedModel model) {
             return new TransformedBakedModel<>(model, transform);
         }
     }
@@ -198,7 +195,7 @@ public class ExtensionBakedModel<T> implements IBakedModel {
         private final BlockState state;
         private final Direction side;
         private final Random random;
-        private final RenderType layer;
+        private final RenderLayer layer;
         private final List<BakedQuad> quads;
         private QuadTransformation transformation;
 
@@ -206,7 +203,7 @@ public class ExtensionBakedModel<T> implements IBakedModel {
         private int dataHash;
         private BiPredicate<T, T> equality;
 
-        public QuadsKey(BlockState state, Direction side, Random random, RenderType layer, List<BakedQuad> quads) {
+        public QuadsKey(BlockState state, Direction side, Random random, RenderLayer layer, List<BakedQuad> quads) {
             this.state = state;
             this.side = side;
             this.random = random;
@@ -238,7 +235,7 @@ public class ExtensionBakedModel<T> implements IBakedModel {
             return random;
         }
 
-        public RenderType getLayer() {
+        public RenderLayer getLayer() {
             return layer;
         }
 

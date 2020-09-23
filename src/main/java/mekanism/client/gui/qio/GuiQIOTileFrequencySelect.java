@@ -14,15 +14,15 @@ import mekanism.common.network.PacketGuiButtonPress.ClickedTileButton;
 import mekanism.common.network.PacketGuiSetFrequency;
 import mekanism.common.network.PacketGuiSetFrequency.FrequencyUpdate;
 import mekanism.common.network.PacketQIOSetColor;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiQIOTileFrequencySelect extends GuiQIOFrequencySelect<QIOFrequencySelectTileContainer> {
 
     private final IQIOFrequencyHolder tile;
 
-    public GuiQIOTileFrequencySelect(QIOFrequencySelectTileContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiQIOTileFrequencySelect(QIOFrequencySelectTileContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
         tile = (IQIOFrequencyHolder) container.getTileEntity();
@@ -32,7 +32,7 @@ public class GuiQIOTileFrequencySelect extends GuiQIOFrequencySelect<QIOFrequenc
     public void init() {
         super.init();
         addButton(new MekanismImageButton(this, getGuiLeft() + 6, getGuiTop() + 6, 14, getButtonLocation("back"),
-              () -> Mekanism.packetHandler.sendToServer(new PacketGuiButtonPress(ClickedTileButton.BACK_BUTTON, (TileEntity) tile))));
+              () -> Mekanism.packetHandler.sendToServer(new PacketGuiButtonPress(ClickedTileButton.BACK_BUTTON, (BlockEntity) tile))));
     }
 
     @Override

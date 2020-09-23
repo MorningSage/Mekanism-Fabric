@@ -6,7 +6,7 @@ import mekanism.api.text.IHasTextComponent;
 import mekanism.client.MekanismClient;
 import mekanism.common.MekanismLang;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class OwnerDisplay implements IHasTextComponent {
 
@@ -37,7 +37,7 @@ public class OwnerDisplay implements IHasTextComponent {
     }
 
     @Override
-    public ITextComponent getTextComponent() {
+    public Text getTextComponent() {
         if (ownerUUID == null) {
             return MekanismLang.NO_OWNER.translateColored(EnumColor.RED);
         }
@@ -47,6 +47,6 @@ public class OwnerDisplay implements IHasTextComponent {
         if (player == null) {
             return MekanismLang.OWNER.translateColored(EnumColor.DARK_GRAY, name);
         }
-        return MekanismLang.OWNER.translateColored(EnumColor.DARK_GRAY, player.getUniqueID().equals(ownerUUID) ? EnumColor.BRIGHT_GREEN : EnumColor.RED, name);
+        return MekanismLang.OWNER.translateColored(EnumColor.DARK_GRAY, player.getUuid().equals(ownerUUID) ? EnumColor.BRIGHT_GREEN : EnumColor.RED, name);
     }
 }

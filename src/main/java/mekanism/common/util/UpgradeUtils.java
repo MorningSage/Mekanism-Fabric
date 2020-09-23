@@ -8,10 +8,9 @@ import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.tile.interfaces.IUpgradeTile;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.ITextComponent;
 
 public class UpgradeUtils {
 
@@ -33,8 +32,8 @@ public class UpgradeUtils {
         return ItemStack.EMPTY;
     }
 
-    public static List<ITextComponent> getInfo(TileEntity tile, Upgrade upgrade) {
-        List<ITextComponent> ret = new ArrayList<>();
+    public static List<Text> getInfo(BlockEntity tile, Upgrade upgrade) {
+        List<Text> ret = new ArrayList<>();
         if (tile instanceof IUpgradeTile) {
             if (tile instanceof IUpgradeInfoHandler) {
                 return ((IUpgradeInfoHandler) tile).getInfo(upgrade);

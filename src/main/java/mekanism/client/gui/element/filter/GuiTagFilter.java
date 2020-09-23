@@ -8,7 +8,7 @@ import mekanism.common.content.filter.ITagFilter;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -22,8 +22,8 @@ public abstract class GuiTagFilter<FILTER extends ITagFilter<FILTER>, TILE exten
     }
 
     @Override
-    protected List<ITextComponent> getScreenText() {
-        List<ITextComponent> list = super.getScreenText();
+    protected List<Text> getScreenText() {
+        List<Text> list = super.getScreenText();
         list.add(MekanismLang.TAG_FILTER_TAG.translate(filter.getTagName()));
         return list;
     }

@@ -7,11 +7,11 @@ import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiScalableElement;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public abstract class GuiScrollList extends GuiScrollableElement {
 
-    protected static final ResourceLocation SCROLL_LIST = MekanismUtils.getResource(ResourceType.GUI, "scroll_list.png");
+    protected static final Identifier SCROLL_LIST = MekanismUtils.getResource(ResourceType.GUI, "scroll_list.png");
     protected static final int TEXTURE_WIDTH = 6;
     protected static final int TEXTURE_HEIGHT = 6;
 
@@ -43,16 +43,16 @@ public abstract class GuiScrollList extends GuiScrollableElement {
         //Draw the background
         background.render(matrix, mouseX, mouseY, partialTicks);
         background.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        GuiElement.minecraft.textureManager.bindTexture(getResource());
+        GuiElement.minecraft.getTextureManager().bindTexture(getResource());
         //Draw Scroll
         //Top border
-        blit(matrix, barX - 1, barY - 1, 0, 0, TEXTURE_WIDTH, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, barX - 1, barY - 1, 0, 0, TEXTURE_WIDTH, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         //Middle border
-        blit(matrix, barX - 1, barY, 6, maxBarHeight, 0, 1, TEXTURE_WIDTH, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, barX - 1, barY, 6, maxBarHeight, 0, 1, TEXTURE_WIDTH, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         //Bottom border
-        blit(matrix, barX - 1, y + maxBarHeight + 2, 0, 0, TEXTURE_WIDTH, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, barX - 1, y + maxBarHeight + 2, 0, 0, TEXTURE_WIDTH, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         //Scroll bar
-        blit(matrix, barX, barY + getScroll(), 0, 2, barWidth, barHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, barX, barY + getScroll(), 0, 2, barWidth, barHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         //Draw the elements
         renderElements(matrix, mouseX, mouseY, partialTicks);
     }

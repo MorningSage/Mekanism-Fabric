@@ -15,6 +15,7 @@ import mekanism.common.registration.impl.ParticleTypeRegistryObject;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.tile.prefab.TileEntityAdvancedElectricMachine;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IHasContainer;
 import net.minecraft.client.gui.ScreenManager;
@@ -22,14 +23,14 @@ import net.minecraft.client.gui.ScreenManager.IScreenFactory;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.item.ModelPredicateProvider;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -51,15 +52,15 @@ public class ClientRegistrationUtil {
         RenderingRegistry.registerEntityRenderingHandler(entityTypeRO.getEntityType(), renderFactory);
     }
 
-    public static synchronized <T extends TileEntity> void bindTileEntityRenderer(TileEntityTypeRegistryObject<T> tileTypeRO,
-          Function<TileEntityRendererDispatcher, TileEntityRenderer<? super T>> renderFactory) {
+    public static synchronized <T extends BlockEntity> void bindTileEntityRenderer(TileEntityTypeRegistryObject<T> tileTypeRO,
+          Function<BlockEntityRenderDispatcher, BlockEntityRenderer<? super T>> renderFactory) {
         ClientRegistry.bindTileEntityRenderer(tileTypeRO.getTileEntityType(), renderFactory);
     }
 
     @SafeVarargs
-    public static synchronized <T extends TileEntity> void bindTileEntityRenderer(Function<TileEntityRendererDispatcher, TileEntityRenderer<T>> rendererFactory,
-          TileEntityTypeRegistryObject<? extends T>... tileEntityTypeROs) {
-        TileEntityRenderer<T> renderer = rendererFactory.apply(TileEntityRendererDispatcher.instance);
+    public static synchronized <T extends BlockEntity> void bindTileEntityRenderer(Function<BlockEntityRenderDispatcher, BlockEntityRenderer<T>> rendererFactory,
+           TileEntityTypeRegistryObject<? extends T>... tileEntityTypeROs) {
+        BlockEntityRenderer<T> renderer = rendererFactory.apply(BlockEntityRenderDispatcher.INSTANCE);
         for (TileEntityTypeRegistryObject<? extends T> tileTypeRO : tileEntityTypeROs) {
             ClientRegistry.bindTileEntityRenderer(tileTypeRO.getTileEntityType(), constant -> renderer);
         }

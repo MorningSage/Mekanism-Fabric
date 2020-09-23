@@ -14,9 +14,9 @@ import mekanism.common.MekanismLang;
 import mekanism.common.tile.machine.TileEntityOredictionificator;
 import mekanism.common.tile.machine.TileEntityOredictionificator.OredictionificatorFilter;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.tag.ItemTags;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiOredictionificatorFilter extends GuiTextFilter<OredictionificatorFilter, TileEntityOredictionificator> {
 
@@ -83,13 +83,13 @@ public class GuiOredictionificatorFilter extends GuiTextFilter<Oredictionificato
             modid = split[0];
             newFilter = split[1];
         }
-        ResourceLocation filterLocation = new ResourceLocation(modid, newFilter);
+        Identifier filterLocation = new Identifier(modid, newFilter);
         if (filter.hasFilter() && filter.filterMatches(filterLocation)) {
             filterSaveFailed(MekanismLang.TAG_FILTER_SAME_TAG);
         } else {
             List<String> possibleFilters = TileEntityOredictionificator.possibleFilters.getOrDefault(modid, Collections.emptyList());
             if (possibleFilters.stream().anyMatch(newFilter::startsWith) &&
-                ItemTags.getCollection().getRegisteredTags().contains(filterLocation)) {
+                ItemTags.getTagGroup().getTagIds().contains(filterLocation)) {
                 filter.setFilter(filterLocation);
                 slotDisplay.updateStackList();
                 text.setText("");
@@ -100,8 +100,8 @@ public class GuiOredictionificatorFilter extends GuiTextFilter<Oredictionificato
     }
 
     @Override
-    protected List<ITextComponent> getScreenText() {
-        List<ITextComponent> list = super.getScreenText();
+    protected List<Text> getScreenText() {
+        List<Text> list = super.getScreenText();
         if (filter.hasFilter()) {
             ItemStack renderStack = slotDisplay.getRenderStack();
             if (!renderStack.isEmpty()) {

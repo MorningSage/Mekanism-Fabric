@@ -5,15 +5,15 @@ import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.button.TranslationButton;
 import mekanism.common.MekanismLang;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 import java.util.function.Supplier;
 
 public class GuiConfirmationDialog extends GuiWindow {
 
-    private final ITextComponent title;
+    private final Text title;
 
-    public GuiConfirmationDialog(IGuiWrapper gui, int x, int y, int width, int height, ITextComponent title, Runnable onConfirm, DialogType type) {
+    public GuiConfirmationDialog(IGuiWrapper gui, int x, int y, int width, int height, Text title, Runnable onConfirm, DialogType type) {
         super(gui, x, y, width, height);
         this.title = title;
         active = true;
@@ -25,7 +25,7 @@ public class GuiConfirmationDialog extends GuiWindow {
         }, null, type.getColorSupplier()));
     }
 
-    public static void show(IGuiWrapper gui, ITextComponent title, Runnable onConfirm, DialogType type) {
+    public static void show(IGuiWrapper gui, Text title, Runnable onConfirm, DialogType type) {
         gui.addWindow(new GuiConfirmationDialog(gui, gui.getWidth() / 2 - 140 / 2, gui.getHeight() / 2 - 64 / 2, 140, 64, title, onConfirm, type));
     }
 

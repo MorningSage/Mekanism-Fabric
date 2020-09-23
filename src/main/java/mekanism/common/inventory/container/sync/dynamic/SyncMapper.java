@@ -40,7 +40,7 @@ import mekanism.common.lib.math.voxel.VoxelCuboid;
 import mekanism.common.network.container.property.PropertyType;
 import mekanism.common.util.LambdaMetaFactoryUtil;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.ModFileScanData;

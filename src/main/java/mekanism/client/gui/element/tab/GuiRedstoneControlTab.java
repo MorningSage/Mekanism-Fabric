@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.tab;
 
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.client.SpecialColors;
@@ -15,15 +16,14 @@ import mekanism.common.tile.interfaces.IRedstoneControl;
 import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiRedstoneControlTab extends GuiInsetElement<TileEntityMekanism> {
 
-    private static final ResourceLocation DISABLED = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_disabled.png");
-    private static final ResourceLocation HIGH = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_high.png");
-    private static final ResourceLocation LOW = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_low.png");
-    private static final ResourceLocation PULSE = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_pulse.png");
+    private static final Identifier DISABLED = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_disabled.png");
+    private static final Identifier HIGH = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_high.png");
+    private static final Identifier LOW = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_low.png");
+    private static final Identifier PULSE = MekanismUtils.getResource(ResourceType.GUI, "redstone_control_pulse.png");
 
     public GuiRedstoneControlTab(IGuiWrapper gui, TileEntityMekanism tile) {
         super(DISABLED, gui, tile, gui.getWidth(), 137, 26, 18, false);
@@ -40,7 +40,7 @@ public class GuiRedstoneControlTab extends GuiInsetElement<TileEntityMekanism> {
     }
 
     @Override
-    protected ResourceLocation getOverlay() {
+    protected Identifier getOverlay() {
         switch (((IRedstoneControl) tile).getControlType()) {
             case HIGH:
                 return HIGH;
@@ -64,7 +64,7 @@ public class GuiRedstoneControlTab extends GuiInsetElement<TileEntityMekanism> {
             //Draw the button background
             drawButton(matrix, mouseX, mouseY);
             //Draw the overlay onto the button
-            minecraft.textureManager.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+            minecraft.getTextureManager().bindTexture(SpriteAtlasTexture.BLOCK_ATLAS_TEX);
             GuiUtils.drawSprite(matrix, getButtonX() + 1, getButtonY() + 1, innerWidth - 2, innerHeight - 2, 0, MekanismRenderer.redstonePulse);
         }
     }

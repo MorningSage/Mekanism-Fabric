@@ -6,15 +6,15 @@ import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInsetElement;
 import mekanism.client.gui.element.GuiWindow;
 import mekanism.common.tile.base.TileEntityMekanism;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public abstract class GuiWindowCreatorTab<ELEMENT extends GuiWindowCreatorTab<ELEMENT>> extends GuiInsetElement<TileEntityMekanism> {
 
     @Nonnull
     private final Supplier<ELEMENT> elementSupplier;
 
-    public GuiWindowCreatorTab(ResourceLocation overlay, IGuiWrapper gui, TileEntityMekanism tile, int x, int y, int height, int innerSize, boolean left,
-          @Nonnull Supplier<ELEMENT> elementSupplier) {
+    public GuiWindowCreatorTab(Identifier overlay, IGuiWrapper gui, TileEntityMekanism tile, int x, int y, int height, int innerSize, boolean left,
+           @Nonnull Supplier<ELEMENT> elementSupplier) {
         super(overlay, gui, tile, x, y, height, innerSize, left);
         this.elementSupplier = elementSupplier;
     }

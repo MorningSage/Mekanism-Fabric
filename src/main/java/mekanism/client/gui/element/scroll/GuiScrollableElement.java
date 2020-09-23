@@ -3,7 +3,7 @@ package mekanism.client.gui.element.scroll;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiTexturedElement;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public abstract class GuiScrollableElement extends GuiTexturedElement {
 
@@ -17,8 +17,8 @@ public abstract class GuiScrollableElement extends GuiTexturedElement {
     protected final int barHeight;
     protected final int maxBarHeight;
 
-    protected GuiScrollableElement(ResourceLocation resource, IGuiWrapper gui, int x, int y, int width, int height,
-          int barXShift, int barYShift, int barWidth, int barHeight, int maxBarHeight) {
+    protected GuiScrollableElement(Identifier resource, IGuiWrapper gui, int x, int y, int width, int height,
+                                   int barXShift, int barYShift, int barWidth, int barHeight, int maxBarHeight) {
         super(resource, gui, x, y, width, height);
         this.barXShift = barXShift;
         this.barX = this.x + barXShift;

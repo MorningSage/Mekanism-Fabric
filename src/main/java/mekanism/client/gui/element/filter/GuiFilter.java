@@ -29,7 +29,7 @@ import mekanism.common.util.StackUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>> extends GuiWindow
       implements GuiFilterHelper<TILE> {
@@ -37,17 +37,17 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
     public static final Predicate<ItemStack> NOT_EMPTY = stack -> !stack.isEmpty();
     public static final Predicate<ItemStack> NOT_EMPTY_BLOCK = stack -> !stack.isEmpty() && stack.getItem() instanceof BlockItem;
 
-    private final ITextComponent filterName;
+    private final Text filterName;
     protected final FILTER origFilter;
     protected final FILTER filter;
     protected final TILE tile;
     private final boolean isNew;
 
-    protected ITextComponent status = MekanismLang.STATUS_OK.translateColored(EnumColor.DARK_GREEN);
+    protected Text status = MekanismLang.STATUS_OK.translateColored(EnumColor.DARK_GREEN);
     protected GuiSequencedSlotDisplay slotDisplay;
     private int ticker;
 
-    public GuiFilter(IGuiWrapper gui, int x, int y, int width, int height, ITextComponent filterName, TILE tile, FILTER origFilter) {
+    public GuiFilter(IGuiWrapper gui, int x, int y, int width, int height, Text filterName, TILE tile, FILTER origFilter) {
         super(gui, x, y, width, height);
         this.tile = tile;
         this.origFilter = origFilter;
@@ -122,8 +122,8 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
         close();
     }
 
-    protected List<ITextComponent> getScreenText() {
-        List<ITextComponent> list = new ArrayList<>();
+    protected List<Text> getScreenText() {
+        List<Text> list = new ArrayList<>();
         list.add(MekanismLang.STATUS.translate(status));
         return list;
     }
@@ -183,7 +183,7 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
                 if (Screen.hasShiftDown()) {
                     toSet = ItemStack.EMPTY;
                 } else {
-                    ItemStack stack = minecraft.player.inventory.getItemStack();
+                    ItemStack stack = minecraft.player.inventory.getCursorStack();
                     if (!stackValidator.test(stack)) {
                         return false;
                     }

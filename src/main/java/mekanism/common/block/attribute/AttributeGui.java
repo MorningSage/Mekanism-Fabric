@@ -8,19 +8,19 @@ import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
-import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.screen.NamedScreenHandlerFactory;
 
 public class AttributeGui implements Attribute {
 
     private final Supplier<ContainerTypeRegistryObject<? extends MekanismContainer>> containerRegistrar;
-    private Function<TileEntityMekanism, INamedContainerProvider> containerSupplier = (tile) -> new ContainerProvider(TextComponentUtil.translate(tile.getBlockType().getTranslationKey()),
+    private Function<TileEntityMekanism, NamedScreenHandlerFactory> containerSupplier = (tile) -> new ContainerProvider(TextComponentUtil.translate(tile.getBlockType().getTranslationKey()),
           (i, inv, player) -> new MekanismTileContainer<>(getContainerType(), i, inv, tile));
 
     public AttributeGui(Supplier<ContainerTypeRegistryObject<? extends MekanismContainer>> containerRegistrar) {
         this.containerRegistrar = containerRegistrar;
     }
 
-    public void setCustomContainer(Function<TileEntityMekanism, INamedContainerProvider> containerSupplier) {
+    public void setCustomContainer(Function<TileEntityMekanism, NamedScreenHandlerFactory> containerSupplier) {
         this.containerSupplier = containerSupplier;
     }
 
@@ -28,7 +28,7 @@ public class AttributeGui implements Attribute {
         return containerRegistrar.get();
     }
 
-    public INamedContainerProvider getProvider(TileEntityMekanism tile) {
+    public NamedScreenHandlerFactory getProvider(TileEntityMekanism tile) {
         return containerSupplier.apply(tile);
     }
 }

@@ -16,7 +16,7 @@ import moze_intel.projecte.api.nss.NormalizedSimpleStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import org.apache.commons.lang3.tuple.Pair;
 
 @RecipeTypeMapper

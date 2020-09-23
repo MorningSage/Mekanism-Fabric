@@ -39,10 +39,12 @@ import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.renderer.entity.model.ArmorStandModel;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -69,7 +71,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class ClientTickHandler {
 
-    public static final Minecraft minecraft = Minecraft.getInstance();
+    public static final MinecraftClient minecraft = MinecraftClient.getInstance();
     public static final Random rand = new Random();
     public static final Map<PlayerEntity, TeleportData> portableTeleports = new Object2ObjectOpenHashMap<>();
     public boolean initHoliday = false;
@@ -85,14 +87,14 @@ public class ClientTickHandler {
             return Mekanism.playerState.isJetpackOn(player);
         }
         if (MekanismUtils.isPlayingMode(player)) {
-            ItemStack chest = player.getItemStackFromSlot(EquipmentSlotType.CHEST);
+            ItemStack chest = player.getEquippedStack(EquipmentSlot.CHEST);
             if (!chest.isEmpty()) {
                 JetpackMode mode = getJetpackMode(chest);
                 if (mode == JetpackMode.NORMAL) {
-                    return minecraft.currentScreen == null && minecraft.gameSettings.keyBindJump.isKeyDown();
+                    return minecraft.currentScreen == null && minecraft.options.keyJump.isPressed();
                 } else if (mode == JetpackMode.HOVER) {
-                    boolean ascending = minecraft.gameSettings.keyBindJump.isKeyDown();
-                    boolean descending = minecraft.gameSettings.keyBindSneak.isKeyDown();
+                    boolean ascending = minecraft.options.keyJump.isPressed();
+                    boolean descending = minecraft.options.keySneak.isPressed();
                     if (!ascending || descending || minecraft.currentScreen != null) {
                         return !CommonPlayerTickHandler.isOnGround(player);
                     }
@@ -131,7 +133,7 @@ public class ClientTickHandler {
     }
 
     public static boolean isVisionEnhancementOn(PlayerEntity player) {
-        ModuleVisionEnhancementUnit module = Modules.load(player.getItemStackFromSlot(EquipmentSlotType.HEAD), Modules.VISION_ENHANCEMENT_UNIT);
+        ModuleVisionEnhancementUnit module = Modules.load(player.getEquippedStack(EquipmentSlot.HEAD), Modules.VISION_ENHANCEMENT_UNIT);
         return module != null && module.isEnabled() && module.getContainerEnergy().greaterThan(MekanismConfig.gear.mekaSuitEnergyUsageVisionEnhancement.get());
     }
 
@@ -139,7 +141,7 @@ public class ClientTickHandler {
         if (player != minecraft.player) {
             return Mekanism.playerState.isFlamethrowerOn(player);
         }
-        return hasFlamethrower(player) && minecraft.gameSettings.keyBindUseItem.isKeyDown();
+        return hasFlamethrower(player) && minecraft.options.keyBindUseItem.isKeyDown();
     }
 
     public static boolean hasFlamethrower(PlayerEntity player) {
@@ -180,7 +182,7 @@ public class ClientTickHandler {
 
         if (minecraft.world != null && minecraft.player != null && !Mekanism.proxy.isPaused()) {
             if (!initHoliday || MekanismClient.ticksPassed % 1_200 == 0) {
-                HolidayManager.notify(Minecraft.getInstance().player);
+                HolidayManager.notify(MinecraftClient.getInstance().player);
                 initHoliday = true;
             }
 
@@ -190,7 +192,7 @@ public class ClientTickHandler {
 
             Mekanism.radiationManager.tickClient(minecraft.player);
 
-            UUID playerUUID = minecraft.player.getUniqueID();
+            UUID playerUUID = minecraft.player.getUuid();
             // Update player's state for various items; this also automatically notifies server if something changed and
             // kicks off sounds as necessary
             Mekanism.playerState.setJetpackState(playerUUID, isJetpackActive(minecraft.player), true);
@@ -202,9 +204,9 @@ public class ClientTickHandler {
                 Entry<PlayerEntity, TeleportData> entry = iter.next();
                 PlayerEntity player = entry.getKey();
                 for (int i = 0; i < 100; i++) {
-                    double x = player.getPosX() + rand.nextDouble() - 0.5D;
-                    double y = player.getPosY() + rand.nextDouble() * 2 - 2D;
-                    double z = player.getPosZ() + rand.nextDouble() - 0.5D;
+                    double x = player.getX() + rand.nextDouble() - 0.5D;
+                    double y = player.getY() + rand.nextDouble() * 2 - 2D;
+                    double z = player.getZ() + rand.nextDouble() - 0.5D;
                     minecraft.world.addParticle(ParticleTypes.PORTAL, x, y, z, 0, 1, 0);
                 }
 

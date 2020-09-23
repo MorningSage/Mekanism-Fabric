@@ -23,19 +23,19 @@ import mekanism.common.tile.factory.TileEntityItemStackGasToItemStackFactory;
 import mekanism.common.tile.factory.TileEntityMetallurgicInfuserFactory;
 import mekanism.common.tile.factory.TileEntitySawingFactory;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiFactory extends GuiConfigurableTile<TileEntityFactory<?>, MekanismTileContainer<TileEntityFactory<?>>> {
 
-    public GuiFactory(MekanismTileContainer<TileEntityFactory<?>> container, PlayerInventory inv, ITextComponent title) {
+    public GuiFactory(MekanismTileContainer<TileEntityFactory<?>> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         if (tile.hasSecondaryResourceBar()) {
-            ySize += 11;
+            backgroundHeight += 11;
         } else if (tile instanceof TileEntitySawingFactory) {
-            ySize += 21;
+            backgroundHeight += 21;
         }
         if (tile.tier == FactoryTier.ULTIMATE) {
-            xSize += 34;
+            backgroundWidth += 34;
         }
         dynamicSlots = true;
     }

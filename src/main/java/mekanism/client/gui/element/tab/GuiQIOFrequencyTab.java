@@ -16,11 +16,11 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiQIOFrequencyTab extends GuiInsetElement<TileEntityMekanism> {
 
-    private static final ResourceLocation FREQUENCY = MekanismUtils.getResource(ResourceType.GUI, "frequency.png");
+    private static final Identifier FREQUENCY = MekanismUtils.getResource(ResourceType.GUI, "frequency.png");
 
     private final Hand currentHand;
     private boolean isItem;

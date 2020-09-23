@@ -2,25 +2,24 @@ package mekanism.client;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import net.minecraft.particles.RedstoneParticleData;
-import net.minecraft.tileentity.TileEntity;
+
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class SparkleAnimation {
 
-    private final TileEntity tile;
+    private final BlockEntity tile;
     private final BlockPos corner1;
     private final BlockPos corner2;
 
-    public SparkleAnimation(TileEntity tile, BlockPos corner1, BlockPos corner2) {
+    public SparkleAnimation(BlockEntity tile, BlockPos corner1, BlockPos corner2) {
         this.tile = tile;
         this.corner1 = corner1;
         this.corner2 = corner2;
     }
 
-    public SparkleAnimation(TileEntity tile, BlockPos renderLoc, int length, int width, int height) {
+    public SparkleAnimation(BlockEntity tile, BlockPos renderLoc, int length, int width, int height) {
         this(tile, new BlockPos(renderLoc.getX(), renderLoc.getY() - 1, renderLoc.getZ()),
               new BlockPos(renderLoc.getX() + length, renderLoc.getY() + height - 1, renderLoc.getZ() + width));
     }

@@ -21,12 +21,12 @@ import mekanism.common.content.gear.Modules.ModuleData;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiModuleScrollList extends GuiScrollList {
 
-    private static final ResourceLocation MODULE_SELECTION = MekanismUtils.getResource(ResourceType.GUI, "module_selection.png");
+    private static final Identifier MODULE_SELECTION = MekanismUtils.getResource(ResourceType.GUI, "module_selection.png");
     private static final int TEXTURE_WIDTH = 100;
     private static final int TEXTURE_HEIGHT = 36;
 
@@ -97,7 +97,7 @@ public class GuiModuleScrollList extends GuiScrollList {
     public void renderForeground(MatrixStack matrix, int mouseX, int mouseY) {
         super.renderForeground(matrix, mouseX, mouseY);
         ItemStack stack = itemSupplier.get();
-        if (!ItemStack.areItemStacksEqual(currentItem, stack)) {
+        if (!ItemStack.areEqual(currentItem, stack)) {
             updateList(stack, false);
         }
         for (int i = 0; i < getFocusedElements(); i++) {
@@ -127,7 +127,7 @@ public class GuiModuleScrollList extends GuiScrollList {
             Module instance = Modules.load(currentItem, module);
             int multipliedElement = elementHeight * i;
             if (mouseX >= relativeX + 1 && mouseX < relativeX + barXShift - 1 && mouseY >= relativeY + 1 + multipliedElement && mouseY < relativeY + 1 + multipliedElement + elementHeight) {
-                ITextComponent t = MekanismLang.GENERIC_FRACTION.translateColored(EnumColor.GRAY, instance.getInstalledCount(), module.getMaxStackSize());
+                Text t = MekanismLang.GENERIC_FRACTION.translateColored(EnumColor.GRAY, instance.getInstalledCount(), module.getMaxStackSize());
                 guiObj.displayTooltip(matrix, MekanismLang.MODULE_INSTALLED.translate(t), mouseX, mouseY, guiObj.getWidth());
             }
         }
@@ -136,7 +136,7 @@ public class GuiModuleScrollList extends GuiScrollList {
     @Override
     public void renderElements(MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         //Draw elements
-        minecraft.textureManager.bindTexture(MODULE_SELECTION);
+        minecraft.getTextureManager().bindTexture(MODULE_SELECTION);
         for (int i = 0; i < getFocusedElements(); i++) {
             int index = getCurrentSelection() + i;
             if (index > currentList.size() - 1) {
@@ -150,7 +150,7 @@ public class GuiModuleScrollList extends GuiScrollList {
             } else if (mouseX >= x + 1 && mouseX < barX - 1 && mouseY >= shiftedY && mouseY < shiftedY + elementHeight) {
                 j = 0;
             }
-            blit(matrix, x + 1, shiftedY, 0, elementHeight * j, TEXTURE_WIDTH, elementHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            drawTexture(matrix, x + 1, shiftedY, 0, elementHeight * j, TEXTURE_WIDTH, elementHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             MekanismRenderer.resetColor();
         }
     }

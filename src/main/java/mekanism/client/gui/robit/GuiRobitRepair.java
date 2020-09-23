@@ -1,53 +1,52 @@
 package mekanism.client.gui.robit;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nonnull;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.entity.robit.RepairRobitContainer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CRenameItemPacket;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerListener;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-public class GuiRobitRepair extends GuiRobit<RepairRobitContainer> implements IContainerListener {
+public class GuiRobitRepair extends GuiRobit<RepairRobitContainer> implements ScreenHandlerListener {
 
     //Use the vanilla anvil's gui texture
-    private static final ResourceLocation ANVIL_RESOURCE = new ResourceLocation("textures/gui/container/anvil.png");
+    private static final Identifier ANVIL_RESOURCE = new Identifier("textures/gui/container/anvil.png");
     private TextFieldWidget itemNameField;
 
-    public GuiRobitRepair(RepairRobitContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiRobitRepair(RepairRobitContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
     }
 
     @Override
     public void init() {
         super.init();
-        getMinecraft().keyboardListener.enableRepeatEvents(true);
-        addButton(itemNameField = new TextFieldWidget(font, getGuiLeft() + 62, getGuiTop() + 24, 103, 12, new StringTextComponent("")));
-        itemNameField.setCanLoseFocus(false);
+        client.keyboardListener.enableRepeatEvents(true);
+        addButton(itemNameField = new TextFieldWidget(textRenderer, getGuiLeft() + 62, getGuiTop() + 24, 103, 12, new StringTextComponent("")));
+        itemNameField.setFocusUnlocked(false);
         itemNameField.changeFocus(true);
-        itemNameField.setTextColor(-1);
-        itemNameField.setDisabledTextColour(-1);
+        itemNameField.setEditableColor(-1);
+        itemNameField.setUneditableColor(-1);
         itemNameField.setEnableBackgroundDrawing(false);
-        itemNameField.setMaxStringLength(35);
-        itemNameField.setResponder(this::onTextUpdate);
-        container.removeListener(this);
-        container.addListener(this);
+        itemNameField.setMaxLength(35);
+        itemNameField.setChangedListener(this::onTextUpdate);
+        handler.removeListener(this);
+        handler.addListener(this);
     }
 
     @Override
-    public void resize(@Nonnull Minecraft minecraft, int scaledWidth, int scaledHeight) {
+    public void resize(@Nonnull MinecraftClient minecraft, int scaledWidth, int scaledHeight) {
         String s = itemNameField.getText();
         super.resize(minecraft, scaledWidth, scaledHeight);
         itemNameField.setText(s);
@@ -55,39 +54,39 @@ public class GuiRobitRepair extends GuiRobit<RepairRobitContainer> implements IC
 
     private void onTextUpdate(String newText) {
         if (!newText.isEmpty()) {
-            Slot slot = container.getSlot(0);
-            if (slot.getHasStack() && !slot.getStack().hasDisplayName() && newText.equals(slot.getStack().getDisplayName().getString())) {
+            Slot slot = handler.getSlot(0);
+            if (slot.hasStack() && !slot.getStack().hasCustomName() && newText.equals(slot.getStack().getName().getString())) {
                 newText = "";
             }
-            container.updateItemName(newText);
-            getMinecraft().player.connection.sendPacket(new CRenameItemPacket(newText));
+            handler.setNewItemName(newText);
+            client.player.connection.sendPacket(new CRenameItemPacket(newText));
         }
     }
 
     @Override
     public void onClose() {
         super.onClose();
-        getMinecraft().keyboardListener.enableRepeatEvents(false);
-        container.removeListener(this);
+        client.keyboardListener.enableRepeatEvents(false);
+        handler.removeListener(this);
     }
 
     @Override
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         RenderSystem.disableBlend();
         drawString(matrix, MekanismLang.ROBIT_REPAIR.translate(), 60, 6, titleTextColor());
-        int maximumCost = container.getMaximumCost();
+        int maximumCost = handler.getLevelCost();
         if (maximumCost > 0) {
             int k = 0x80FF20;
             boolean flag = true;
-            ITextComponent component = MekanismLang.REPAIR_COST.translate(maximumCost);
-            if (maximumCost >= 40 && !getMinecraft().player.isCreative()) {
+            Text component = MekanismLang.REPAIR_COST.translate(maximumCost);
+            if (maximumCost >= 40 && !client.player.isCreative()) {
                 component = MekanismLang.REPAIR_EXPENSIVE.translate();
                 k = 0xFF6060;
             } else {
-                Slot slot = container.getSlot(2);
-                if (!slot.getHasStack()) {
+                Slot slot = handler.getSlot(2);
+                if (!slot.hasStack()) {
                     flag = false;
-                } else if (!slot.canTakeStack(playerInventory.player)) {
+                } else if (!slot.canTakeItems(playerInventory.player)) {
                     k = 0xFF6060;
                 }
             }
@@ -124,29 +123,30 @@ public class GuiRobitRepair extends GuiRobit<RepairRobitContainer> implements IC
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(@Nonnull MatrixStack matrix, float partialTick, int mouseX, int mouseY) {
-        getMinecraft().textureManager.bindTexture(ANVIL_RESOURCE);
-        blit(matrix, getGuiLeft(), getGuiTop(), 0, 0, getXSize(), getYSize());
-        blit(matrix, getGuiLeft() + 59, getGuiTop() + 20, 0, getYSize() + (container.getSlot(0).getHasStack() ? 0 : 16), 110, 16);
-        if ((container.getSlot(0).getHasStack() || container.getSlot(1).getHasStack()) && !container.getSlot(2).getHasStack()) {
-            blit(matrix, getGuiLeft() + 99, getGuiTop() + 45, getXSize(), 0, 28, 21);
+    protected void drawBackground(@NotNull MatrixStack matrices, float delta, int mouseX, int mouseY) {
+        client.getTextureManager().bindTexture(ANVIL_RESOURCE);
+        drawTexture(matrices, getGuiLeft(), getGuiTop(), 0, 0, getXSize(), getYSize());
+        drawTexture(matrices, getGuiLeft() + 59, getGuiTop() + 20, 0, getYSize() + (handler.getSlot(0).hasStack() ? 0 : 16), 110, 16);
+        if ((handler.getSlot(0).hasStack() || handler.getSlot(1).hasStack()) && !handler.getSlot(2).hasStack()) {
+            drawTexture(matrices, getGuiLeft() + 99, getGuiTop() + 45, getXSize(), 0, 28, 21);
         }
     }
 
     @Override
-    public void sendAllContents(@Nonnull Container container, @Nonnull NonNullList<ItemStack> list) {
-        sendSlotContents(container, 0, container.getSlot(0).getStack());
+    public void onHandlerRegistered(@Nonnull ScreenHandler container, @Nonnull DefaultedList<ItemStack> list) {
+        onSlotUpdate(container, 0, container.getSlot(0).getStack());
     }
 
     @Override
-    public void sendSlotContents(@Nonnull Container container, int slotID, @Nonnull ItemStack stack) {
+    public void onSlotUpdate(@Nonnull ScreenHandler container, int slotID, @Nonnull ItemStack stack) {
         if (slotID == 0) {
-            itemNameField.setText(stack.isEmpty() ? "" : stack.getDisplayName().getString());
-            itemNameField.setEnabled(!stack.isEmpty());
+            itemNameField.setText(stack.isEmpty() ? "" : stack.getName().getString());
+            itemNameField.setEditable(!stack.isEmpty());
         }
     }
 
     @Override
-    public void sendWindowProperty(@Nonnull Container container, int varToUpdate, int newValue) {
+    public void onPropertyUpdate(@Nonnull ScreenHandler handler, int varToUpdate, int newValue) {
+
     }
 }

@@ -8,7 +8,7 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.network.container.property.FluidStackPropertyData;
 import mekanism.common.network.container.property.IntPropertyData;
 import mekanism.common.network.container.property.PropertyData;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 /**
  * Version of {@link net.minecraft.util.IntReferenceHolder} for handling fluid stacks

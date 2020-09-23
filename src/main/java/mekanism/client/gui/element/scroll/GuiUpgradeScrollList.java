@@ -13,11 +13,11 @@ import mekanism.common.tile.component.TileComponentUpgrade;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.UpgradeUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiUpgradeScrollList extends GuiScrollList {
 
-    private static final ResourceLocation UPGRADE_SELECTION = MekanismUtils.getResource(ResourceType.GUI, "upgrade_selection.png");
+    private static final Identifier UPGRADE_SELECTION = MekanismUtils.getResource(ResourceType.GUI, "upgrade_selection.png");
     private static final int TEXTURE_WIDTH = 58;
     private static final int TEXTURE_HEIGHT = 36;
 
@@ -98,7 +98,7 @@ public class GuiUpgradeScrollList extends GuiScrollList {
         if (hasSelection() && component.getUpgrades(getSelection()) == 0) {
             clearSelection();
         }
-        minecraft.textureManager.bindTexture(UPGRADE_SELECTION);
+        minecraft.getTextureManager().bindTexture(UPGRADE_SELECTION);
         Upgrade[] upgrades = getCurrentUpgrades().toArray(new Upgrade[0]);
         for (int i = 0; i < getFocusedElements(); i++) {
             int index = getCurrentSelection() + i;
@@ -114,7 +114,7 @@ public class GuiUpgradeScrollList extends GuiScrollList {
                 j = 0;
             }
             MekanismRenderer.color(upgrade.getColor());
-            blit(matrix, x + 1, shiftedY, 0, elementHeight * j, TEXTURE_WIDTH, elementHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            drawTexture(matrix, x + 1, shiftedY, 0, elementHeight * j, TEXTURE_WIDTH, elementHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             MekanismRenderer.resetColor();
         }
     }

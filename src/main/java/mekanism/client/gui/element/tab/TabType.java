@@ -1,16 +1,16 @@
 package mekanism.client.gui.element.tab;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
-public interface TabType<TILE extends TileEntity> {
+public interface TabType<TILE extends BlockEntity> {
 
-    ResourceLocation getResource();
+    Identifier getResource();
 
     void onClick(TILE tile);
 
-    ITextComponent getDescription();
+    Text getDescription();
 
     int getYPos();
 }

@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.client.gui.GuiMekanismTile;
@@ -16,13 +18,12 @@ import mekanism.common.network.PacketDropperUse.TankType;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.interfaces.ISideConfiguration;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.text.Text;
 
 public class GuiFluidGauge extends GuiTankGauge<FluidStack, IExtendedFluidTank> {
 
-    private ITextComponent label;
+    private Text label;
     private Supplier<IExtendedFluidTank> tankSupplier;
 
     public GuiFluidGauge(ITankInfoHandler<IExtendedFluidTank> handler, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY) {
@@ -56,7 +57,7 @@ public class GuiFluidGauge extends GuiTankGauge<FluidStack, IExtendedFluidTank> 
     protected GaugeInfo getGaugeColor() {
         IExtendedFluidTank tank;
         if (guiObj instanceof GuiMekanismTile && tankSupplier != null && (tank = tankSupplier.get()) != null) {
-            TileEntityMekanism tile = ((GuiMekanismTile<?, ?>) guiObj).getContainer().getTileEntity();
+            TileEntityMekanism tile = ((GuiMekanismTile<?, ?>) guiObj).getScreenHandler().getTileEntity();
             if (tile instanceof ISideConfiguration) {
                 DataType dataType = ((ISideConfiguration) tile).getActiveDataType(tank);
                 if (dataType != null) {
@@ -67,7 +68,7 @@ public class GuiFluidGauge extends GuiTankGauge<FluidStack, IExtendedFluidTank> 
         return GaugeInfo.STANDARD;
     }
 
-    public GuiFluidGauge setLabel(ITextComponent label) {
+    public GuiFluidGauge setLabel(Text label) {
         this.label = label;
         return this;
     }
@@ -100,7 +101,7 @@ public class GuiFluidGauge extends GuiTankGauge<FluidStack, IExtendedFluidTank> 
     }
 
     @Override
-    public TextureAtlasSprite getIcon() {
+    public Sprite getIcon() {
         if (dummy || getTank() == null) {
             return MekanismRenderer.getFluidTexture(dummyType, FluidType.STILL);
         }
@@ -109,12 +110,12 @@ public class GuiFluidGauge extends GuiTankGauge<FluidStack, IExtendedFluidTank> 
     }
 
     @Override
-    public ITextComponent getLabel() {
+    public Text getLabel() {
         return label;
     }
 
     @Override
-    public List<ITextComponent> getTooltipText() {
+    public List<Text> getTooltipText() {
         if (dummy) {
             return Collections.singletonList(TextComponentUtil.build(dummyType));
         }

@@ -29,21 +29,15 @@ import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.DimensionSavedDataManager;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -83,7 +77,7 @@ public class RadiationManager {
     private boolean loaded;
 
     private final Map<Chunk3D, Map<Coord4D, RadiationSource>> radiationMap = new Object2ObjectOpenHashMap<>();
-    private final Map<ResourceLocation, List<Meltdown>> meltdowns = new Object2ObjectOpenHashMap<>();
+    private final Map<Identifier, List<Meltdown>> meltdowns = new Object2ObjectOpenHashMap<>();
 
     private final Map<UUID, RadiationScale> playerExposureMap = new Object2ObjectOpenHashMap<>();
 
@@ -154,7 +148,7 @@ public class RadiationManager {
     }
 
     public void createMeltdown(World world, BlockPos minPos, BlockPos maxPos, double magnitude, double chance) {
-        meltdowns.computeIfAbsent(world.func_234923_W_().func_240901_a_(), id -> new ArrayList<>()).add(new Meltdown(world, minPos, maxPos, magnitude, chance));
+        meltdowns.computeIfAbsent(world.getRegistryKey().getValue(), id -> new ArrayList<>()).add(new Meltdown(world, minPos, maxPos, magnitude, chance));
     }
 
     public void clearSources() {
@@ -167,8 +161,8 @@ public class RadiationManager {
 
     private double getRadiationResistance(LivingEntity entity) {
         double resistance = 0;
-        for (EquipmentSlotType type : EnumUtils.ARMOR_SLOTS) {
-            ItemStack stack = entity.getItemStackFromSlot(type);
+        for (EquipmentSlot type : EnumUtils.ARMOR_SLOTS) {
+            ItemStack stack = entity.getEquippedStack(type);
             Optional<IRadiationShielding> shielding = MekanismUtils.toOptional(CapabilityUtils.getCapability(stack, Capabilities.RADIATION_SHIELDING_CAPABILITY, null));
             if (shielding.isPresent()) {
                 resistance += shielding.get().getRadiationShielding();
@@ -191,9 +185,9 @@ public class RadiationManager {
             int count = player.world.getRandom().nextInt(clientRadiationScale.ordinal() * MekanismConfig.client.radiationParticleCount.get());
             int radius = MekanismConfig.client.radiationParticleRadius.get();
             for (int i = 0; i < count; i++) {
-                double x = player.getPosX() + player.world.getRandom().nextDouble() * radius * 2 - radius;
-                double y = player.getPosY() + player.world.getRandom().nextDouble() * radius * 2 - radius;
-                double z = player.getPosZ() + player.world.getRandom().nextDouble() * radius * 2 - radius;
+                double x = player.getX() + player.world.getRandom().nextDouble() * radius * 2 - radius;
+                double y = player.getY() + player.world.getRandom().nextDouble() * radius * 2 - radius;
+                double z = player.getZ() + player.world.getRandom().nextDouble() * radius * 2 - radius;
                 player.world.addParticle((BasicParticleType) MekanismParticleTypes.RADIATION.getParticleType(), x, y, z, 0, 0, 0);
             }
         }
@@ -220,8 +214,8 @@ public class RadiationManager {
             if (entity instanceof ServerPlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) entity;
                 RadiationScale scale = RadiationScale.get(magnitude);
-                if (playerExposureMap.get(player.getUniqueID()) != scale) {
-                    playerExposureMap.put(player.getUniqueID(), scale);
+                if (playerExposureMap.get(player.getUuid()) != scale) {
+                    playerExposureMap.put(player.getUuid(), scale);
                     Mekanism.packetHandler.sendTo(PacketRadiationData.create(scale), player);
                 }
             }
@@ -240,7 +234,7 @@ public class RadiationManager {
         }
 
         // update meltdowns
-        ResourceLocation dimension = world.func_234923_W_().func_240901_a_();
+        Identifier dimension = world.getRegistryKey().getValue();
         if (meltdowns.containsKey(dimension)) {
             meltdowns.get(dimension).removeIf(Meltdown::update);
         }
@@ -301,7 +295,7 @@ public class RadiationManager {
     @SubscribeEvent
     public void onLivingUpdate(LivingUpdateEvent event) {
         World world = event.getEntityLiving().getEntityWorld();
-        if (!world.isRemote() && !(event.getEntityLiving() instanceof PlayerEntity) && world.getRandom().nextInt() % 20 == 0) {
+        if (!world.isClient() && !(event.getEntityLiving() instanceof PlayerEntity) && world.getRandom().nextInt() % 20 == 0) {
             updateEntityRadiation(event.getEntityLiving());
         }
     }

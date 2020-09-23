@@ -21,14 +21,14 @@ import mekanism.common.network.PacketRobit;
 import mekanism.common.network.PacketRobit.RobitPacketType;
 import mekanism.common.util.text.EnergyDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiRobitMain extends GuiMekanism<MainRobitContainer> {
 
     private final EntityRobit robit;
     private MekanismImageButton renameButton;
 
-    public GuiRobitMain(MainRobitContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiRobitMain(MainRobitContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         robit = container.getEntity();
         dynamicSlots = true;
@@ -47,7 +47,7 @@ public class GuiRobitMain extends GuiMekanism<MainRobitContainer> {
         addButton(new GuiHorizontalPowerBar(this, robit.getEnergyContainer(), 27, 74, 120));
         addButton(new MekanismImageButton(this, getGuiLeft() + 6, getGuiTop() + 16, 18, getButtonLocation("home"), () -> {
             Mekanism.packetHandler.sendToServer(new PacketRobit(RobitPacketType.GO_HOME, robit.getEntityId()));
-            getMinecraft().displayGuiScreen(null);
+            client.displayGuiScreen(null);
         }, getOnHover(MekanismLang.ROBIT_TELEPORT)));
         addButton(new MekanismImageButton(this, getGuiLeft() + 6, getGuiTop() + 35, 18, getButtonLocation("drop"),
               () -> Mekanism.packetHandler.sendToServer(new PacketRobit(RobitPacketType.DROP_PICKUP, robit.getEntityId())),

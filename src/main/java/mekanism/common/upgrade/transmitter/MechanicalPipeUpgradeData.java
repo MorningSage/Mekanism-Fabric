@@ -1,7 +1,7 @@
 package mekanism.common.upgrade.transmitter;
 
 import mekanism.common.lib.transmitter.ConnectionType;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 public class MechanicalPipeUpgradeData extends TransmitterUpgradeData {
 

@@ -41,6 +41,8 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tier.ChemicalTankTier;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Direction;
 
 /**
  * @apiNote This class is called ChemicalUtil instead of ChemicalUtils so that it does not overlap with {@link mekanism.api.chemical.ChemicalUtils}
@@ -242,8 +244,8 @@ public class ChemicalUtil {
         return false;
     }
 
-    public static List<ITextComponent> getAttributeTooltips(Chemical<?> chemical) {
-        List<ITextComponent> list = new ArrayList<>();
+    public static List<Text> getAttributeTooltips(Chemical<?> chemical) {
+        List<Text> list = new ArrayList<>();
         chemical.getAttributes().forEach(attr -> attr.addTooltipText(list));
         return list;
     }
@@ -271,7 +273,7 @@ public class ChemicalUtil {
      *
      * @return the amount of chemical emitted
      */
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> long emit(Set<Direction> sides, @Nonnull STACK stack, TileEntity from) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> long emit(Set<Direction> sides, @Nonnull STACK stack, BlockEntity from) {
         if (stack.isEmpty() || sides.isEmpty()) {
             return 0;
         }

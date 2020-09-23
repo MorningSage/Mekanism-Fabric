@@ -57,7 +57,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 
 public class TileEntityElectricPump extends TileEntityMekanism implements IConfigurable {

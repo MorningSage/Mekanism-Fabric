@@ -22,8 +22,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
 
 public class GuiSeismicReader extends GuiMekanism<SeismicReaderContainer> {
 
@@ -33,13 +33,13 @@ public class GuiSeismicReader extends GuiMekanism<SeismicReaderContainer> {
     private MekanismButton downButton;
     private GuiScrollBar scrollBar;
 
-    public GuiSeismicReader(SeismicReaderContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiSeismicReader(SeismicReaderContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        xSize = 147;
-        ySize = 182;
-        BlockPos pos = inv.player.getPosition();
+        backgroundWidth = 147;
+        backgroundHeight = 182;
+        BlockPos pos = inv.player.getBlockPos();
         //Calculate all the blocks in the column
-        for (BlockPos p : BlockPos.getAllInBoxMutable(new BlockPos(pos.getX(), 0, pos.getZ()), pos)) {
+        for (BlockPos p : BlockPos.iterate(new BlockPos(pos.getX(), 0, pos.getZ()), pos)) {
             blockList.add(inv.player.world.getBlockState(p));
         }
     }
@@ -53,7 +53,7 @@ public class GuiSeismicReader extends GuiMekanism<SeismicReaderContainer> {
         addButton(new GuiArrowSelection(this, 76, 81, () -> {
             int currentLayer = scrollBar.getCurrentSelection();
             if (currentLayer >= 0) {
-                return blockList.get(blockList.size() - 1 - currentLayer).getBlock().getTranslatedName();
+                return blockList.get(blockList.size() - 1 - currentLayer).getBlock().getName();
             }
             return null;
         }));
@@ -111,7 +111,7 @@ public class GuiSeismicReader extends GuiMekanism<SeismicReaderContainer> {
         // Get the name from the stack and render it
         if (currentLayer >= 0) {
             Block block = blockList.get(currentLayer).getBlock();
-            ITextComponent displayName = block.getTranslatedName();
+            Text displayName = block.getName();
             drawTextScaledBound(matrix, displayName, 10, 16, screenTextColor(), 57);
             frequency = frequencies.computeIntIfAbsent(block, b -> (int) blockList.stream().filter(blockState -> b == blockState.getBlock()).count());
         }

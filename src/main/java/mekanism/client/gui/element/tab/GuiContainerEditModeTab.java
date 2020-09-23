@@ -13,20 +13,20 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.IFluidContainerManager;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiContainerEditModeTab<TILE extends TileEntityMekanism & IFluidContainerManager> extends GuiInsetElement<TILE> {
 
-    private static final ResourceLocation BOTH = MekanismUtils.getResource(ResourceType.GUI, "container_edit_mode_both.png");
-    private static final ResourceLocation FILL = MekanismUtils.getResource(ResourceType.GUI, "container_edit_mode_fill.png");
-    private static final ResourceLocation EMPTY = MekanismUtils.getResource(ResourceType.GUI, "container_edit_mode_empty.png");
+    private static final Identifier BOTH = MekanismUtils.getResource(ResourceType.GUI, "container_edit_mode_both.png");
+    private static final Identifier FILL = MekanismUtils.getResource(ResourceType.GUI, "container_edit_mode_fill.png");
+    private static final Identifier EMPTY = MekanismUtils.getResource(ResourceType.GUI, "container_edit_mode_empty.png");
 
     public GuiContainerEditModeTab(IGuiWrapper gui, TILE tile) {
         super(BOTH, gui, tile, gui.getWidth(), 138, 26, 18, false);
     }
 
     @Override
-    protected ResourceLocation getOverlay() {
+    protected Identifier getOverlay() {
         switch (tile.getContainerEditMode()) {
             case FILL:
                 return FILL;

@@ -15,9 +15,9 @@ import mekanism.common.inventory.GuiComponents.IDropdownEnum;
 import mekanism.common.inventory.container.item.DictionaryContainer;
 import mekanism.common.registries.MekanismItems;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 
 //TODO: Eventually it would be nice that when a tag is selected in the GUI that it shows everything else that is in that tag
 public class GuiDictionary extends GuiMekanism<DictionaryContainer> {
@@ -26,9 +26,9 @@ public class GuiDictionary extends GuiMekanism<DictionaryContainer> {
     private GuiDictionaryTarget target;
     private DictionaryTagType currentType = DictionaryTagType.ITEM;
 
-    public GuiDictionary(DictionaryContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiDictionary(DictionaryContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 5;
+        backgroundHeight += 5;
         dynamicSlots = true;
     }
 
@@ -66,8 +66,8 @@ public class GuiDictionary extends GuiMekanism<DictionaryContainer> {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && hasShiftDown() && !target.hasTarget()) {
-            for (int i = 0; i < container.inventorySlots.size(); i++) {
-                Slot slot = container.inventorySlots.get(i);
+            for (int i = 0; i < handler.slots.size(); i++) {
+                Slot slot = handler.slots.get(i);
                 if (isMouseOverSlot(slot, mouseX, mouseY)) {
                     ItemStack stack = slot.getStack();
                     if (stack.isEmpty()) {
@@ -100,12 +100,12 @@ public class GuiDictionary extends GuiMekanism<DictionaryContainer> {
         }
 
         @Override
-        public ITextComponent getTooltip() {
+        public Text getTooltip() {
             return tooltip.translate();
         }
 
         @Override
-        public ITextComponent getShortName() {
+        public Text getShortName() {
             return name.translate();
         }
     }

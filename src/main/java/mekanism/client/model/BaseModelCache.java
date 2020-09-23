@@ -2,11 +2,9 @@ package mekanism.client.model;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
-import net.minecraft.client.renderer.model.BlockModel;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.IUnbakedModel;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.util.ResourceLocation;
+
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.ModelLoader;
@@ -17,7 +15,7 @@ import net.minecraftforge.client.model.obj.OBJModel.ModelSettings;
 
 public class BaseModelCache {
 
-    private final Map<ResourceLocation, ModelData> modelMap = new Object2ObjectOpenHashMap<>();
+    private final Map<Identifier, ModelData> modelMap = new Object2ObjectOpenHashMap<>();
 
     public void onBake(ModelBakeEvent evt) {
         modelMap.values().forEach(m -> m.reload(evt));
@@ -27,13 +25,13 @@ public class BaseModelCache {
         modelMap.values().forEach(ModelData::setup);
     }
 
-    protected OBJModelData registerOBJ(ResourceLocation rl) {
+    protected OBJModelData registerOBJ(Identifier rl) {
         OBJModelData data = new OBJModelData(rl);
         modelMap.put(rl, data);
         return data;
     }
 
-    protected JSONModelData registerJSON(ResourceLocation rl) {
+    protected JSONModelData registerJSON(Identifier rl) {
         JSONModelData data = new JSONModelData(rl);
         modelMap.put(rl, data);
         return data;
@@ -43,10 +41,10 @@ public class BaseModelCache {
 
         protected IModelGeometry<?> model;
 
-        protected final ResourceLocation rl;
-        private final Map<IModelConfiguration, IBakedModel> bakedMap = new Object2ObjectOpenHashMap<>();
+        protected final Identifier rl;
+        private final Map<IModelConfiguration, BakedModel> bakedMap = new Object2ObjectOpenHashMap<>();
 
-        protected ModelData(ResourceLocation rl) {
+        protected ModelData(Identifier rl) {
             this.rl = rl;
         }
 
@@ -57,7 +55,7 @@ public class BaseModelCache {
         protected void setup() {
         }
 
-        public IBakedModel bake(IModelConfiguration config) {
+        public BakedModel bake(IModelConfiguration config) {
             return bakedMap.computeIfAbsent(config, c -> model.bake(c, ModelLoader.instance(), ModelLoader.defaultTextureGetter(), SimpleModelTransform.IDENTITY, ItemOverrideList.EMPTY, rl));
         }
 
@@ -68,7 +66,7 @@ public class BaseModelCache {
 
     public static class OBJModelData extends ModelData {
 
-        private OBJModelData(ResourceLocation rl) {
+        private OBJModelData(Identifier rl) {
             super(rl);
         }
 
@@ -81,9 +79,9 @@ public class BaseModelCache {
 
     public static class JSONModelData extends ModelData {
 
-        private IBakedModel bakedModel;
+        private BakedModel bakedModel;
 
-        private JSONModelData(ResourceLocation rl) {
+        private JSONModelData(Identifier rl) {
             super(rl);
         }
 
@@ -102,7 +100,7 @@ public class BaseModelCache {
             ModelLoader.addSpecialModel(rl);
         }
 
-        public IBakedModel getBakedModel() {
+        public BakedModel getBakedModel() {
             return bakedModel;
         }
     }

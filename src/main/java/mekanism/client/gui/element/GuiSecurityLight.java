@@ -6,11 +6,11 @@ import javax.annotation.Nonnull;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiSecurityLight extends GuiTexturedElement {
 
-    private static final ResourceLocation LIGHTS = MekanismUtils.getResource(ResourceType.GUI, "security_lights.png");
+    private static final Identifier LIGHTS = MekanismUtils.getResource(ResourceType.GUI, "security_lights.png");
     private final GuiInnerScreen screen;
     private final IntSupplier lightSupplier;
 
@@ -24,7 +24,7 @@ public class GuiSecurityLight extends GuiTexturedElement {
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
         screen.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        minecraft.textureManager.bindTexture(getResource());
-        blit(matrix, x + 1, y + 1, 6 * lightSupplier.getAsInt(), 0, width - 2, height - 2, 18, 6);
+        minecraft.getTextureManager().bindTexture(getResource());
+        drawTexture(matrix, x + 1, y + 1, 6 * lightSupplier.getAsInt(), 0, width - 2, height - 2, 18, 6);
     }
 }

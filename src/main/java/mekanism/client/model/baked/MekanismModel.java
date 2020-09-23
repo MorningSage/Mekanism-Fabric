@@ -15,27 +15,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+
+import mekanism._helpers.IMultipartModelGeometry;
 import mekanism.client.render.lib.Quad;
 import mekanism.client.render.lib.QuadTransformation;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.BlockModel;
-import net.minecraft.client.renderer.model.BlockPart;
-import net.minecraft.client.renderer.model.BlockPartFace;
-import net.minecraft.client.renderer.model.IModelTransform;
-import net.minecraft.client.renderer.model.IUnbakedModel;
-import net.minecraft.client.renderer.model.ModelBakery;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.MissingTextureSprite;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.json.ModelElement;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.geometry.IModelGeometryPart;
-import net.minecraftforge.client.model.geometry.IMultipartModelGeometry;
 
 public class MekanismModel implements IMultipartModelGeometry<MekanismModel> {
 
@@ -50,6 +42,7 @@ public class MekanismModel implements IMultipartModelGeometry<MekanismModel> {
         public static final Loader INSTANCE = new Loader();
 
         private Loader() {
+            
         }
 
         @Override
@@ -61,9 +54,9 @@ public class MekanismModel implements IMultipartModelGeometry<MekanismModel> {
         public MekanismModel read(@Nonnull JsonDeserializationContext ctx, JsonObject modelContents) {
             Multimap<String, BlockPartWrapper> multimap = HashMultimap.create();
             if (modelContents.has("elements")) {
-                for (JsonElement element : JSONUtils.getJsonArray(modelContents, "elements")) {
+                for (JsonElement element : JsonHelper.getArray(modelContents, "elements")) {
                     JsonObject obj = element.getAsJsonObject();
-                    BlockPart part = ctx.deserialize(element, BlockPart.class);
+                    ModelElement part = ctx.deserialize(element, ModelElement.class);
                     String name = obj.has("name") ? obj.get("name").getAsString() : "undefined";
                     BlockPartWrapper wrapper = new BlockPartWrapper(name, part);
                     multimap.put(name, wrapper);
@@ -91,16 +84,16 @@ public class MekanismModel implements IMultipartModelGeometry<MekanismModel> {
     public static class BlockPartWrapper implements IModelGeometryPart {
 
         private final String name;
-        private final BlockPart blockPart;
+        private final ModelElement blockPart;
 
         private final Object2IntMap<BlockPartFace> litFaceMap = new Object2IntOpenHashMap<>();
 
-        public BlockPartWrapper(String name, BlockPart blockPart) {
+        public BlockPartWrapper(String name, ModelElement blockPart) {
             this.name = name;
             this.blockPart = blockPart;
         }
 
-        public BlockPart getPart() {
+        public ModelElement getPart() {
             return blockPart;
         }
 
@@ -115,7 +108,7 @@ public class MekanismModel implements IMultipartModelGeometry<MekanismModel> {
 
         @Override
         public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform,
-              ResourceLocation modelLocation) {
+              Identifier modelLocation) {
             for (Direction direction : blockPart.mapFaces.keySet()) {
                 BlockPartFace face = blockPart.mapFaces.get(direction);
                 TextureAtlasSprite sprite = spriteGetter.apply(owner.resolveTexture(face.texture));

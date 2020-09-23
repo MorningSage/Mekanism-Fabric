@@ -5,9 +5,7 @@ import java.lang.ref.WeakReference;
 import javax.annotation.Nonnull;
 import mekanism.common.Mekanism;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
 
 // Global, shared FakePlayer for Mekanism-specific uses

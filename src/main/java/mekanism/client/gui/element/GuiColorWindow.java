@@ -1,5 +1,9 @@
 package mekanism.client.gui.element;
 
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.function.Consumer;
@@ -16,18 +20,14 @@ import mekanism.common.lib.Color;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.text.TextUtils;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 public class GuiColorWindow extends GuiWindow {
 
-    private static final ResourceLocation HUE_PICKER = MekanismUtils.getResource(ResourceType.GUI, "color_picker.png");
+    private static final Identifier HUE_PICKER = MekanismUtils.getResource(ResourceType.GUI, "color_picker.png");
 
     private final GuiTextField textField;
 
@@ -100,14 +100,14 @@ public class GuiColorWindow extends GuiWindow {
         RenderSystem.defaultBlendFunc();
         RenderSystem.shadeModel(GL11.GL_SMOOTH);
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
-        Matrix4f matrix4f = matrix.getLast().getMatrix();
-        buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(matrix4f, x, y + height, 0).color(bl.rf(), bl.gf(), bl.bf(), bl.af()).endVertex();
-        buffer.pos(matrix4f, x + width, y + height, 0).color(br.rf(), br.gf(), br.bf(), br.af()).endVertex();
-        buffer.pos(matrix4f, x + width, y, 0).color(tr.rf(), tr.gf(), tr.bf(), tr.af()).endVertex();
-        buffer.pos(matrix4f, x, y, 0).color(tl.rf(), tl.gf(), tl.bf(), tl.af()).endVertex();
-        buffer.finishDrawing();
-        WorldVertexBufferUploader.draw(buffer);
+        Matrix4f matrix4f = matrix.peek().getModel();
+        buffer.begin(7, VertexFormats.POSITION_COLOR);
+        buffer.vertex(matrix4f, x, y + height, 0).color(bl.rf(), bl.gf(), bl.bf(), bl.af()).next();
+        buffer.vertex(matrix4f, x + width, y + height, 0).color(br.rf(), br.gf(), br.bf(), br.af()).next();
+        buffer.vertex(matrix4f, x + width, y, 0).color(tr.rf(), tr.gf(), tr.bf(), tr.af()).next();
+        buffer.vertex(matrix4f, x, y, 0).color(tl.rf(), tl.gf(), tl.bf(), tl.af()).next();
+        buffer.end();
+        BufferRenderer.draw(buffer);
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -176,7 +176,7 @@ public class GuiColorWindow extends GuiWindow {
         @Override
         public void renderToolTip(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
             super.renderToolTip(matrix, mouseX, mouseY);
-            ITextComponent hex = MekanismLang.GENERIC_HEX.translateColored(EnumColor.GRAY, TextUtils.hex(false, 3, getColor().rgb()));
+            Text hex = MekanismLang.GENERIC_HEX.translateColored(EnumColor.GRAY, TextUtils.hex(false, 3, getColor().rgb()));
             guiObj.displayTooltip(matrix, hex, mouseX, mouseY);
         }
 
@@ -243,9 +243,9 @@ public class GuiColorWindow extends GuiWindow {
         public void renderBackgroundOverlay(MatrixStack matrix, int mouseX, int mouseY) {
             super.renderBackgroundOverlay(matrix, mouseX, mouseY);
             drawColorBar(matrix, getButtonX(), getButtonY(), getButtonWidth(), getButtonHeight());
-            minecraft.textureManager.bindTexture(HUE_PICKER);
+            minecraft.getTextureManager().bindTexture(HUE_PICKER);
             int posX = Math.round((hue / 360F) * (getButtonWidth() - 3));
-            blit(matrix, getButtonX() - 2 + posX, getButtonY() - 2, 0, 0, 7, 12, 12, 12);
+            drawTexture(matrix, getButtonX() - 2 + posX, getButtonY() - 2, 0, 0, 7, 12, 12, 12);
             GuiUtils.fill(matrix, getButtonX() + posX, getButtonY(), 3, 8, Color.hsv(hue, 1, 1).argb());
         }
 

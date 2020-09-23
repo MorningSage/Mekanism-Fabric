@@ -37,11 +37,11 @@ import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiLogisticalSorter extends GuiFilterHolder<SorterFilter<?>, TileEntityLogisticalSorter, MekanismTileContainer<TileEntityLogisticalSorter>> {
 
-    public GuiLogisticalSorter(MekanismTileContainer<TileEntityLogisticalSorter> container, PlayerInventory inv, ITextComponent title) {
+    public GuiLogisticalSorter(MekanismTileContainer<TileEntityLogisticalSorter> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
     }
 

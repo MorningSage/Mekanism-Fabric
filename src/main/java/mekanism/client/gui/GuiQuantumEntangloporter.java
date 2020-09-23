@@ -31,7 +31,7 @@ import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.OwnerDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuantumEntangloporter, MekanismTileContainer<TileEntityQuantumEntangloporter>> {
 
@@ -43,12 +43,12 @@ public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuan
     private GuiTextField frequencyField;
     private boolean privateMode;
 
-    public GuiQuantumEntangloporter(MekanismTileContainer<TileEntityQuantumEntangloporter> container, PlayerInventory inv, ITextComponent title) {
+    public GuiQuantumEntangloporter(MekanismTileContainer<TileEntityQuantumEntangloporter> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         if (tile.getFreq() != null) {
             privateMode = tile.getFreq().isPrivate();
         }
-        ySize += 64;
+        backgroundHeight += 64;
         dynamicSlots = true;
     }
 
@@ -96,8 +96,8 @@ public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuan
             return Arrays.asList(MekanismLang.STORING.translate(storing), MekanismLang.MATRIX_INPUT_RATE.translate(rate));
         }, this));
         addButton(new GuiHeatTab(() -> {
-            ITextComponent transfer = MekanismUtils.getTemperatureDisplay(tile.getLastTransferLoss(), TemperatureUnit.KELVIN, false);
-            ITextComponent environment = MekanismUtils.getTemperatureDisplay(tile.getLastEnvironmentLoss(), TemperatureUnit.KELVIN, false);
+            Text transfer = MekanismUtils.getTemperatureDisplay(tile.getLastTransferLoss(), TemperatureUnit.KELVIN, false);
+            Text environment = MekanismUtils.getTemperatureDisplay(tile.getLastEnvironmentLoss(), TemperatureUnit.KELVIN, false);
             return Arrays.asList(MekanismLang.TRANSFERRED_RATE.translate(transfer), MekanismLang.DISSIPATED_RATE.translate(environment));
         }, this));
         updateButtons();
@@ -109,7 +109,7 @@ public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuan
         }
     }
 
-    public ITextComponent getSecurity(Frequency freq) {
+    public Text getSecurity(Frequency freq) {
         if (freq.isPublic()) {
             return MekanismLang.PUBLIC.translate();
         }
@@ -171,9 +171,9 @@ public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuan
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         renderTitleText(matrix, 4);
         drawString(matrix, OwnerDisplay.of(tile.getSecurity().getOwnerUUID(), tile.getSecurity().getClientOwner()).getTextComponent(), 8, (getYSize() - 96) + 4, titleTextColor());
-        ITextComponent frequencyComponent = MekanismLang.FREQUENCY.translate();
+        Text frequencyComponent = MekanismLang.FREQUENCY.translate();
         drawString(matrix, frequencyComponent, 32, 81, titleTextColor());
-        ITextComponent securityComponent = MekanismLang.SECURITY.translate("");
+        Text securityComponent = MekanismLang.SECURITY.translate("");
         drawString(matrix, securityComponent, 32, 91, titleTextColor());
         Frequency frequency = tile.getFreq();
         int frequencyOffset = getStringWidth(frequencyComponent) + 1;
@@ -181,7 +181,7 @@ public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuan
             drawString(matrix, MekanismLang.NONE.translateColored(EnumColor.DARK_RED), 32 + frequencyOffset, 81, subheadingTextColor());
             drawString(matrix, MekanismLang.NONE.translateColored(EnumColor.DARK_RED), 32 + getStringWidth(securityComponent), 91, subheadingTextColor());
         } else {
-            drawTextScaledBound(matrix, frequency.getName(), 32 + frequencyOffset, 81, subheadingTextColor(), xSize - 32 - frequencyOffset - 4);
+            drawTextScaledBound(matrix, frequency.getName(), 32 + frequencyOffset, 81, subheadingTextColor(), backgroundWidth - 32 - frequencyOffset - 4);
             drawString(matrix, getSecurity(frequency), 32 + getStringWidth(securityComponent), 91, subheadingTextColor());
         }
         drawTextScaledBound(matrix, MekanismLang.SET.translate(), 27, 104, titleTextColor(), 20);

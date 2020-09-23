@@ -1,5 +1,10 @@
 package mekanism.client.gui;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Arrays;
@@ -9,14 +14,9 @@ import javax.annotation.Nonnull;
 import mekanism.api.IDisableableEnum;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.item.interfaces.IRadialSelectorEnum;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 public class GuiRadialSelector<TYPE extends Enum<TYPE> & IRadialSelectorEnum<TYPE>> extends Screen {
@@ -26,7 +26,7 @@ public class GuiRadialSelector<TYPE extends Enum<TYPE> & IRadialSelectorEnum<TYP
     private static final float INNER = 40, OUTER = 100;
     private static final float SELECT_RADIUS = 10;
 
-    private final Minecraft minecraft = Minecraft.getInstance();
+    private final MinecraftClient minecraft = MinecraftClient.getInstance();
     private final Class<TYPE> enumClass;
     private final TYPE[] types;
     private final Supplier<TYPE> curSupplier;
@@ -36,7 +36,7 @@ public class GuiRadialSelector<TYPE extends Enum<TYPE> & IRadialSelectorEnum<TYP
     private TYPE selection = null;
 
     public GuiRadialSelector(Class<TYPE> enumClass, Supplier<TYPE> curSupplier, Consumer<TYPE> changeHandler) {
-        super(new StringTextComponent("Radial Selector Screen"));
+        super(new LiteralText("Radial Selector Screen"));
         this.enumClass = enumClass;
         this.curSupplier = curSupplier;
         this.changeHandler = changeHandler;
@@ -47,8 +47,8 @@ public class GuiRadialSelector<TYPE extends Enum<TYPE> & IRadialSelectorEnum<TYP
     @Override
     public void render(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTick) {
         // center of screen
-        float centerX = minecraft.getMainWindow().getScaledWidth() / 2F;
-        float centerY = minecraft.getMainWindow().getScaledHeight() / 2F;
+        float centerX = minecraft.getWindow().getScaledWidth() / 2F;
+        float centerY = minecraft.getWindow().getScaledHeight() / 2F;
 
         matrix.push();
         RenderSystem.enableBlend();
@@ -146,14 +146,14 @@ public class GuiRadialSelector<TYPE extends Enum<TYPE> & IRadialSelectorEnum<TYP
             float x = (float) Math.cos(angle) * (INNER + OUTER) / 2F;
             float y = (float) Math.sin(angle) * (INNER + OUTER) / 2F;
             // draw icon
-            minecraft.textureManager.bindTexture(type.getIcon());
-            blit(matrix, Math.round(x - 12), Math.round(y - 20), 24, 24, 0, 0, 18, 18, 18, 18);
+            minecraft.getTextureManager().bindTexture(type.getIcon());
+            drawTexture(matrix, Math.round(x - 12), Math.round(y - 20), 24, 24, 0, 0, 18, 18, 18, 18);
             // draw label
             matrix.push();
-            int width = minecraft.fontRenderer.func_238414_a_(type.getShortText());
+            int width = minecraft.textRenderer.getWidth(type.getShortText());
             matrix.translate(x, y, 0);
             matrix.scale(0.6F, 0.6F, 0.6F);
-            minecraft.fontRenderer.func_238422_b_(matrix, type.getShortText(), -width / 2F, 8, 0xCCFFFFFF);
+            minecraft.textRenderer.draw(matrix, type.getShortText(), -width / 2F, 8, 0xCCFFFFFF);
             matrix.pop();
             position++;
         }
@@ -186,16 +186,16 @@ public class GuiRadialSelector<TYPE extends Enum<TYPE> & IRadialSelectorEnum<TYP
 
     private void drawTorus(MatrixStack matrix, float startAngle, float sizeAngle) {
         BufferBuilder vertexBuffer = Tessellator.getInstance().getBuffer();
-        Matrix4f matrix4f = matrix.getLast().getMatrix();
-        vertexBuffer.begin(GL11.GL_QUAD_STRIP, DefaultVertexFormats.POSITION);
+        Matrix4f matrix4f = matrix.peek().getModel();
+        vertexBuffer.begin(GL11.GL_QUAD_STRIP, VertexFormats.POSITION);
         float draws = DRAWS * (sizeAngle / 360F);
         for (int i = 0; i <= draws; i++) {
             float angle = (float) Math.toRadians(startAngle + (i / DRAWS) * 360);
-            vertexBuffer.pos(matrix4f, (float) (OUTER * Math.cos(angle)), (float) (OUTER * Math.sin(angle)), 0).endVertex();
-            vertexBuffer.pos(matrix4f, (float) (INNER * Math.cos(angle)), (float) (INNER * Math.sin(angle)), 0).endVertex();
+            vertexBuffer.vertex(matrix4f, (float) (OUTER * Math.cos(angle)), (float) (OUTER * Math.sin(angle)), 0).next();
+            vertexBuffer.vertex(matrix4f, (float) (INNER * Math.cos(angle)), (float) (INNER * Math.sin(angle)), 0).next();
         }
-        vertexBuffer.finishDrawing();
-        WorldVertexBufferUploader.draw(vertexBuffer);
+        vertexBuffer.end();
+        BufferRenderer.draw(vertexBuffer);
     }
 
     public void updateSelection() {

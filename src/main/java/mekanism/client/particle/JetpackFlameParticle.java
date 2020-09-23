@@ -1,15 +1,11 @@
 package mekanism.client.particle;
 
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import javax.annotation.Nonnull;
-import net.minecraft.client.Minecraft;
+
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.FlameParticle;
-import net.minecraft.client.particle.IAnimatedSprite;
-import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particles.BasicParticleType;
 
 public class JetpackFlameParticle extends FlameParticle {
 
@@ -17,9 +13,11 @@ public class JetpackFlameParticle extends FlameParticle {
         super(world, posX, posY, posZ, velX, velY, velZ);
     }
 
+
+
     @Override
     public int getBrightnessForRender(float partialTick) {
-        return 190 + (int) (20F * (1.0F - Minecraft.getInstance().gameSettings.gamma));
+        return 190 + (int) (20F * (1.0F - MinecraftClient.getInstance().gameSettings.gamma));
     }
 
     @Override

@@ -13,7 +13,7 @@ import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.lib.Color;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -44,9 +44,9 @@ public class GuiTextField extends GuiRelativeElement {
     public GuiTextField(IGuiWrapper gui, int x, int y, int width, int height) {
         super(gui, x, y, width, height);
 
-        textField = new TextFieldWidget(getFont(), this.x, this.y, width, height, StringTextComponent.EMPTY);
-        textField.setEnableBackgroundDrawing(false);
-        textField.setResponder(s -> {
+        textField = new TextFieldWidget(getFont(), this.x, this.y, width, height, LiteralText.EMPTY);
+        textField.setHasBorder(false);
+        textField.setChangedListener(s -> {
             if (responder != null) {
                 responder.accept(s);
             }
@@ -195,8 +195,8 @@ public class GuiTextField extends GuiRelativeElement {
         }
         MekanismRenderer.resetColor();
         if (iconType != null) {
-            minecraft.textureManager.bindTexture(iconType.getIcon());
-            blit(matrix, x + 2, y + (height / 2) - (int) Math.ceil(iconType.getHeight() / 2F), 0, 0, iconType.getWidth(), iconType.getHeight(), iconType.getWidth(), iconType.getHeight());
+            minecraft.getTextureManager().bindTexture(iconType.getIcon());
+            drawTexture(matrix, x + 2, y + (height / 2) - (int) Math.ceil(iconType.getHeight() / 2F), 0, 0, iconType.getWidth(), iconType.getHeight(), iconType.getWidth(), iconType.getHeight());
         }
     }
 
@@ -253,28 +253,28 @@ public class GuiTextField extends GuiRelativeElement {
     }
 
     public void setMaxStringLength(int length) {
-        textField.setMaxStringLength(length);
+        textField.setMaxLength(length);
     }
 
     public void setTextColor(int color) {
-        textField.setTextColor(color);
+        textField.setEditableColor(color);
     }
 
     public void setEnabled(boolean enabled) {
-        textField.setEnabled(enabled);
+        textField.setEditable(enabled);
     }
 
     @Override
     public void setFocused(boolean focused) {
         super.setFocused(focused);
-        textField.setFocused2(focused);
+        textField.setSelected(focused);
         if (focused) {
             guiObj.focusChange(this);
         }
     }
 
     public boolean canWrite() {
-        return textField.canWrite();
+        return textField.isActive();
     }
 
     public void setText(String text) {

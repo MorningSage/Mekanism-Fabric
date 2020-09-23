@@ -7,11 +7,11 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.laser.TileEntityLaserTractorBeam;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiLaserTractorBeam extends GuiMekanismTile<TileEntityLaserTractorBeam, MekanismTileContainer<TileEntityLaserTractorBeam>> {
 
-    public GuiLaserTractorBeam(MekanismTileContainer<TileEntityLaserTractorBeam> container, PlayerInventory inv, ITextComponent title) {
+    public GuiLaserTractorBeam(MekanismTileContainer<TileEntityLaserTractorBeam> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

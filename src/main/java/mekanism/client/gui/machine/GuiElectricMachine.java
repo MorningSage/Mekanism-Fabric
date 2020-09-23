@@ -15,11 +15,11 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiElectricMachine<TILE extends TileEntityElectricMachine, CONTAINER extends MekanismTileContainer<TILE>> extends GuiConfigurableTile<TILE, CONTAINER> {
 
-    public GuiElectricMachine(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    public GuiElectricMachine(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

@@ -19,7 +19,7 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.StackUtils;
 import mekanism.common.util.text.BooleanStateDisplay.YesNo;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.sound.SoundEvents;
 
 import java.util.function.Consumer;
 
@@ -43,9 +43,9 @@ public interface GuiMinerFilterHelper extends GuiFilterHelper<TileEntityDigitalM
 
     default void renderReplaceStack(MatrixStack matrix, IGuiWrapper gui, MinerFilter<?> filter) {
         if (!filter.replaceStack.isEmpty()) {
-            gui.getItemRenderer().zLevel += 200;
+            gui.getItemRenderer().zOffset += 200;
             gui.renderItem(matrix, filter.replaceStack, getRelativeX() + 149, getRelativeY() + 19);
-            gui.getItemRenderer().zLevel -= 200;
+            gui.getItemRenderer().zOffset -= 200;
         }
     }
 

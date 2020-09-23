@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.RelativeSide;
 import mekanism.api.inventory.IInventorySlot;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public class InventorySlotHolder implements IInventorySlotHolder {
 

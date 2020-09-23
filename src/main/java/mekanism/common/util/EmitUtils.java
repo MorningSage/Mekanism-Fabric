@@ -8,9 +8,9 @@ import mekanism.common.lib.distribution.IntegerSplitInfo;
 import mekanism.common.lib.distribution.LongSplitInfo;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class EmitUtils {
@@ -103,12 +103,12 @@ public class EmitUtils {
      * @param sides  - sides to search
      * @param action - action to complete
      */
-    public static void forEachSide(World world, BlockPos center, Iterable<Direction> sides, BiConsumer<TileEntity, Direction> action) {
+    public static void forEachSide(World world, BlockPos center, Iterable<Direction> sides, BiConsumer<BlockEntity, Direction> action) {
         if (sides != null) {
             //Loop provided sides
             for (Direction side : sides) {
                 //Get tile and provide if not null and the block is loaded, prevents ghost chunk loading
-                TileEntity tile = MekanismUtils.getTileEntity(world, center.offset(side));
+                BlockEntity tile = MekanismUtils.getTileEntity(world, center.offset(side));
                 if (tile != null) {
                     action.accept(tile, side);
                 }

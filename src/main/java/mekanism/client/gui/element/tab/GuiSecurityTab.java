@@ -1,5 +1,7 @@
 package mekanism.client.gui.element.tab;
 
+import net.fabricmc.api.EnvType;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import mekanism.api.text.EnumColor;
 import mekanism.client.MekanismClient;
@@ -22,21 +24,19 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.SecurityUtils;
 import mekanism.common.util.text.OwnerDisplay;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraft.util.Identifier;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class GuiSecurityTab<TILE extends TileEntity & ISecurityTile> extends GuiInsetElement<TILE> {
+public class GuiSecurityTab<TILE extends BlockEntity & ISecurityTile> extends GuiInsetElement<TILE> {
 
-    private static final ResourceLocation PUBLIC = MekanismUtils.getResource(ResourceType.GUI, "public.png");
-    private static final ResourceLocation PRIVATE = MekanismUtils.getResource(ResourceType.GUI, "private.png");
-    private static final ResourceLocation PROTECTED = MekanismUtils.getResource(ResourceType.GUI, "protected.png");
+    private static final Identifier PUBLIC = MekanismUtils.getResource(ResourceType.GUI, "public.png");
+    private static final Identifier PRIVATE = MekanismUtils.getResource(ResourceType.GUI, "private.png");
+    private static final Identifier PROTECTED = MekanismUtils.getResource(ResourceType.GUI, "protected.png");
 
     private final Hand currentHand;
     private boolean isItem;
@@ -58,7 +58,7 @@ public class GuiSecurityTab<TILE extends TileEntity & ISecurityTile> extends Gui
     }
 
     @Override
-    protected ResourceLocation getOverlay() {
+    protected Identifier getOverlay() {
         SecurityMode mode = getSecurity();
         SecurityData data = MekanismClient.clientSecurityMap.get(getOwner());
         if (data != null && data.override) {
@@ -75,10 +75,10 @@ public class GuiSecurityTab<TILE extends TileEntity & ISecurityTile> extends Gui
 
     @Override
     public void renderToolTip(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
-        ITextComponent securityComponent = MekanismLang.SECURITY.translateColored(EnumColor.GRAY, isItem ? SecurityUtils.getSecurity(getItem(), Dist.CLIENT)
-                                                                                                         : SecurityUtils.getSecurity(tile, Dist.CLIENT));
-        ITextComponent ownerComponent = OwnerDisplay.of(minecraft.player, getOwner(), getOwnerUsername()).getTextComponent();
-        if (isItem ? SecurityUtils.isOverridden(getItem(), Dist.CLIENT) : SecurityUtils.isOverridden(tile, Dist.CLIENT)) {
+        Text securityComponent = MekanismLang.SECURITY.translateColored(EnumColor.GRAY, isItem ? SecurityUtils.getSecurity(getItem(), EnvType.CLIENT)
+                                                                                                         : SecurityUtils.getSecurity(tile, EnvType.CLIENT));
+        Text ownerComponent = OwnerDisplay.of(minecraft.player, getOwner(), getOwnerUsername()).getTextComponent();
+        if (isItem ? SecurityUtils.isOverridden(getItem(), EnvType.CLIENT) : SecurityUtils.isOverridden(tile, EnvType.CLIENT)) {
             displayTooltips(matrix, Arrays.asList(securityComponent, ownerComponent, MekanismLang.SECURITY_OVERRIDDEN.translateColored(EnumColor.RED)), mouseX, mouseY);
         } else {
             displayTooltips(matrix, Arrays.asList(securityComponent, ownerComponent), mouseX, mouseY);
@@ -126,14 +126,14 @@ public class GuiSecurityTab<TILE extends TileEntity & ISecurityTile> extends Gui
     }
 
     private ItemStack getItem() {
-        return minecraft.player.getHeldItem(currentHand);
+        return minecraft.player.getStackInHand(currentHand);
     }
 
     @Override
     public void onClick(double mouseX, double mouseY) {
         if (MekanismConfig.general.allowProtection.get()) {
             UUID owner = getOwner();
-            if (owner != null && minecraft.player.getUniqueID().equals(owner)) {
+            if (owner != null && minecraft.player.getUuid().equals(owner)) {
                 if (isItem) {
                     Mekanism.packetHandler.sendToServer(new PacketSecurityMode(currentHand, getSecurity().getNext()));
                 } else {

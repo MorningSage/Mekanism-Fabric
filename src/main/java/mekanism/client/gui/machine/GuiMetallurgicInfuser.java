@@ -16,11 +16,11 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.machine.TileEntityMetallurgicInfuser;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiMetallurgicInfuser extends GuiConfigurableTile<TileEntityMetallurgicInfuser, MekanismTileContainer<TileEntityMetallurgicInfuser>> {
 
-    public GuiMetallurgicInfuser(MekanismTileContainer<TileEntityMetallurgicInfuser> container, PlayerInventory inv, ITextComponent title) {
+    public GuiMetallurgicInfuser(MekanismTileContainer<TileEntityMetallurgicInfuser> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

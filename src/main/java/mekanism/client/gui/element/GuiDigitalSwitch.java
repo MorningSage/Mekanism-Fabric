@@ -1,5 +1,7 @@
 package mekanism.client.gui.element;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nonnull;
@@ -8,23 +10,21 @@ import mekanism.common.MekanismLang;
 import mekanism.common.registries.MekanismSounds;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiDigitalSwitch extends GuiTexturedElement {
 
-    public static final ResourceLocation SWITCH = MekanismUtils.getResource(ResourceType.GUI, "switch/switch.png");
+    public static final Identifier SWITCH = MekanismUtils.getResource(ResourceType.GUI, "switch/switch.png");
     public static final int BUTTON_SIZE_X = 15, BUTTON_SIZE_Y = 8;
 
     private final SwitchType type;
-    private final ResourceLocation icon;
+    private final Identifier icon;
     private final BooleanSupplier stateSupplier;
-    private final ITextComponent tooltip;
+    private final Text tooltip;
     private final Runnable onToggle;
 
-    public GuiDigitalSwitch(IGuiWrapper gui, int x, int y, ResourceLocation icon, BooleanSupplier stateSupplier, ITextComponent tooltip,
+    public GuiDigitalSwitch(IGuiWrapper gui, int x, int y, Identifier icon, BooleanSupplier stateSupplier, Text tooltip,
           Runnable onToggle, SwitchType type) {
         super(SWITCH, gui, x, y, type.sizeX, type.sizeY);
         this.type = type;
@@ -42,12 +42,12 @@ public class GuiDigitalSwitch extends GuiTexturedElement {
     @Override
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        minecraft.textureManager.bindTexture(getResource());
-        blit(matrix, x + type.switchX, y + type.switchY, 0, stateSupplier.getAsBoolean() ? 0 : BUTTON_SIZE_Y, BUTTON_SIZE_X, BUTTON_SIZE_Y, BUTTON_SIZE_X, BUTTON_SIZE_Y * 2);
-        blit(matrix, x + type.switchX, y + type.switchY + BUTTON_SIZE_Y + 1, 0, stateSupplier.getAsBoolean() ? BUTTON_SIZE_Y : 0, BUTTON_SIZE_X, BUTTON_SIZE_Y, BUTTON_SIZE_X, BUTTON_SIZE_Y * 2);
+        minecraft.getTextureManager().bindTexture(getResource());
+        drawTexture(matrix, x + type.switchX, y + type.switchY, 0, stateSupplier.getAsBoolean() ? 0 : BUTTON_SIZE_Y, BUTTON_SIZE_X, BUTTON_SIZE_Y, BUTTON_SIZE_X, BUTTON_SIZE_Y * 2);
+        drawTexture(matrix, x + type.switchX, y + type.switchY + BUTTON_SIZE_Y + 1, 0, stateSupplier.getAsBoolean() ? BUTTON_SIZE_Y : 0, BUTTON_SIZE_X, BUTTON_SIZE_Y, BUTTON_SIZE_X, BUTTON_SIZE_Y * 2);
 
-        minecraft.textureManager.bindTexture(icon);
-        blit(matrix, x + 6, y + 21, 0, 0, 5, 5, 5, 5);
+        minecraft.getTextureManager().bindTexture(icon);
+        drawTexture(matrix, x + 6, y + 21, 0, 0, 5, 5, 5, 5);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class GuiDigitalSwitch extends GuiTexturedElement {
 
     @Override
     public void onClick(double mouseX, double mouseY) {
-        Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
+        MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(MekanismSounds.BEEP.get(), 1.0F));
         onToggle.run();
     }
 

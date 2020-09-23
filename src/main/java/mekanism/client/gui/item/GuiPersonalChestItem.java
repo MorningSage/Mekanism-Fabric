@@ -8,20 +8,20 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.item.PersonalChestItemContainer;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiPersonalChestItem extends GuiMekanism<PersonalChestItemContainer> {
 
-    public GuiPersonalChestItem(PersonalChestItemContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiPersonalChestItem(PersonalChestItemContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 64;
+        backgroundHeight += 64;
         dynamicSlots = true;
     }
 
     @Override
     public void init() {
         super.init();
-        addButton(new GuiSecurityTab<>(this, container.getHand()));
+        addButton(new GuiSecurityTab<>(this, handler.getHand()));
     }
 
     @Override

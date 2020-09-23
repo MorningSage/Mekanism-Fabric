@@ -2,6 +2,7 @@ package mekanism.common.content.filter;
 
 import javax.annotation.Nullable;
 import mekanism.api.NBTConstants;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.common.content.miner.MinerItemStackFilter;
 import mekanism.common.content.miner.MinerMaterialFilter;
 import mekanism.common.content.miner.MinerModIDFilter;
@@ -13,9 +14,8 @@ import mekanism.common.content.transporter.SorterMaterialFilter;
 import mekanism.common.content.transporter.SorterModIDFilter;
 import mekanism.common.content.transporter.SorterTagFilter;
 import mekanism.common.tile.machine.TileEntityOredictionificator.OredictionificatorFilter;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
 
 public abstract class BaseFilter<FILTER extends BaseFilter<FILTER>> implements IFilter<FILTER> {
 
@@ -30,19 +30,19 @@ public abstract class BaseFilter<FILTER extends BaseFilter<FILTER>> implements I
     public abstract boolean equals(Object o);
 
     @Override
-    public CompoundNBT write(CompoundNBT nbtTags) {
+    public CompoundTag write(CompoundTag nbtTags) {
         nbtTags.putInt(NBTConstants.TYPE, getFilterType().ordinal());
         return nbtTags;
     }
 
     @Override
-    public void write(PacketBuffer buffer) {
-        buffer.writeEnumValue(getFilterType());
+    public void write(PacketByteBuf buffer) {
+        buffer.writeEnumConstant(getFilterType());
     }
 
     @Nullable
-    public static IFilter<?> readFromNBT(CompoundNBT nbt) {
-        if (nbt.contains(NBTConstants.TYPE, NBT.TAG_INT)) {
+    public static IFilter<?> readFromNBT(CompoundTag nbt) {
+        if (nbt.contains(NBTConstants.TYPE, NBTFlags.INT)) {
             IFilter<?> filter = fromType(FilterType.byIndexStatic(nbt.getInt(NBTConstants.TYPE)));
             if (filter != null) {
                 filter.read(nbt);
@@ -53,8 +53,8 @@ public abstract class BaseFilter<FILTER extends BaseFilter<FILTER>> implements I
     }
 
     @Nullable
-    public static IFilter<?> readFromPacket(PacketBuffer dataStream) {
-        IFilter<?> filter = fromType(dataStream.readEnumValue(FilterType.class));
+    public static IFilter<?> readFromPacket(PacketByteBuf dataStream) {
+        IFilter<?> filter = fromType(dataStream.readEnumConstant(FilterType.class));
         if (filter != null) {
             filter.read(dataStream);
         }

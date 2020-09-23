@@ -17,11 +17,11 @@ import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tier.ChemicalTankTier;
 import mekanism.common.tile.TileEntityChemicalTank;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiChemicalTank extends GuiConfigurableTile<TileEntityChemicalTank, MekanismTileContainer<TileEntityChemicalTank>> {
 
-    public GuiChemicalTank(MekanismTileContainer<TileEntityChemicalTank> container, PlayerInventory inv, ITextComponent title) {
+    public GuiChemicalTank(MekanismTileContainer<TileEntityChemicalTank> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }
@@ -31,7 +31,7 @@ public class GuiChemicalTank extends GuiConfigurableTile<TileEntityChemicalTank,
         super.init();
         addButton(new GuiMergedChemicalBar<>(this, tile, tile.getChemicalTank(), 42, 16, 116, 10, true));
         addButton(new GuiInnerScreen(this, 42, 37, 118, 28, () -> {
-            List<ITextComponent> ret = new ArrayList<>();
+            List<Text> ret = new ArrayList<>();
             Current current = tile.getChemicalTank().getCurrent();
             if (current == Current.EMPTY) {
                 ret.add(MekanismLang.CHEMICAL.translate(MekanismLang.NONE));
@@ -54,7 +54,7 @@ public class GuiChemicalTank extends GuiConfigurableTile<TileEntityChemicalTank,
         addButton(new GuiGasMode(this, getGuiLeft() + 159, getGuiTop() + 72, true, () -> tile.dumping, tile.getPos(), 0));
     }
 
-    private void addStored(List<ITextComponent> ret, IChemicalTank<?, ?> tank, ILangEntry langKey) {
+    private void addStored(List<Text> ret, IChemicalTank<?, ?> tank, ILangEntry langKey) {
         ret.add(langKey.translate(tank.getStack()));
         if (!tank.isEmpty() && tile.getTier() == ChemicalTankTier.CREATIVE) {
             ret.add(MekanismLang.INFINITE.translate());

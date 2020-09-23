@@ -8,11 +8,11 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.entity.robit.SmeltingRobitContainer;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiRobitSmelting extends GuiRobit<SmeltingRobitContainer> {
 
-    public GuiRobitSmelting(SmeltingRobitContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiRobitSmelting(SmeltingRobitContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

@@ -24,9 +24,9 @@ import mekanism.common.network.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.machine.TileEntityFormulaicAssemblicator;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 
 public class GuiFormulaicAssemblicator extends GuiConfigurableTile<TileEntityFormulaicAssemblicator, MekanismTileContainer<TileEntityFormulaicAssemblicator>> {
 
@@ -37,9 +37,9 @@ public class GuiFormulaicAssemblicator extends GuiConfigurableTile<TileEntityFor
     private MekanismButton craftAvailableButton;
     private MekanismButton autoModeButton;
 
-    public GuiFormulaicAssemblicator(MekanismTileContainer<TileEntityFormulaicAssemblicator> container, PlayerInventory inv, ITextComponent title) {
+    public GuiFormulaicAssemblicator(MekanismTileContainer<TileEntityFormulaicAssemblicator> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 64;
+        backgroundHeight += 64;
         dynamicSlots = true;
     }
 
@@ -99,7 +99,7 @@ public class GuiFormulaicAssemblicator extends GuiConfigurableTile<TileEntityFor
         if (i >= 0 && tile.formula != null && tile.formula.isValidFormula()) {
             ItemStack stack = tile.formula.input.get(i);
             if (!stack.isEmpty()) {
-                Slot slot = container.inventorySlots.get(slotIndex);
+                Slot slot = handler.slots.get(slotIndex);
                 //Only render the "correct" item in the gui slot if we don't already have that item there
                 if (slot.getStack().isEmpty() || !tile.formula.isIngredientInPos(tile.getWorld(), slot.getStack(), i)) {
                     return stack;
@@ -114,8 +114,8 @@ public class GuiFormulaicAssemblicator extends GuiConfigurableTile<TileEntityFor
         super.drawGuiContainerBackgroundLayer(matrix, partialTick, mouseX, mouseY);
         //TODO: Gui element
         SlotOverlay overlay = tile.isRecipe ? SlotOverlay.CHECK : SlotOverlay.X;
-        getMinecraft().textureManager.bindTexture(overlay.getTexture());
-        blit(matrix, getGuiLeft() + 88, getGuiTop() + 22, 0, 0, overlay.getWidth(), overlay.getHeight(), overlay.getWidth(), overlay.getHeight());
+        client.getTextureManager().bindTexture(overlay.getTexture());
+        drawTexture(matrix, getGuiLeft() + 88, getGuiTop() + 22, 0, 0, overlay.getWidth(), overlay.getHeight(), overlay.getWidth(), overlay.getHeight());
     }
 
     private boolean canEncode() {

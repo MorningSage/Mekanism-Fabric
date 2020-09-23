@@ -1,5 +1,6 @@
 package mekanism.client.gui.machine;
 
+import mekanism.api._helpers_pls_remove.FluidStack;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +21,11 @@ import mekanism.common.tile.machine.TileEntityFluidicPlenisher;
 import mekanism.common.util.text.BooleanStateDisplay.YesNo;
 import mekanism.common.util.text.EnergyDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.text.Text;
 
 public class GuiFluidicPlenisher extends GuiMekanismTile<TileEntityFluidicPlenisher, MekanismTileContainer<TileEntityFluidicPlenisher>> {
 
-    public GuiFluidicPlenisher(MekanismTileContainer<TileEntityFluidicPlenisher> container, PlayerInventory inv, ITextComponent title) {
+    public GuiFluidicPlenisher(MekanismTileContainer<TileEntityFluidicPlenisher> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }
@@ -34,7 +34,7 @@ public class GuiFluidicPlenisher extends GuiMekanismTile<TileEntityFluidicPlenis
     public void init() {
         super.init();
         addButton(new GuiInnerScreen(this, 54, 23, 80, 41, () -> {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             list.add(EnergyDisplay.of(tile.getEnergyContainer().getEnergy(), tile.getEnergyContainer().getMaxEnergy()).getTextComponent());
             list.add(MekanismLang.FINISHED.translate(YesNo.of(tile.finishedCalc)));
             FluidStack fluid = tile.fluidTank.getFluid();

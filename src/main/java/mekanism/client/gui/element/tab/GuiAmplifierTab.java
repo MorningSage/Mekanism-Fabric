@@ -11,20 +11,20 @@ import mekanism.common.network.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.laser.TileEntityLaserAmplifier;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiAmplifierTab extends GuiInsetElement<TileEntityLaserAmplifier> {
 
-    private static final ResourceLocation OFF = MekanismUtils.getResource(ResourceType.GUI, "amplifier_off.png");
-    private static final ResourceLocation ENTITY = MekanismUtils.getResource(ResourceType.GUI, "amplifier_entity.png");
-    private static final ResourceLocation CONTENTS = MekanismUtils.getResource(ResourceType.GUI, "amplifier_contents.png");
+    private static final Identifier OFF = MekanismUtils.getResource(ResourceType.GUI, "amplifier_off.png");
+    private static final Identifier ENTITY = MekanismUtils.getResource(ResourceType.GUI, "amplifier_entity.png");
+    private static final Identifier CONTENTS = MekanismUtils.getResource(ResourceType.GUI, "amplifier_contents.png");
 
     public GuiAmplifierTab(IGuiWrapper gui, TileEntityLaserAmplifier tile) {
         super(OFF, gui, tile, -26, 138, 26, 18, true);
     }
 
     @Override
-    protected ResourceLocation getOverlay() {
+    protected Identifier getOverlay() {
         switch (tile.outputMode) {
             case ENTITY_DETECTION:
                 return ENTITY;

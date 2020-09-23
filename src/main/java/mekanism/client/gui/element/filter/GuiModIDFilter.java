@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import mekanism.api._helpers_pls_remove.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.gui.IGuiWrapper;
@@ -15,9 +17,8 @@ import mekanism.common.content.filter.IModIDFilter;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public abstract class GuiModIDFilter<FILTER extends IModIDFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>>
@@ -28,8 +29,8 @@ public abstract class GuiModIDFilter<FILTER extends IModIDFilter<FILTER>, TILE e
     }
 
     @Override
-    protected List<ITextComponent> getScreenText() {
-        List<ITextComponent> list = super.getScreenText();
+    protected List<Text> getScreenText() {
+        List<Text> list = super.getScreenText();
         list.add(MekanismLang.MODID_FILTER_ID.translate(filter.getModID()));
         return list;
     }

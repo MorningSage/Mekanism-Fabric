@@ -6,12 +6,12 @@ import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiSideHolder extends GuiTexturedElement {
 
-    private static final ResourceLocation HOLDER_LEFT = MekanismUtils.getResource(ResourceType.GUI, "holder_left.png");
-    private static final ResourceLocation HOLDER_RIGHT = MekanismUtils.getResource(ResourceType.GUI, "holder_right.png");
+    private static final Identifier HOLDER_LEFT = MekanismUtils.getResource(ResourceType.GUI, "holder_left.png");
+    private static final Identifier HOLDER_RIGHT = MekanismUtils.getResource(ResourceType.GUI, "holder_right.png");
     private static final int TEXTURE_WIDTH = 26;
     private static final int TEXTURE_HEIGHT = 9;
 
@@ -31,17 +31,17 @@ public class GuiSideHolder extends GuiTexturedElement {
     @Override
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        minecraft.textureManager.bindTexture(getResource());
+        minecraft.getTextureManager().bindTexture(getResource());
         colorTab();
         //Top
-        blit(matrix, x, y, 0, 0, width, 4, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, x, y, 0, 0, width, 4, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         //Middle
         int middleHeight = height - 8;
         if (middleHeight > 0) {
-            blit(matrix, x, y + 4, width, middleHeight, 0, 4, width, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            drawTexture(matrix, x, y + 4, width, middleHeight, 0, 4, width, 1, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         }
         //Bottom
-        blit(matrix, x, y + 4 + middleHeight, 0, 5, width, 4, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        drawTexture(matrix, x, y + 4 + middleHeight, 0, 5, width, 4, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         MekanismRenderer.resetColor();
     }
 }

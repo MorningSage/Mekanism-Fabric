@@ -42,11 +42,11 @@ import mekanism.common.tile.prefab.TileEntityMultiblock;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class MultiblockData implements IMekanismInventory, IMekanismFluidHandler, IMekanismStrictEnergyHandler, ITileHeatHandler, IGasTracker, IInfusionTracker,
@@ -96,8 +96,8 @@ public class MultiblockData implements IMekanismInventory, IMekanismFluidHandler
     protected final List<IEnergyContainer> energyContainers = new ArrayList<>();
     protected final List<IHeatCapacitor> heatCapacitors = new ArrayList<>();
 
-    public MultiblockData(TileEntity tile) {
-        remoteSupplier = () -> tile.getWorld().isRemote();
+    public MultiblockData(BlockEntity tile) {
+        remoteSupplier = () -> tile.getWorld().isClient();
         worldSupplier = tile::getWorld;
     }
 
@@ -194,21 +194,21 @@ public class MultiblockData implements IMekanismInventory, IMekanismFluidHandler
         formed = false;
     }
 
-    public void readUpdateTag(CompoundNBT tag) {
+    public void readUpdateTag(CompoundTag tag) {
         NBTUtils.setIntIfPresent(tag, NBTConstants.VOLUME, this::setVolume);
         NBTUtils.setBlockPosIfPresent(tag, NBTConstants.RENDER_LOCATION, value -> renderLocation = value);
-        bounds = new VoxelCuboid(NBTUtil.readBlockPos(tag.getCompound(NBTConstants.MIN)),
-              NBTUtil.readBlockPos(tag.getCompound(NBTConstants.MAX)));
+        bounds = new VoxelCuboid(NbtHelper.toBlockPos(tag.getCompound(NBTConstants.MIN)),
+            NbtHelper.toBlockPos(tag.getCompound(NBTConstants.MAX)));
         NBTUtils.setUUIDIfPresentElse(tag, NBTConstants.INVENTORY_ID, value -> inventoryID = value, () -> inventoryID = null);
     }
 
-    public void writeUpdateTag(CompoundNBT tag) {
+    public void writeUpdateTag(CompoundTag tag) {
         tag.putInt(NBTConstants.VOLUME, getVolume());
-        tag.put(NBTConstants.RENDER_LOCATION, NBTUtil.writeBlockPos(renderLocation));
-        tag.put(NBTConstants.MIN, NBTUtil.writeBlockPos(bounds.getMinPos()));
-        tag.put(NBTConstants.MAX, NBTUtil.writeBlockPos(bounds.getMaxPos()));
+        tag.put(NBTConstants.RENDER_LOCATION, NbtHelper.fromBlockPos(renderLocation));
+        tag.put(NBTConstants.MIN, NbtHelper.fromBlockPos(bounds.getMinPos()));
+        tag.put(NBTConstants.MAX, NbtHelper.fromBlockPos(bounds.getMaxPos()));
         if (inventoryID != null) {
-            tag.putUniqueId(NBTConstants.INVENTORY_ID, inventoryID);
+            tag.putUuid(NBTConstants.INVENTORY_ID, inventoryID);
         }
     }
 

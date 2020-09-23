@@ -16,11 +16,11 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.machine.TileEntityChemicalOxidizer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiChemicalOxidizer extends GuiConfigurableTile<TileEntityChemicalOxidizer, MekanismTileContainer<TileEntityChemicalOxidizer>> {
 
-    public GuiChemicalOxidizer(MekanismTileContainer<TileEntityChemicalOxidizer> container, PlayerInventory inv, ITextComponent title) {
+    public GuiChemicalOxidizer(MekanismTileContainer<TileEntityChemicalOxidizer> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

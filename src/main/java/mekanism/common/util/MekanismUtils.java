@@ -1037,8 +1037,7 @@ public final class MekanismUtils {
         Block.dropStacks(state, world, pos, tile);
         world.removeBlock(pos, false);
     }
-
-    /**
+     /**
      * Copy of LivingEntity#onChangedPotionEffect(EffectInstance, boolean) due to not being able to AT the field.
      */
     public static void onChangedPotionEffect(LivingEntity entity, StatusEffectInstance id, boolean reapply) {

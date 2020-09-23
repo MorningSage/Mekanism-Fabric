@@ -8,7 +8,7 @@ import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.network.PacketDropperUse.TankType;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiInfusionGauge extends GuiChemicalGauge<InfuseType, InfusionStack, IInfusionTank> {
 
@@ -36,6 +36,6 @@ public class GuiInfusionGauge extends GuiChemicalGauge<InfuseType, InfusionStack
     }
 
     @Override
-    protected void addAttributeTooltips(List<ITextComponent> tooltips, InfuseType chemical) {
+    protected void addAttributeTooltips(List<Text> tooltips, InfuseType chemical) {
     }
 }

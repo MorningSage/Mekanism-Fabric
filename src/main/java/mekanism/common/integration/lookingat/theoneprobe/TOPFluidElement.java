@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import mcjty.theoneprobe.api.IElement;
 import mekanism.common.integration.lookingat.FluidElement;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 public class TOPFluidElement extends FluidElement implements IElement {
 

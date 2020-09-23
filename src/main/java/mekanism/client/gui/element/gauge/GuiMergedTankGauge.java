@@ -12,8 +12,8 @@ import mekanism.common.capabilities.chemical.dynamic.IPigmentTracker;
 import mekanism.common.capabilities.chemical.dynamic.ISlurryTracker;
 import mekanism.common.capabilities.merged.MergedTank;
 import mekanism.common.lib.transmitter.TransmissionType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.text.Text;
 
 public class GuiMergedTankGauge<HANDLER extends IMekanismFluidHandler & IGasTracker & IInfusionTracker & IPigmentTracker & ISlurryTracker> extends GuiGauge<Void>
       implements IJEIIngredientHelper {
@@ -27,7 +27,7 @@ public class GuiMergedTankGauge<HANDLER extends IMekanismFluidHandler & IGasTrac
     private final GuiPigmentGauge pigmentGauge;
     private final GuiSlurryGauge slurryGauge;
 
-    private ITextComponent label;
+    private Text label;
 
     public GuiMergedTankGauge(Supplier<MergedTank> mergedTankSupplier, Supplier<HANDLER> handlerSupplier, GaugeType type, IGuiWrapper gui, int x, int y, int width,
           int height) {
@@ -41,7 +41,7 @@ public class GuiMergedTankGauge<HANDLER extends IMekanismFluidHandler & IGasTrac
         slurryGauge = new GuiSlurryGauge(() -> this.mergedTankSupplier.get().getSlurryTank(), () -> this.handlerSupplier.get().getSlurryTanks(null), type, gui, x, y, width, height);
     }
 
-    public GuiMergedTankGauge<HANDLER> setLabel(ITextComponent label) {
+    public GuiMergedTankGauge<HANDLER> setLabel(Text label) {
         this.label = label;
         return this;
     }
@@ -86,17 +86,17 @@ public class GuiMergedTankGauge<HANDLER extends IMekanismFluidHandler & IGasTrac
     }
 
     @Override
-    public TextureAtlasSprite getIcon() {
+    public Sprite getIcon() {
         return getCurrentGauge().getIcon();
     }
 
     @Override
-    public List<ITextComponent> getTooltipText() {
+    public List<Text> getTooltipText() {
         return getCurrentGauge().getTooltipText();
     }
 
     @Override
-    public ITextComponent getLabel() {
+    public Text getLabel() {
         return label;
     }
 

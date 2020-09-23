@@ -7,7 +7,7 @@ import mekanism.common.content.network.transmitter.MechanicalPipe;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import net.minecraft.util.Direction;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 //TODO: Improve handling for fluid storage as longs
 public class FluidTransmitterSaveTarget extends Target<MechanicalPipe, Integer, @NonNull FluidStack> {

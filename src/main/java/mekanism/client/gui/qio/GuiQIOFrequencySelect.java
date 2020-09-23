@@ -25,10 +25,10 @@ import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
 import mekanism.common.lib.frequency.FrequencyManager;
 import mekanism.common.util.text.OwnerDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
 
-public abstract class GuiQIOFrequencySelect<CONTAINER extends Container> extends GuiMekanism<CONTAINER> {
+public abstract class GuiQIOFrequencySelect<CONTAINER extends ScreenHandler> extends GuiMekanism<CONTAINER> {
 
     private MekanismButton publicButton;
     private MekanismButton privateButton;
@@ -40,9 +40,9 @@ public abstract class GuiQIOFrequencySelect<CONTAINER extends Container> extends
 
     private boolean init = false;
 
-    public GuiQIOFrequencySelect(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    public GuiQIOFrequencySelect(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize -= 6;
+        backgroundHeight -= 6;
     }
 
     @Override
@@ -96,7 +96,7 @@ public abstract class GuiQIOFrequencySelect<CONTAINER extends Container> extends
         }
     }
 
-    public ITextComponent getSecurity(Frequency freq) {
+    public Text getSecurity(Frequency freq) {
         if (freq.isPublic()) {
             return MekanismLang.PUBLIC.translate();
         }
@@ -162,9 +162,9 @@ public abstract class GuiQIOFrequencySelect<CONTAINER extends Container> extends
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         drawTitleText(matrix, MekanismLang.QIO_FREQUENCY_SELECT.translate(), 5);
         drawString(matrix, OwnerDisplay.of(getOwnerUUID(), getOwnerUsername()).getTextComponent(), 8, 143, titleTextColor());
-        ITextComponent frequencyComponent = MekanismLang.FREQUENCY.translate();
+        Text frequencyComponent = MekanismLang.FREQUENCY.translate();
         drawString(matrix, frequencyComponent, 32, 84, titleTextColor());
-        ITextComponent securityComponent = MekanismLang.SECURITY.translate("");
+        Text securityComponent = MekanismLang.SECURITY.translate("");
         drawString(matrix, securityComponent, 32, 94, titleTextColor());
         Frequency frequency = getFrequency();
         int frequencyOffset = getStringWidth(frequencyComponent) + 1;
@@ -172,7 +172,7 @@ public abstract class GuiQIOFrequencySelect<CONTAINER extends Container> extends
             drawString(matrix, MekanismLang.NONE.translateColored(EnumColor.DARK_RED), 32 + frequencyOffset, 84, subheadingTextColor());
             drawString(matrix, MekanismLang.NONE.translateColored(EnumColor.DARK_RED), 32 + getStringWidth(securityComponent), 94, subheadingTextColor());
         } else {
-            drawTextScaledBound(matrix, frequency.getName(), 32 + frequencyOffset, 84, subheadingTextColor(), xSize - 32 - frequencyOffset - 4);
+            drawTextScaledBound(matrix, frequency.getName(), 32 + frequencyOffset, 84, subheadingTextColor(), backgroundWidth - 32 - frequencyOffset - 4);
             drawString(matrix, getSecurity(frequency), 32 + getStringWidth(securityComponent), 94, subheadingTextColor());
         }
         drawTextScaledBound(matrix, MekanismLang.SET.translate(), 27, 107, titleTextColor(), 20);

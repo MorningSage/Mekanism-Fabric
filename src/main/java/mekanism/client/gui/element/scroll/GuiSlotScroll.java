@@ -1,5 +1,8 @@
 package mekanism.client.gui.element.scroll;
 
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.List;
 import java.util.function.Supplier;
@@ -13,14 +16,12 @@ import mekanism.common.inventory.ISlotClickHandler.IScrollableSlot;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiSlotScroll extends GuiRelativeElement {
 
-    private static final ResourceLocation SLOTS = MekanismUtils.getResource(ResourceType.GUI_SLOT, "slots.png");
-    private static final ResourceLocation SLOTS_DARK = MekanismUtils.getResource(ResourceType.GUI_SLOT, "slots_dark.png");
+    private static final Identifier SLOTS = MekanismUtils.getResource(ResourceType.GUI_SLOT, "slots.png");
+    private static final Identifier SLOTS_DARK = MekanismUtils.getResource(ResourceType.GUI_SLOT, "slots_dark.png");
 
     private final GuiScrollBar scrollBar;
 
@@ -41,8 +42,8 @@ public class GuiSlotScroll extends GuiRelativeElement {
     @Override
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        minecraft.textureManager.bindTexture(getSlotList() == null ? SLOTS_DARK : SLOTS);
-        blit(matrix, x, y, 0, 0, xSlots * 18, ySlots * 18, 288, 288);
+        minecraft.getTextureManager().bindTexture(getSlotList() == null ? SLOTS_DARK : SLOTS);
+        drawTexture(matrix, x, y, 0, 0, xSlots * 18, ySlots * 18, 288, 288);
 
         List<IScrollableSlot> list = getSlotList();
         if (list != null) {
@@ -90,7 +91,7 @@ public class GuiSlotScroll extends GuiRelativeElement {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         super.mouseReleased(mouseX, mouseY, button);
         IScrollableSlot slot = getSlot(mouseX, mouseY, x, y);
-        clickHandler.onClick(slot, button, Screen.hasShiftDown(), minecraft.player.inventory.getItemStack());
+        clickHandler.onClick(slot, button, Screen.hasShiftDown(), minecraft.player.inventory.getCursorStack());
         return true;
     }
 
@@ -141,12 +142,12 @@ public class GuiSlotScroll extends GuiRelativeElement {
         MekanismRenderer.resetColor();
         float scale = 0.6F;
         float yAdd = 4 - (scale * 8) / 2F;
-        matrix.translate(x + 16 - getFont().getStringWidth(text) * scale, y + 9 + yAdd, 200F);
+        matrix.translate(x + 16 - getFont().getWidth(text) * scale, y + 9 + yAdd, 200F);
         matrix.scale(scale, scale, scale);
 
-        IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-        getFont().renderString(text, 0, 0, 0xFFFFFF, true, matrix.getLast().getMatrix(), buffer, false, 0, MekanismRenderer.FULL_LIGHT);
-        buffer.finish();
+        VertexConsumerProvider.Immediate buffer = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+        getFont().draw(text, 0, 0, 0xFFFFFF, true, matrix.peek().getModel(), buffer, false, 0, MekanismRenderer.FULL_LIGHT);
+        buffer.draw();
         matrix.pop();
     }
 

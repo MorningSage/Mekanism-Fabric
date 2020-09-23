@@ -17,17 +17,17 @@ import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.PacketRemoveModule;
 import mekanism.common.tile.TileEntityModificationStation;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiModificationStation extends GuiMekanismTile<TileEntityModificationStation, MekanismTileContainer<TileEntityModificationStation>> {
 
     private Module selectedModule;
     private TranslationButton removeButton;
 
-    public GuiModificationStation(MekanismTileContainer<TileEntityModificationStation> container, PlayerInventory inv, ITextComponent title) {
+    public GuiModificationStation(MekanismTileContainer<TileEntityModificationStation> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
-        ySize += 64;
+        backgroundHeight += 64;
     }
 
     @Override

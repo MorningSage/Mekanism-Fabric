@@ -24,7 +24,7 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public abstract class GuiFilterHolder<FILTER extends IFilter<?>, TILE extends TileEntityMekanism & ITileFilterHolder<FILTER>, CONTAINER extends MekanismTileContainer<TILE>>
       extends GuiMekanismTile<TILE, CONTAINER> {
@@ -35,9 +35,9 @@ public abstract class GuiFilterHolder<FILTER extends IFilter<?>, TILE extends Ti
     private static final int FILTER_COUNT = 4;
     private GuiScrollBar scrollBar;
 
-    public GuiFilterHolder(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    public GuiFilterHolder(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 86;
+        backgroundHeight += 86;
         dynamicSlots = true;
     }
 

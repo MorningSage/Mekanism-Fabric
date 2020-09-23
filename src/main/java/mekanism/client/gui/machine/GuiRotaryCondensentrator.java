@@ -25,15 +25,15 @@ import mekanism.common.network.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.machine.TileEntityRotaryCondensentrator;
 import mekanism.common.util.text.EnergyDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiRotaryCondensentrator extends GuiConfigurableTile<TileEntityRotaryCondensentrator, MekanismTileContainer<TileEntityRotaryCondensentrator>> {
 
-    private static final ResourceLocation condensentrating = Mekanism.rl("rotary_condensentrator_condensentrating");
-    private static final ResourceLocation decondensentrating = Mekanism.rl("rotary_condensentrator_decondensentrating");
+    private static final Identifier condensentrating = Mekanism.rl("rotary_condensentrator_condensentrating");
+    private static final Identifier decondensentrating = Mekanism.rl("rotary_condensentrator_decondensentrating");
 
-    public GuiRotaryCondensentrator(MekanismTileContainer<TileEntityRotaryCondensentrator> container, PlayerInventory inv, ITextComponent title) {
+    public GuiRotaryCondensentrator(MekanismTileContainer<TileEntityRotaryCondensentrator> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

@@ -18,14 +18,14 @@ import mekanism.common.tile.multiblock.TileEntitySPSCasing;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiSPS extends GuiMekanismTile<TileEntitySPSCasing, MekanismTileContainer<TileEntitySPSCasing>> {
 
-    public GuiSPS(MekanismTileContainer<TileEntitySPSCasing> container, PlayerInventory inv, ITextComponent title) {
+    public GuiSPS(MekanismTileContainer<TileEntitySPSCasing> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
-        ySize += 16;
+        backgroundHeight += 16;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class GuiSPS extends GuiMekanismTile<TileEntitySPSCasing, MekanismTileCon
         addButton(new GuiGasGauge(() -> tile.getMultiblock().inputTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 7, 17));
         addButton(new GuiGasGauge(() -> tile.getMultiblock().outputTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 151, 17));
         addButton(new GuiInnerScreen(this, 27, 17, 122, 60, () -> {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             boolean active = tile.getMultiblock().lastProcessed > 0;
             list.add(MekanismLang.STATUS.translate(active ? MekanismLang.ACTIVE.translate() : MekanismLang.IDLE.translate()));
             if (active) {
@@ -45,7 +45,7 @@ public class GuiSPS extends GuiMekanismTile<TileEntitySPSCasing, MekanismTileCon
         }).jeiCategories(MekanismBlocks.SPS_CASING.getRegistryName()));
         addButton(new GuiDynamicHorizontalRateBar(this, new IBarInfoHandler() {
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 return MekanismLang.PROGRESS.translate(TextUtils.getPercent(tile.getMultiblock().getScaledProgress()));
             }
 
@@ -53,7 +53,7 @@ public class GuiSPS extends GuiMekanismTile<TileEntitySPSCasing, MekanismTileCon
             public double getLevel() {
                 return tile.getMultiblock().getScaledProgress();
             }
-        }, 7, 79, xSize - 16, ColorFunction.scale(Color.rgbi(60, 45, 74), Color.rgbi(100, 30, 170))));
+        }, 7, 79, backgroundWidth - 16, ColorFunction.scale(Color.rgbi(60, 45, 74), Color.rgbi(100, 30, 170))));
     }
 
     @Override

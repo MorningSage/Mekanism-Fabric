@@ -5,10 +5,11 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "LivingEntityAccessor",
-    "MinecraftClientMixin",
     "WorldAccessor"
   ],
   "client": [
+    "HandledScreenAccessor",
+    "MinecraftClientMixin"
   ],
   "server": [],
   "injectors": {

@@ -14,7 +14,7 @@ import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.slot.ISlotInfo;
 import mekanism.common.tile.component.config.slot.InventorySlotInfo;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public class ConfigInventorySlotHolder extends ConfigHolder implements IInventorySlotHolder {
 

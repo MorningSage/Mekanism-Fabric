@@ -1,5 +1,7 @@
 package mekanism.client.gui.machine;
 
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -29,15 +31,13 @@ import mekanism.common.lib.effect.BoltEffect.SpawnFunction;
 import mekanism.common.tile.machine.TileEntityAntiprotonicNucleosynthesizer;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 
 public class GuiAntiprotonicNucleosynthesizer extends GuiConfigurableTile<TileEntityAntiprotonicNucleosynthesizer, MekanismTileContainer<TileEntityAntiprotonicNucleosynthesizer>> {
 
-    private static final Vector3d from = new Vector3d(47, 50, 0), to = new Vector3d(147, 50, 0);
+    private static final Vec3d from = new Vec3d(47, 50, 0), to = new Vec3d(147, 50, 0);
     private static final BoltRenderInfo boltRenderInfo = new BoltRenderInfo().color(Color.rgbad(0.45F, 0.45F, 0.5F, 1));
 
     private final BoltRenderer bolt = new BoltRenderer();
@@ -48,11 +48,11 @@ public class GuiAntiprotonicNucleosynthesizer extends GuiConfigurableTile<TileEn
           .spawn(SpawnFunction.CONSECUTIVE)
           .fade(FadeFunction.NONE);
 
-    public GuiAntiprotonicNucleosynthesizer(MekanismTileContainer<TileEntityAntiprotonicNucleosynthesizer> container, PlayerInventory inv, ITextComponent title) {
+    public GuiAntiprotonicNucleosynthesizer(MekanismTileContainer<TileEntityAntiprotonicNucleosynthesizer> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
-        ySize += 27;
-        xSize += 20;
+        backgroundHeight += 27;
+        backgroundWidth += 20;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class GuiAntiprotonicNucleosynthesizer extends GuiConfigurableTile<TileEn
         addButton(new GuiEnergyGauge(tile.getEnergyContainer(), GaugeType.SMALL_MED, this, 172, 18));
         addButton(new GuiDynamicHorizontalRateBar(this, new IBarInfoHandler() {
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 return MekanismLang.PROGRESS.translate(TextUtils.getPercent(tile.getScaledProgress()));
             }
 
@@ -77,7 +77,7 @@ public class GuiAntiprotonicNucleosynthesizer extends GuiConfigurableTile<TileEn
             public double getLevel() {
                 return tile.getScaledProgress();
             }
-        }, 5, 88, xSize - 12, ColorFunction.scale(Color.rgbi(60, 45, 74), Color.rgbi(100, 30, 170))));
+        }, 5, 88, backgroundWidth - 12, ColorFunction.scale(Color.rgbi(60, 45, 74), Color.rgbi(100, 30, 170))));
     }
 
     @Override
@@ -88,10 +88,10 @@ public class GuiAntiprotonicNucleosynthesizer extends GuiConfigurableTile<TileEn
         super.drawForegroundText(matrix, mouseX, mouseY);
         matrix.push();
         matrix.translate(0, 0, 100);
-        IRenderTypeBuffer.Impl renderer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+        VertexConsumerProvider.Immediate renderer = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
         bolt.update(this, boltSupplier.get(), MekanismRenderer.getPartialTick());
         bolt.render(MekanismRenderer.getPartialTick(), matrix, renderer);
-        renderer.finish(MekanismRenderType.MEK_LIGHTNING);
+        renderer.draw(MekanismRenderType.MEK_LIGHTNING);
         matrix.pop();
     }
 }

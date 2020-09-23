@@ -11,17 +11,18 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.NonNullList;
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 public class RecipeFormula {
 
-    public final NonNullList<ItemStack> input = NonNullList.withSize(9, ItemStack.EMPTY);
+    public final DefaultedList<ItemStack> input = DefaultedList.ofSize(9, ItemStack.EMPTY);
     @Nullable
     public ICraftingRecipe recipe;
     private final CraftingInventory dummy = MekanismUtils.getDummyCraftingInv();
 
-    public RecipeFormula(World world, NonNullList<ItemStack> inv) {
+    public RecipeFormula(World world, DefaultedList<ItemStack> inv) {
         for (int i = 0; i < 9; i++) {
             input.set(i, StackUtils.size(inv.get(i), 1));
         }
@@ -47,7 +48,7 @@ public class RecipeFormula {
 
     private void resetToRecipe() {
         for (int i = 0; i < 9; i++) {
-            dummy.setInventorySlotContents(i, input.get(i));
+            dummy.setStack(i, input.get(i));
         }
     }
 
@@ -57,7 +58,7 @@ public class RecipeFormula {
         }
         //Should always be 9 for the size
         for (int i = 0; i < craftingGridSlots.size(); i++) {
-            dummy.setInventorySlotContents(i, StackUtils.size(craftingGridSlots.get(i).getStack(), 1));
+            dummy.setStack(i, StackUtils.size(craftingGridSlots.get(i).getStack(), 1));
         }
         return recipe.matches(dummy, world);
     }
@@ -67,7 +68,7 @@ public class RecipeFormula {
             return false;
         }
         resetToRecipe();
-        dummy.setInventorySlotContents(i, stack);
+        dummy.setStack(i, stack);
         return recipe.matches(dummy, world);
     }
 
@@ -75,11 +76,11 @@ public class RecipeFormula {
         IntList ret = new IntArrayList();
         if (recipe != null) {
             for (int i = 0; i < 9; i++) {
-                dummy.setInventorySlotContents(i, stack);
+                dummy.setStack(i, stack);
                 if (recipe.matches(dummy, world)) {
                     ret.add(i);
                 }
-                dummy.setInventorySlotContents(i, input.get(i));
+                dummy.setStack(i, input.get(i));
             }
         }
         return ret;
@@ -106,6 +107,6 @@ public class RecipeFormula {
 
     @Nullable
     private static ICraftingRecipe getRecipeFromGrid(CraftingInventory inv, World world) {
-        return world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, inv, world).orElse(null);
+        return world.getRecipeManager().getRecipe(RecipeType.CRAFTING, inv, world).orElse(null);
     }
 }

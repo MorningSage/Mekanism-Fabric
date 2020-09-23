@@ -15,12 +15,11 @@ import mekanism.common.tile.machine.TileEntityDigitalMiner;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.Region;
+import net.minecraft.world.chunk.ChunkCache;
 import net.minecraftforge.fluids.IFluidBlock;
 
 public class ThreadMinerSearch extends Thread {
@@ -32,7 +31,7 @@ public class ThreadMinerSearch extends Thread {
     private final Map<ChunkPos, BitSet> oresToMine = new Object2ObjectOpenHashMap<>();
     private final Int2ObjectMap<MinerFilter<?>> replaceMap = new Int2ObjectOpenHashMap<>();
     private final Map<Block, MinerFilter<?>> acceptedItems = new Object2ObjectOpenHashMap<>();
-    private Region chunkCache;
+    private ChunkCache chunkCache;
 
     public int found = 0;
 
@@ -40,7 +39,7 @@ public class ThreadMinerSearch extends Thread {
         this.tile = tile;
     }
 
-    public void setChunkCache(Region cache) {
+    public void setChunkCache(ChunkCache cache) {
         this.chunkCache = cache;
     }
 
@@ -134,7 +133,7 @@ public class ThreadMinerSearch extends Thread {
         }
 
         @Override
-        public ITextComponent getTextComponent() {
+        public Text getTextComponent() {
             return langEntry.translate();
         }
 

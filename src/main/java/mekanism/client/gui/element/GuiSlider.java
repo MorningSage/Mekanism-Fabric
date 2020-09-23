@@ -6,11 +6,11 @@ import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiSlider extends GuiRelativeElement {
 
-    private static final ResourceLocation SLIDER = MekanismUtils.getResource(ResourceType.GUI, "smooth_slider.png");
+    private static final Identifier SLIDER = MekanismUtils.getResource(ResourceType.GUI, "smooth_slider.png");
 
     private final DoubleConsumer callback;
 
@@ -34,9 +34,9 @@ public class GuiSlider extends GuiRelativeElement {
     public void renderBackgroundOverlay(MatrixStack matrix, int mouseX, int mouseY) {
         super.renderBackgroundOverlay(matrix, mouseX, mouseY);
         GuiUtils.fill(matrix, getButtonX() + 2, getButtonY() + 3, getButtonWidth() - 4, 6, 0xFF555555);
-        minecraft.textureManager.bindTexture(SLIDER);
+        minecraft.getTextureManager().bindTexture(SLIDER);
         int posX = (int) (value * (getButtonWidth() - 6));
-        blit(matrix, getButtonX() + posX, getButtonY(), 0, 0, 7, 12, 12, 12);
+        drawTexture(matrix, getButtonX() + posX, getButtonY(), 0, 0, 7, 12, 12, 12);
     }
 
     @Override

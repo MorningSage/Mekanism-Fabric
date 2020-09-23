@@ -2,18 +2,18 @@ package mekanism.common.util;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
+
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class CapabilityUtils {
 
     @Nonnull
-    public static <T> LazyOptional<T> getCapability(@Nullable ICapabilityProvider provider, @Nullable Capability<T> cap, @Nullable Direction side) {
+    public static <T> Optional<T> getCapability(@Nullable ICapabilityProvider provider, @Nullable Capability<T> cap, @Nullable Direction side) {
         if (provider == null || cap == null) {
-            return LazyOptional.empty();
+            return Optional.empty();
         }
         return provider.getCapability(cap, side);
     }
@@ -23,7 +23,7 @@ public final class CapabilityUtils {
      * without having to deal with the fact that one is "capture of ?" and the listener is "?".
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addListener(@Nonnull LazyOptional<?> lazyOptional, @Nonnull NonNullConsumer listener) {
+    public static void addListener(@Nonnull Optional<?> lazyOptional, @Nonnull Consumer listener) {
         lazyOptional.addListener(listener);
     }
 }

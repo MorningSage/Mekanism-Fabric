@@ -3,7 +3,7 @@ package mekanism.common.integration.lookingat;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.math.FloatingLong;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 public interface LookingAtHelper {
 

@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.slurry.ISlurryTank;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public interface ISlurryTracker extends IContentsListener {
 

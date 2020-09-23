@@ -31,13 +31,13 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import mekanism.common.util.text.OwnerDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, MekanismTileContainer<TileEntitySecurityDesk>> {
 
-    private static final ResourceLocation PUBLIC = MekanismUtils.getResource(ResourceType.GUI, "public.png");
-    private static final ResourceLocation PRIVATE = MekanismUtils.getResource(ResourceType.GUI, "private.png");
+    private static final Identifier PUBLIC = MekanismUtils.getResource(ResourceType.GUI, "public.png");
+    private static final Identifier PRIVATE = MekanismUtils.getResource(ResourceType.GUI, "private.png");
     private static final List<Character> SPECIAL_CHARS = Arrays.asList('-', '|', '_');
     private MekanismButton removeButton;
     private MekanismButton publicButton;
@@ -47,9 +47,9 @@ public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, Mek
     private GuiTextScrollList scrollList;
     private GuiTextField trustedField;
 
-    public GuiSecurityDesk(MekanismTileContainer<TileEntitySecurityDesk> container, PlayerInventory inv, ITextComponent title) {
+    public GuiSecurityDesk(MekanismTileContainer<TileEntitySecurityDesk> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 64;
+        backgroundHeight += 64;
         dynamicSlots = true;
     }
 
@@ -66,7 +66,7 @@ public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, Mek
         addButton(new GuiSlot(SlotType.INNER_HOLDER_SLOT, this, 145, 17));
         addButton(new GuiSlot(SlotType.INNER_HOLDER_SLOT, this, 145, 96));
         addButton(new GuiSecurityLight(this, 144, 77, () -> tile.getFreq() == null || tile.ownerUUID == null ||
-                                                            !tile.ownerUUID.equals(getMinecraft().player.getUniqueID()) ? 2 : tile.getFreq().isOverridden() ? 0 : 1));
+            !tile.ownerUUID.equals(client.player.getUuid()) ? 2 : tile.getFreq().isOverridden() ? 0 : 1));
         addButton(new GuiTextureOnlyElement(PUBLIC, this, 145, 32, 18, 18));
         addButton(new GuiTextureOnlyElement(PRIVATE, this, 145, 111, 18, 18));
         addButton(scrollList = new GuiTextScrollList(this, 13, 13, 122, 42));
@@ -113,7 +113,7 @@ public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, Mek
 
     private void setTrusted() {
         SecurityFrequency freq = tile.getFreq();
-        if (freq != null && tile.ownerUUID != null && tile.ownerUUID.equals(getMinecraft().player.getUniqueID())) {
+        if (freq != null && tile.ownerUUID != null && tile.ownerUUID.equals(client.player.getUuid())) {
             addTrusted(trustedField.getText());
             trustedField.setText("");
             updateButtons();
@@ -133,7 +133,7 @@ public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, Mek
             removeButton.active = scrollList.hasSelection();
         }
 
-        if (freq != null && tile.ownerUUID != null && tile.ownerUUID.equals(getMinecraft().player.getUniqueID())) {
+        if (freq != null && tile.ownerUUID != null && tile.ownerUUID.equals(client.player.getUuid())) {
             publicButton.active = freq.getSecurityMode() != SecurityMode.PUBLIC;
             privateButton.active = freq.getSecurityMode() != SecurityMode.PRIVATE;
             trustedButton.active = freq.getSecurityMode() != SecurityMode.TRUSTED;
@@ -161,7 +161,7 @@ public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, Mek
     @Override
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         renderTitleText(matrix, 4);
-        ITextComponent ownerComponent = OwnerDisplay.of(tile.ownerUUID, tile.clientOwner).getTextComponent();
+        Text ownerComponent = OwnerDisplay.of(tile.ownerUUID, tile.clientOwner).getTextComponent();
         drawString(matrix, ownerComponent, getXSize() - 7 - getStringWidth(ownerComponent), (getYSize() - 96) + 2, titleTextColor());
         drawString(matrix, MekanismLang.INVENTORY.translate(), 8, (getYSize() - 96) + 2, titleTextColor());
         drawCenteredText(matrix, MekanismLang.TRUSTED_PLAYERS.translate(), 74, 57, subheadingTextColor());

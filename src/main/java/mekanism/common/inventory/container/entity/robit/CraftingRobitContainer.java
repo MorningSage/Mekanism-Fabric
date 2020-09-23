@@ -7,11 +7,11 @@ import mekanism.common.inventory.container.entity.MekanismEntityContainer;
 import mekanism.common.registries.MekanismContainerTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.WorkbenchContainer;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 
-public class CraftingRobitContainer extends WorkbenchContainer implements IEntityContainer<EntityRobit> {
+public class CraftingRobitContainer extends CraftingScreenHandler implements IEntityContainer<EntityRobit> {
 
     private final EntityRobit entity;
 
@@ -20,12 +20,12 @@ public class CraftingRobitContainer extends WorkbenchContainer implements IEntit
         this.entity = robit;
     }
 
-    public CraftingRobitContainer(int id, PlayerInventory inv, PacketBuffer buf) {
+    public CraftingRobitContainer(int id, PlayerInventory inv, PacketByteBuf buf) {
         this(id, inv, MekanismEntityContainer.getEntityFromBuf(buf, EntityRobit.class));
     }
 
     @Override
-    public boolean canInteractWith(@Nonnull PlayerEntity player) {
+    public boolean canUse(@Nonnull PlayerEntity player) {
         return entity.isAlive();
     }
 
@@ -36,7 +36,7 @@ public class CraftingRobitContainer extends WorkbenchContainer implements IEntit
 
     @Nonnull
     @Override
-    public ContainerType<?> getType() {
+    public ScreenHandlerType<?> getType() {
         return MekanismContainerTypes.CRAFTING_ROBIT.getContainerType();
     }
 }

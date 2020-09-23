@@ -7,7 +7,9 @@ import javax.annotation.Nullable;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiWindow;
 import mekanism.common.Mekanism;
+import mekanism.mixin.HandledScreenAccessor;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -32,29 +34,29 @@ public interface IGuiWrapper {
     }
 
     default int getLeft() {
-        if (this instanceof ContainerScreen) {
-            return ((ContainerScreen<?>) this).getGuiLeft();
+        if (this instanceof HandledScreen) {
+            return ((HandledScreenAccessor) this).getGuiLeft();
         }
         return 0;
     }
 
     default int getTop() {
-        if (this instanceof ContainerScreen) {
-            return ((ContainerScreen<?>) this).getGuiTop();
+        if (this instanceof HandledScreen) {
+            return ((HandledScreenAccessor) this).getGuiTop();
         }
         return 0;
     }
 
     default int getWidth() {
-        if (this instanceof ContainerScreen) {
-            return ((ContainerScreen<?>) this).getXSize();
+        if (this instanceof HandledScreen) {
+            return ((HandledScreenAccessor) this).getXSize();
         }
         return 0;
     }
 
     default int getHeight() {
-        if (this instanceof ContainerScreen) {
-            return ((ContainerScreen<?>) this).getYSize();
+        if (this instanceof HandledScreen) {
+            return ((HandledScreenAccessor) this).getYSize();
         }
         return 0;
     }

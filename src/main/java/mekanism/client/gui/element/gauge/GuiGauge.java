@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.gauge;
 
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +19,8 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.interfaces.ISideConfiguration;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public abstract class GuiGauge<T> extends GuiTexturedElement {
 
@@ -39,11 +39,11 @@ public abstract class GuiGauge<T> extends GuiTexturedElement {
 
     public abstract int getScaledLevel();
 
-    public abstract TextureAtlasSprite getIcon();
+    public abstract Sprite getIcon();
 
-    public abstract ITextComponent getLabel();
+    public abstract Text getLabel();
 
-    public abstract List<ITextComponent> getTooltipText();
+    public abstract List<Text> getTooltipText();
 
     protected GaugeInfo getGaugeColor() {
         return GaugeInfo.STANDARD;
@@ -64,21 +64,21 @@ public abstract class GuiGauge<T> extends GuiTexturedElement {
 
     public void renderContents(MatrixStack matrix) {
         int scale = getScaledLevel();
-        TextureAtlasSprite icon = getIcon();
+        Sprite icon = getIcon();
         if (scale > 0 && icon != null) {
             applyRenderColor();
             drawTiledSprite(matrix, x + 1, y + 1, height - 2, width - 2, scale, icon);
             MekanismRenderer.resetColor();
         }
         //Draw the bar overlay
-        minecraft.textureManager.bindTexture(getResource());
+        minecraft.getTextureManager().bindTexture(getResource());
         GaugeOverlay gaugeOverlay = gaugeType.getGaugeOverlay();
-        blit(matrix, x + 1, y + 1, getWidth() - 2, getHeight() - 2, 0, 0, gaugeOverlay.getWidth(), gaugeOverlay.getHeight(), gaugeOverlay.getWidth(), gaugeOverlay.getHeight());
+        drawTexture(matrix, x + 1, y + 1, getWidth() - 2, getHeight() - 2, 0, 0, gaugeOverlay.getWidth(), gaugeOverlay.getHeight(), gaugeOverlay.getWidth(), gaugeOverlay.getHeight());
     }
 
     @Override
     public void renderToolTip(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
-        ItemStack stack = minecraft.player.inventory.getItemStack();
+        ItemStack stack = minecraft.player.inventory.getCursorStack();
         EnumColor color = gaugeType.getGaugeInfo().getColor();
         if (!stack.isEmpty() && stack.getItem() instanceof ItemConfigurator && color != null) {
             if (guiObj instanceof GuiMekanismTile) {
@@ -103,7 +103,7 @@ public abstract class GuiGauge<T> extends GuiTexturedElement {
                 }
             }
         } else {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             if (getLabel() != null) {
                 list.add(getLabel());
             }

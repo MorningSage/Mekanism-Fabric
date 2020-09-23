@@ -3,13 +3,8 @@ package mekanism.client.render.lib;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import mekanism.common.lib.Color;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.pipeline.IVertexConsumer;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 
@@ -20,15 +15,15 @@ public class Quad {
 
     private final Vertex[] vertices;
     private Direction side;
-    private TextureAtlasSprite sprite;
+    private Sprite sprite;
     private int tintIndex = -1;
     private boolean applyDiffuseLighting;
 
-    public Quad(TextureAtlasSprite sprite, Direction side, Vertex[] vertices) {
+    public Quad(Sprite sprite, Direction side, Vertex[] vertices) {
         this(sprite, side, vertices, -1, false);
     }
 
-    public Quad(TextureAtlasSprite sprite, Direction side, Vertex[] vertices, int tintIndex, boolean applyDiffuseLighting) {
+    public Quad(Sprite sprite, Direction side, Vertex[] vertices, int tintIndex, boolean applyDiffuseLighting) {
         this.sprite = sprite;
         this.side = side;
         this.vertices = vertices;
@@ -41,11 +36,11 @@ public class Quad {
         quad.pipe(new BakedQuadUnpacker());
     }
 
-    public TextureAtlasSprite getTexture() {
+    public Sprite getTexture() {
         return sprite;
     }
 
-    public void setTexture(TextureAtlasSprite sprite) {
+    public void setTexture(Sprite sprite) {
         this.sprite = sprite;
     }
 
@@ -183,7 +178,7 @@ public class Quad {
 
     public static class Builder {
 
-        private TextureAtlasSprite texture;
+        private Sprite texture;
         private final Direction side;
 
         private Vector3d vec1, vec2, vec3, vec4;
@@ -195,7 +190,7 @@ public class Quad {
         private boolean applyDiffuseLighting;
         private boolean contractUVs = true;
 
-        public Builder(TextureAtlasSprite texture, Direction side) {
+        public Builder(Sprite texture, Direction side) {
             this.texture = texture;
             this.side = side;
         }
@@ -214,7 +209,7 @@ public class Quad {
             return this;
         }
 
-        public Builder tex(TextureAtlasSprite texture) {
+        public Builder tex(Sprite texture) {
             this.texture = texture;
             return this;
         }

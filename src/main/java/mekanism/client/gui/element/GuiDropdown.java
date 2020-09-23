@@ -1,5 +1,6 @@
 package mekanism.client.gui.element;
 
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -8,9 +9,8 @@ import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.inventory.GuiComponents.IDropdownEnum;
 import mekanism.common.registries.MekanismSounds;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiDropdown<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> extends GuiTexturedElement {
 
@@ -34,7 +34,7 @@ public class GuiDropdown<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> extends 
         super.onClick(mouseX, mouseY);
         isHolding = true;
         setOpen(!isOpen || !(mouseY <= y + 11));
-        minecraft.getSoundHandler().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
+        minecraft.getSoundManager().play(PositionedSoundInstance.master(MekanismSounds.BEEP.get(), 1.0F));
     }
 
     @Override
@@ -78,16 +78,16 @@ public class GuiDropdown<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> extends 
 
         TYPE current = curType.get();
         if (current.getIcon() != null) {
-            minecraft.textureManager.bindTexture(current.getIcon());
-            blit(matrix, x + width - 9, y + 3, 0, 0, 6, 6, 6, 6);
+            minecraft.getTextureManager().bindTexture(current.getIcon());
+            drawTexture(matrix, x + width - 9, y + 3, 0, 0, 6, 6, 6, 6);
         }
 
         if (isOpen) {
             for (int i = 0; i < options.length; i++) {
-                ResourceLocation icon = options[i].getIcon();
+                Identifier icon = options[i].getIcon();
                 if (icon != null) {
-                    minecraft.textureManager.bindTexture(icon);
-                    blit(matrix, x + width - 9, y + 12 + 2 + 10 * i, 0, 0, 6, 6, 6, 6);
+                    minecraft.getTextureManager().bindTexture(icon);
+                    drawTexture(matrix, x + width - 9, y + 12 + 2 + 10 * i, 0, 0, 6, 6, 6, 6);
                 }
             }
         }
@@ -98,7 +98,7 @@ public class GuiDropdown<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> extends 
     public void renderToolTip(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         int index = getHoveredIndex(mouseX + guiObj.getLeft(), mouseY + guiObj.getTop());
         if (index != -1) {
-            ITextComponent text = options[index].getTooltip();
+            Text text = options[index].getTooltip();
             if (text != null) {
                 displayTooltip(matrix, options[index].getTooltip(), mouseX, mouseY);
             }

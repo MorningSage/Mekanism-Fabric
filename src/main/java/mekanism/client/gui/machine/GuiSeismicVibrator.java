@@ -13,11 +13,11 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.machine.TileEntitySeismicVibrator;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiSeismicVibrator extends GuiMekanismTile<TileEntitySeismicVibrator, MekanismTileContainer<TileEntitySeismicVibrator>> {
 
-    public GuiSeismicVibrator(MekanismTileContainer<TileEntitySeismicVibrator> container, PlayerInventory inv, ITextComponent title) {
+    public GuiSeismicVibrator(MekanismTileContainer<TileEntitySeismicVibrator> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

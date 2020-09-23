@@ -5,11 +5,11 @@ import javax.annotation.Nonnull;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.entity.robit.InventoryRobitContainer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiRobitInventory extends GuiRobit<InventoryRobitContainer> {
 
-    public GuiRobitInventory(InventoryRobitContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiRobitInventory(InventoryRobitContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

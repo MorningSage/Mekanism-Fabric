@@ -9,10 +9,10 @@ import mekanism.common.CommonProxy;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.HolidayManager;
 import mekanism.common.config.MekanismConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,20 +25,20 @@ import net.minecraftforge.fml.network.NetworkEvent.Context;
  */
 public class ClientProxy extends CommonProxy {
 
-    private void doSparkle(TileEntity tile, SparkleAnimation anim) {
-        ClientPlayerEntity player = Minecraft.getInstance().player;
+    private void doSparkle(BlockEntity tile, SparkleAnimation anim) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
         //If player is within 40 blocks (1,600 = 40^2), show the status message/sparkles
-        if (tile.getPos().distanceSq(player.getPosition()) <= 1_600) {
+        if (tile.getPos().getSquaredDistance(player.getBlockPos()) <= 1_600) {
             if (MekanismConfig.client.enableMultiblockFormationParticles.get()) {
                 anim.run();
             } else {
-                player.sendStatusMessage(MekanismLang.MULTIBLOCK_FORMED_CHAT.translateColored(EnumColor.INDIGO), true);
+                player.sendMessage(MekanismLang.MULTIBLOCK_FORMED_CHAT.translateColored(EnumColor.INDIGO), true);
             }
         }
     }
 
     @Override
-    public void doMultiblockSparkle(TileEntity tile, BlockPos renderLoc, int length, int width, int height) {
+    public void doMultiblockSparkle(BlockEntity tile, BlockPos renderLoc, int length, int width, int height) {
         doSparkle(tile, new SparkleAnimation(tile, renderLoc, length, width, height));
     }
 
@@ -54,13 +54,13 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public double getReach(PlayerEntity player) {
-        return Minecraft.getInstance().playerController == null ? 8 : Minecraft.getInstance().playerController.getBlockReachDistance();
+        return MinecraftClient.getInstance().playerController == null ? 8 : MinecraftClient.getInstance().playerController.getBlockReachDistance();
     }
 
     @Override
     public boolean isPaused() {
-        if (Minecraft.getInstance().isSingleplayer() && !Minecraft.getInstance().getIntegratedServer().getPublic()) {
-            return Minecraft.getInstance().isGamePaused();
+        if (MinecraftClient.getInstance().isInSingleplayer() && !MinecraftClient.getInstance().getIntegratedServer().getPublic()) {
+            return MinecraftClient.getInstance().isPaused();
         }
         return false;
     }
@@ -76,6 +76,6 @@ public class ClientProxy extends CommonProxy {
     @Nullable
     @Override
     public World tryGetMainWorld() {
-        return Minecraft.getInstance().world;
+        return MinecraftClient.getInstance().world;
     }
 }

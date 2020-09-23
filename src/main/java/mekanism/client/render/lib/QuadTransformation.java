@@ -7,10 +7,10 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import mekanism.common.lib.Color;
 import mekanism.common.lib.math.Quaternion;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public interface QuadTransformation {
 
@@ -36,7 +36,7 @@ public interface QuadTransformation {
         return new LightTransformation(light, light);
     }
 
-    static QuadTransformation translate(Vector3d translation) {
+    static QuadTransformation translate(Vec3d translation) {
         return new TranslationTransformation(translation);
     }
 
@@ -76,7 +76,7 @@ public interface QuadTransformation {
         return new SideTransformation(side);
     }
 
-    static QuadTransformation texture(TextureAtlasSprite texture) {
+    static QuadTransformation texture(Sprite texture) {
         return new TextureTransformation(texture);
     }
 
@@ -186,8 +186,8 @@ public interface QuadTransformation {
             });
         }
 
-        private static Vector3d round(Vector3d vec) {
-            return new Vector3d(Math.round(vec.x * EPSILON) / EPSILON, Math.round(vec.y * EPSILON) / EPSILON, Math.round(vec.z * EPSILON) / EPSILON);
+        private static Vec3d round(Vec3d vec) {
+            return new Vec3d(Math.round(vec.x * EPSILON) / EPSILON, Math.round(vec.y * EPSILON) / EPSILON, Math.round(vec.z * EPSILON) / EPSILON);
         }
 
         @Override
@@ -203,9 +203,9 @@ public interface QuadTransformation {
 
     class TranslationTransformation implements QuadTransformation {
 
-        private final Vector3d translation;
+        private final Vec3d translation;
 
-        public TranslationTransformation(Vector3d translation) {
+        public TranslationTransformation(Vec3d translation) {
             this.translation = translation;
         }
 
@@ -227,9 +227,9 @@ public interface QuadTransformation {
 
     class TextureTransformation implements QuadTransformation {
 
-        private final TextureAtlasSprite texture;
+        private final Sprite texture;
 
-        public TextureTransformation(TextureAtlasSprite texture) {
+        public TextureTransformation(Sprite texture) {
             this.texture = texture;
         }
 
@@ -256,14 +256,14 @@ public interface QuadTransformation {
     class TextureFilteredTransformation implements QuadTransformation {
 
         private final QuadTransformation original;
-        private final Predicate<ResourceLocation> verifier;
+        private final Predicate<Identifier> verifier;
 
-        public TextureFilteredTransformation(QuadTransformation original, Predicate<ResourceLocation> verifier) {
+        public TextureFilteredTransformation(QuadTransformation original, Predicate<Identifier> verifier) {
             this.original = original;
             this.verifier = verifier;
         }
 
-        public static TextureFilteredTransformation of(QuadTransformation original, Predicate<ResourceLocation> verifier) {
+        public static TextureFilteredTransformation of(QuadTransformation original, Predicate<Identifier> verifier) {
             return new TextureFilteredTransformation(original, verifier);
         }
 

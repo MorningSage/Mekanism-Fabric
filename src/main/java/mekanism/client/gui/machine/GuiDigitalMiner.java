@@ -36,22 +36,22 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.text.EnergyDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiDigitalMiner extends GuiMekanismTile<TileEntityDigitalMiner, MekanismTileContainer<TileEntityDigitalMiner>> {
 
-    private static final ResourceLocation eject = MekanismUtils.getResource(ResourceType.GUI, "switch/eject.png");
-    private static final ResourceLocation input = MekanismUtils.getResource(ResourceType.GUI, "switch/input.png");
-    private static final ResourceLocation silk = MekanismUtils.getResource(ResourceType.GUI, "switch/silk.png");
+    private static final Identifier eject = MekanismUtils.getResource(ResourceType.GUI, "switch/eject.png");
+    private static final Identifier input = MekanismUtils.getResource(ResourceType.GUI, "switch/input.png");
+    private static final Identifier silk = MekanismUtils.getResource(ResourceType.GUI, "switch/silk.png");
 
     private MekanismButton startButton;
     private MekanismButton stopButton;
     private MekanismButton configButton;
 
-    public GuiDigitalMiner(MekanismTileContainer<TileEntityDigitalMiner> container, PlayerInventory inv, ITextComponent title) {
+    public GuiDigitalMiner(MekanismTileContainer<TileEntityDigitalMiner> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 76;
+        backgroundHeight += 76;
         dynamicSlots = true;
     }
 
@@ -59,7 +59,7 @@ public class GuiDigitalMiner extends GuiMekanismTile<TileEntityDigitalMiner, Mek
     public void init() {
         super.init();
         addButton(new GuiInnerScreen(this, 7, 19, 77, 69, () -> {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             ILangEntry runningType;
             if (tile.getEnergyContainer().getEnergyPerTick().greaterThan(tile.getEnergyContainer().getMaxEnergy())) {
                 runningType = MekanismLang.MINER_LOW_POWER;
@@ -91,7 +91,7 @@ public class GuiDigitalMiner extends GuiMekanismTile<TileEntityDigitalMiner, Mek
         addButton(new GuiEnergyTab(() -> {
             MinerEnergyContainer energyContainer = tile.getEnergyContainer();
             FloatingLong perTick = energyContainer.getEnergyPerTick();
-            ArrayList<ITextComponent> ret = new ArrayList<>(4);
+            ArrayList<Text> ret = new ArrayList<>(4);
             ret.add(MekanismLang.MINER_ENERGY_CAPACITY.translate(EnergyDisplay.of(energyContainer.getMaxEnergy())));
             ret.add(MekanismLang.NEEDED_PER_TICK.translate(EnergyDisplay.of(perTick)));
             if (perTick.greaterThan(energyContainer.getMaxEnergy())) {

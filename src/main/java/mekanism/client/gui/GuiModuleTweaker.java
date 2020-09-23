@@ -20,9 +20,9 @@ import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.network.PacketUpdateInventorySlot;
 import mekanism.common.registries.MekanismItems;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
@@ -33,10 +33,10 @@ public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
 
     private int selected = -1;
 
-    public GuiModuleTweaker(ModuleTweakerContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiModuleTweaker(ModuleTweakerContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        xSize = 248;
-        ySize += 20;
+        backgroundWidth = 248;
+        backgroundHeight += 20;
     }
 
     @Override
@@ -44,23 +44,23 @@ public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
         super.init();
 
         addButton(moduleScreen = new GuiModuleScreen(this, 138, 20, stack -> {
-            int slotId = container.inventorySlots.get(selected).getSlotIndex();
+            int slotId = handler.slots.get(selected).id;
             Mekanism.packetHandler.sendToServer(new PacketUpdateInventorySlot(stack, slotId));
-            playerInventory.player.inventory.setInventorySlotContents(slotId, stack);
+            playerInventory.player.inventory.setStack(slotId, stack);
         }));
         addButton(scrollList = new GuiModuleScrollList(this, 30, 20, 108, 116, () -> getStack(selected), this::onModuleSelected));
         addButton(new GuiElementHolder(this, 30, 136, 108, 18));
         addButton(optionsButton = new TranslationButton(this, getGuiLeft() + 31, getGuiTop() + 137, 106, 16, MekanismLang.BUTTON_OPTIONS, this::openOptions));
         optionsButton.active = false;
-        int size = container.inventorySlots.size();
+        int size = handler.slots.size();
         for (int i = 0; i < size; i++) {
-            Slot slot = container.inventorySlots.get(i);
+            Slot slot = handler.slots.get(i);
             final int index = i;
             // initialize selected item
             if (selected == -1 && isValidItem(index)) {
                 select(index);
             }
-            addButton(new GuiSlot(SlotType.NORMAL, this, slot.xPos - 1, slot.yPos - 1)
+            addButton(new GuiSlot(SlotType.NORMAL, this, slot.x - 1, slot.x - 1)
                   .click((e, x, y) -> select(index))
                   .overlayColor(isValidItem(index) ? null : () -> 0xCC333333)
                   .with(() -> index == selected ? SlotOverlay.SELECT : null));
@@ -84,7 +84,7 @@ public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
         if (selected != -1) {
             int curIndex = -1;
             IntList selectable = new IntArrayList();
-            for (int index = 0; index < container.inventorySlots.size(); index++) {
+            for (int index = 0; index < handler.slots.size(); index++) {
                 if (isValidItem(index)) {
                     selectable.add(index);
                     if (index == selected) {
@@ -134,6 +134,6 @@ public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
         if (index == -1) {
             return ItemStack.EMPTY;
         }
-        return container.inventorySlots.get(index).getStack();
+        return handler.slots.get(index).getStack();
     }
 }

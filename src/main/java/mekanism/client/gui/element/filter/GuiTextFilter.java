@@ -8,14 +8,14 @@ import mekanism.common.content.filter.IFilter;
 import mekanism.common.content.transporter.SorterFilter;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public abstract class GuiTextFilter<FILTER extends IFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>>
       extends GuiFilter<FILTER, TILE> {
 
     protected GuiTextField text;
 
-    protected GuiTextFilter(IGuiWrapper gui, int x, int y, int width, int height, ITextComponent filterName, TILE tile, FILTER origFilter) {
+    protected GuiTextFilter(IGuiWrapper gui, int x, int y, int width, int height, Text filterName, TILE tile, FILTER origFilter) {
         super(gui, x, y, width, height, filterName, tile, origFilter);
     }
 

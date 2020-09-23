@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 
@@ -32,7 +33,7 @@ public abstract class MekanismEntityContainer<ENTITY extends Entity> extends Mek
         return entity.isAlive();
     }
 
-    public static <ENTITY extends Entity> ENTITY getEntityFromBuf(PacketBuffer buf, Class<ENTITY> type) {
+    public static <ENTITY extends Entity> ENTITY getEntityFromBuf(PacketByteBuf buf, Class<ENTITY> type) {
         if (buf == null) {
             return null;
         }

@@ -15,13 +15,13 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.machine.TileEntityNutritionalLiquifier;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 import javax.annotation.Nonnull;
 
 public class GuiNutritionalLiquifier extends GuiConfigurableTile<TileEntityNutritionalLiquifier, MekanismTileContainer<TileEntityNutritionalLiquifier>> {
 
-    public GuiNutritionalLiquifier(MekanismTileContainer<TileEntityNutritionalLiquifier> container, PlayerInventory inv, ITextComponent title) {
+    public GuiNutritionalLiquifier(MekanismTileContainer<TileEntityNutritionalLiquifier> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

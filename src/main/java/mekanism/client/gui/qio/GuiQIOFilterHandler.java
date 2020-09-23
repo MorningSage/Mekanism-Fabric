@@ -29,7 +29,7 @@ import mekanism.common.tile.qio.TileEntityQIOFilterHandler;
 import mekanism.common.util.text.TextUtils;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiQIOFilterHandler<TILE extends TileEntityQIOFilterHandler> extends GuiMekanismTile<TILE, MekanismTileContainer<TILE>> {
 
@@ -37,17 +37,17 @@ public class GuiQIOFilterHandler<TILE extends TileEntityQIOFilterHandler> extend
 
     private GuiScrollBar scrollBar;
 
-    public GuiQIOFilterHandler(MekanismTileContainer<TILE> container, PlayerInventory inv, ITextComponent title) {
+    public GuiQIOFilterHandler(MekanismTileContainer<TILE> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
-        ySize += 74;
+        backgroundHeight += 74;
     }
 
     @Override
     public void init() {
         super.init();
-        addButton(new GuiInnerScreen(this, 9, 16, xSize - 18, 12, () -> {
-            List<ITextComponent> list = new ArrayList<>();
+        addButton(new GuiInnerScreen(this, 9, 16, backgroundWidth - 18, 12, () -> {
+            List<Text> list = new ArrayList<>();
             QIOFrequency freq = tile.getQIOFrequency();
             if (freq != null) {
                 list.add(MekanismLang.FREQUENCY.translate(freq.getKey()));
@@ -56,7 +56,7 @@ public class GuiQIOFilterHandler<TILE extends TileEntityQIOFilterHandler> extend
             }
             return list;
         }).tooltip(() -> {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             QIOFrequency freq = tile.getQIOFrequency();
             if (freq != null) {
                 list.add(MekanismLang.QIO_ITEMS_DETAIL.translateColored(EnumColor.GRAY, EnumColor.INDIGO,

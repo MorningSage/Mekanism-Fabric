@@ -27,6 +27,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 
 public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends GuiBar<ChemicalInfoProvider<STACK>>
       implements IJEIIngredientHelper {
@@ -121,7 +122,7 @@ public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends C
             }
 
             @Override
-            public ITextComponent getTooltip() {
+            public Text getTooltip() {
                 if (tank.isEmpty()) {
                     return MekanismLang.EMPTY.translate();
                 } else if (tank.getStored() == Long.MAX_VALUE) {

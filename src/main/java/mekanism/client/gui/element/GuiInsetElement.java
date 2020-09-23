@@ -1,20 +1,20 @@
 package mekanism.client.gui.element;
 
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.client.gui.IGuiWrapper;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
-public abstract class GuiInsetElement<TILE extends TileEntity> extends GuiSideHolder {
+public abstract class GuiInsetElement<TILE extends BlockEntity> extends GuiSideHolder {
 
     protected final int border;
     protected final int innerWidth;
     protected final int innerHeight;
     protected final TILE tile;
-    protected final ResourceLocation overlay;
+    protected final Identifier overlay;
 
-    public GuiInsetElement(ResourceLocation overlay, IGuiWrapper gui, TILE tile, int x, int y, int height, int innerSize, boolean left) {
+    public GuiInsetElement(Identifier overlay, IGuiWrapper gui, TILE tile, int x, int y, int height, int innerSize, boolean left) {
         super(gui, x, y, height, left);
         this.overlay = overlay;
         this.tile = tile;
@@ -52,7 +52,7 @@ public abstract class GuiInsetElement<TILE extends TileEntity> extends GuiSideHo
         return innerHeight;
     }
 
-    protected ResourceLocation getOverlay() {
+    protected Identifier getOverlay() {
         return overlay;
     }
 
@@ -62,7 +62,7 @@ public abstract class GuiInsetElement<TILE extends TileEntity> extends GuiSideHo
         //Draw the button background
         drawButton(matrix, mouseX, mouseY);
         //Draw the overlay onto the button
-        minecraft.textureManager.bindTexture(getOverlay());
-        blit(matrix, getButtonX(), getButtonY(), 0, 0, innerWidth, innerHeight, innerWidth, innerHeight);
+        minecraft.getTextureManager().bindTexture(getOverlay());
+        drawTexture(matrix, getButtonX(), getButtonY(), 0, 0, innerWidth, innerHeight, innerWidth, innerHeight);
     }
 }

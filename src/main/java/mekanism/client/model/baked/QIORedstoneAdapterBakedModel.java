@@ -1,20 +1,21 @@
 package mekanism.client.model.baked;
 
 import java.util.List;
+
+import mekanism._helpers.IModelData;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadTransformation.TextureFilteredTransformation;
 import mekanism.client.render.lib.QuadUtils;
 import mekanism.common.tile.qio.TileEntityQIORedstoneAdapter;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
 
 public class QIORedstoneAdapterBakedModel extends ExtensionBakedModel<Boolean> {
 
     private final QuadTransformation TORCH_TRANSFORM = QuadTransformation.list(QuadTransformation.fullbright, QuadTransformation.texture(MekanismRenderer.redstoneTorch));
 
-    public QIORedstoneAdapterBakedModel(IBakedModel original) {
+    public QIORedstoneAdapterBakedModel(BakedModel original) {
         super(original);
     }
 
@@ -28,7 +29,7 @@ public class QIORedstoneAdapterBakedModel extends ExtensionBakedModel<Boolean> {
     }
 
     @Override
-    public QuadsKey<Boolean> createKey(QuadsKey<Boolean> key, IModelData data) {
+    protected QuadsKey<Boolean> createKey(QuadsKey<Boolean> key, IModelData data) {
         Boolean powering = data.getData(TileEntityQIORedstoneAdapter.POWERING_PROPERTY);
         if (powering == null) {
             return null;
@@ -37,7 +38,7 @@ public class QIORedstoneAdapterBakedModel extends ExtensionBakedModel<Boolean> {
     }
 
     @Override
-    protected QIORedstoneAdapterBakedModel wrapModel(IBakedModel model) {
+    protected QIORedstoneAdapterBakedModel wrapModel(BakedModel model) {
         return new QIORedstoneAdapterBakedModel(model);
     }
 }

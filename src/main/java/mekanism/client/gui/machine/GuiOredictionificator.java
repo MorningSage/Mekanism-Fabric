@@ -20,7 +20,7 @@ import mekanism.common.tile.machine.TileEntityOredictionificator;
 import mekanism.common.tile.machine.TileEntityOredictionificator.OredictionificatorFilter;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -35,9 +35,9 @@ public class GuiOredictionificator extends GuiConfigurableTile<TileEntityOredict
     private final Map<OredictionificatorFilter, ItemStack> renderStacks = new Object2ObjectOpenHashMap<>();
     private GuiScrollBar scrollBar;
 
-    public GuiOredictionificator(MekanismTileContainer<TileEntityOredictionificator> container, PlayerInventory inv, ITextComponent title) {
+    public GuiOredictionificator(MekanismTileContainer<TileEntityOredictionificator> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        ySize += 64;
+        backgroundHeight += 64;
         dynamicSlots = true;
     }
 

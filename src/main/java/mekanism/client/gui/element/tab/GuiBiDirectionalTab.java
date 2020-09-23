@@ -2,12 +2,12 @@ package mekanism.client.gui.element.tab;
 
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiTexturedElement;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 
 public abstract class GuiBiDirectionalTab extends GuiTexturedElement {
 
-    protected GuiBiDirectionalTab(ResourceLocation resource, IGuiWrapper gui, int x, int y, int width, int height) {
+    protected GuiBiDirectionalTab(Identifier resource, IGuiWrapper gui, int x, int y, int width, int height) {
         super(resource, gui, x, y, width, height);
     }
 
@@ -22,7 +22,7 @@ public abstract class GuiBiDirectionalTab extends GuiTexturedElement {
         if (this.active && this.visible && isHovered()) {
             if (button == 1) {
                 //Right clicked
-                playDownSound(Minecraft.getInstance().getSoundHandler());
+                playDownSound(MinecraftClient.getInstance().getSoundManager());
                 onRightClick(mouseX, mouseY);
                 return true;
             }

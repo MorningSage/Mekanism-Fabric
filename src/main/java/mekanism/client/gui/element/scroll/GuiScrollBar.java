@@ -8,11 +8,11 @@ import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiScrollBar extends GuiScrollableElement {
 
-    private static final ResourceLocation BAR = MekanismUtils.getResource(ResourceType.GUI, "scroll_bar.png");
+    private static final Identifier BAR = MekanismUtils.getResource(ResourceType.GUI, "scroll_bar.png");
     private static final int TEXTURE_WIDTH = 24;
     private static final int TEXTURE_HEIGHT = 15;
 
@@ -33,8 +33,8 @@ public class GuiScrollBar extends GuiScrollableElement {
         //Draw background and border
         holder.renderButton(matrix, mouseX, mouseY, partialTicks);
         holder.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        GuiElement.minecraft.textureManager.bindTexture(getResource());
-        blit(matrix, barX, barY + getScroll(), needsScrollBars() ? 0 : barWidth, 0, barWidth, barHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        GuiElement.minecraft.getTextureManager().bindTexture(getResource());
+        drawTexture(matrix, barX, barY + getScroll(), needsScrollBars() ? 0 : barWidth, 0, barWidth, barHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }
 
     @Override

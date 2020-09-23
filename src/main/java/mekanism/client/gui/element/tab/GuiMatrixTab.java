@@ -10,8 +10,8 @@ import mekanism.common.network.PacketGuiButtonPress.ClickedTileButton;
 import mekanism.common.tile.multiblock.TileEntityInductionCasing;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiMatrixTab extends GuiTabElementType<TileEntityInductionCasing, MatrixTab> {
 
@@ -34,7 +34,7 @@ public class GuiMatrixTab extends GuiTabElementType<TileEntityInductionCasing, M
         }
 
         @Override
-        public ResourceLocation getResource() {
+        public Identifier getResource() {
             return MekanismUtils.getResource(ResourceType.GUI, path);
         }
 
@@ -44,7 +44,7 @@ public class GuiMatrixTab extends GuiTabElementType<TileEntityInductionCasing, M
         }
 
         @Override
-        public ITextComponent getDescription() {
+        public Text getDescription() {
             return description.translate();
         }
 

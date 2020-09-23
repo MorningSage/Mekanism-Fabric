@@ -6,13 +6,13 @@ import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.jei.interfaces.IJEIRecipeArea;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public class GuiRightArrow extends GuiTextureOnlyElement implements IJEIRecipeArea<GuiRightArrow> {
 
-    private static final ResourceLocation ARROW = MekanismUtils.getResource(ResourceType.GUI, "right_arrow.png");
+    private static final Identifier ARROW = MekanismUtils.getResource(ResourceType.GUI, "right_arrow.png");
 
-    private ResourceLocation[] recipeCategories;
+    private Identifier[] recipeCategories;
 
     public GuiRightArrow(IGuiWrapper gui, int x, int y) {
         super(ARROW, gui, x, y, 22, 15);
@@ -20,14 +20,14 @@ public class GuiRightArrow extends GuiTextureOnlyElement implements IJEIRecipeAr
 
     @Nonnull
     @Override
-    public GuiRightArrow jeiCategories(@Nullable ResourceLocation... recipeCategories) {
+    public GuiRightArrow jeiCategories(@Nullable Identifier... recipeCategories) {
         this.recipeCategories = recipeCategories;
         return this;
     }
 
     @Nullable
     @Override
-    public ResourceLocation[] getRecipeCategories() {
+    public Identifier[] getRecipeCategories() {
         return recipeCategories;
     }
 }

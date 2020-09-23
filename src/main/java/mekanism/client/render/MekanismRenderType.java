@@ -1,28 +1,27 @@
 package mekanism.client.render;
 
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.renderer.RenderState;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderPhase;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
-public class MekanismRenderType extends RenderType {
+public class MekanismRenderType extends RenderLayer {
 
-    private static final AlphaState CUBOID_ALPHA = new RenderState.AlphaState(0.1F);
-    private static final RenderState.TransparencyState BLADE_TRANSPARENCY = new RenderState.TransparencyState("blade_transparency", () -> {
+    private static final RenderPhase.Alpha CUBOID_ALPHA = new RenderPhase.Alpha(0.1F);
+    private static final RenderPhase.Transparency BLADE_TRANSPARENCY = new RenderPhase.Transparency("blade_transparency", () -> {
         RenderSystem.enableBlend();
-        RenderSystem.blendFunc(SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
     }, RenderSystem::disableBlend);
 
-    public static final RenderType MEK_LIGHTNING = makeType("mek_lightning", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256,
-          false, true, RenderType.State.getBuilder()
-                .writeMask(COLOR_DEPTH_WRITE)
+    public static final RenderLayer MEK_LIGHTNING = of("mek_lightning", VertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256,
+          false, true, RenderLayer.MultiPhaseParameters.builder()
+                .writeMaskState(RenderPhase.ALL_MASK)
                 .transparency(LIGHTNING_TRANSPARENCY)
-                .shadeModel(SHADE_ENABLED)
+                .shadeModel(RenderPhase.SMOOTH_SHADE_MODEL)
                 .build(false)
     );
 
@@ -31,55 +30,55 @@ public class MekanismRenderType extends RenderType {
         super(name, format, drawMode, bufferSize, useDelegate, needsSorting, runnablePre, runnablePost);
     }
 
-    public static RenderType mekStandard(ResourceLocation resourceLocation) {
-        RenderType.State state = RenderType.State.getBuilder()
-              .texture(new RenderState.TextureState(resourceLocation, false, false))//Texture state
-              .shadeModel(SHADE_ENABLED)//shadeModel(GL11.GL_SMOOTH)
+    public static RenderLayer mekStandard(Identifier resourceLocation) {
+        RenderLayer.MultiPhaseParameters state = RenderLayer.MultiPhaseParameters.builder()
+              .texture(new RenderPhase.Texture(resourceLocation, false, false))//Texture state
+              .shadeModel(RenderPhase.SMOOTH_SHADE_MODEL)//shadeModel(GL11.GL_SMOOTH)
               .alpha(ZERO_ALPHA)//disableAlphaTest
               .transparency(TRANSLUCENT_TRANSPARENCY)//enableBlend/blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA)
               .build(true);
-        return makeType("mek_standard", DefaultVertexFormats.ENTITY, GL11.GL_QUADS, 256, true, false, state);
+        return of("mek_standard", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, GL11.GL_QUADS, 256, true, false, state);
     }
 
-    public static RenderType bladeRender(ResourceLocation resourceLocation) {
-        RenderType.State state = RenderType.State.getBuilder()
-              .texture(new RenderState.TextureState(resourceLocation, false, false))//Texture state
-              .shadeModel(SHADE_ENABLED)
+    public static RenderLayer bladeRender(Identifier resourceLocation) {
+        RenderLayer.MultiPhaseParameters state = RenderLayer.MultiPhaseParameters.builder()
+              .texture(new RenderPhase.Texture(resourceLocation, false, false))//Texture state
+              .shadeModel(RenderPhase.SMOOTH_SHADE_MODEL)
               .transparency(BLADE_TRANSPARENCY)
               .build(true);
-        return makeType("mek_blade", DefaultVertexFormats.ENTITY, GL11.GL_QUADS, 256, true, false, state);
+        return of("mek_blade", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, GL11.GL_QUADS, 256, true, false, state);
     }
 
-    public static RenderType renderFlame(ResourceLocation resourceLocation) {
-        RenderType.State state = RenderType.State.getBuilder()
-              .texture(new RenderState.TextureState(resourceLocation, false, false))//Texture state
-              .shadeModel(SHADE_ENABLED)//shadeModel(GL11.GL_SMOOTH)
+    public static RenderLayer renderFlame(Identifier resourceLocation) {
+        RenderLayer.MultiPhaseParameters state = RenderLayer.MultiPhaseParameters.builder()
+              .texture(new RenderPhase.Texture(resourceLocation, false, false))//Texture state
+              .shadeModel(RenderPhase.SMOOTH_SHADE_MODEL)//shadeModel(GL11.GL_SMOOTH)
               .alpha(ZERO_ALPHA)//disableAlphaTest
               .transparency(TRANSLUCENT_TRANSPARENCY)//enableBlend/blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA)
-              .lightmap(LIGHTMAP_DISABLED)//disableLighting
+              .lightmap(DISABLE_LIGHTMAP)//disableLighting
               .build(true);
-        return makeType("mek_flame", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, true, false, state);
+        return of("mek_flame", VertexFormats.POSITION_COLOR_TEXTURE, GL11.GL_QUADS, 256, true, false, state);
     }
 
-    public static RenderType getMekaSuit() {
-        RenderType.State state = RenderType.State.getBuilder()
-              .texture(BLOCK_SHEET)
-              .diffuseLighting(DIFFUSE_LIGHTING_ENABLED)
-              .shadeModel(SHADE_ENABLED)
+    public static RenderLayer getMekaSuit() {
+        RenderLayer.MultiPhaseParameters state = RenderLayer.MultiPhaseParameters.builder()
+              .texture(BLOCK_ATLAS_TEXTURE)
+              .diffuseLighting(ENABLE_DIFFUSE_LIGHTING)
+              .shadeModel(RenderPhase.SMOOTH_SHADE_MODEL)
               .alpha(HALF_ALPHA)
-              .lightmap(LIGHTMAP_ENABLED)
+              .lightmap(ENABLE_LIGHTMAP)
               .build(true);
-        return makeType("mekasuit", DefaultVertexFormats.BLOCK, 7, 131_072, true, true, state);
+        return of("mekasuit", VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL, 7, 131_072, true, true, state);
     }
 
-    public static RenderType renderSPS(ResourceLocation resourceLocation) {
-        RenderType.State state = RenderType.State.getBuilder()
-              .texture(new RenderState.TextureState(resourceLocation, false, false))//Texture state
-              .shadeModel(SHADE_ENABLED)//shadeModel(GL11.GL_SMOOTH)
+    public static RenderLayer renderSPS(Identifier resourceLocation) {
+        RenderLayer.MultiPhaseParameters state = RenderLayer.MultiPhaseParameters.builder()
+              .texture(new RenderPhase.Texture(resourceLocation, false, false))//Texture state
+              .shadeModel(RenderPhase.SMOOTH_SHADE_MODEL)//shadeModel(GL11.GL_SMOOTH)
               .transparency(LIGHTNING_TRANSPARENCY)//enableBlend/blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA)
-              .lightmap(LIGHTMAP_DISABLED)
+              .lightmap(DISABLE_LIGHTMAP)
               .alpha(CUBOID_ALPHA)
               .build(true);
-        return makeType("mek_sps", DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, true, false, state);
+        return of("mek_sps", VertexFormats.POSITION_COLOR_TEXTURE, GL11.GL_QUADS, 256, true, false, state);
     }
 }

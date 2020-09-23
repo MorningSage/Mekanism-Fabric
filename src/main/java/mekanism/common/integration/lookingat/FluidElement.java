@@ -7,7 +7,7 @@ import mekanism.client.render.MekanismRenderer.FluidType;
 import mekanism.common.MekanismLang;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 public class FluidElement extends LookingAtElement {
 

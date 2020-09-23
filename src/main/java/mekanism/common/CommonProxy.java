@@ -5,12 +5,12 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import mekanism.client.ClientProxy;
 import mekanism.common.base.MekFakePlayer;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -43,7 +43,7 @@ public class CommonProxy {
     /**
      * Does the multiblock creation animation, starting from the rendering block.
      */
-    public void doMultiblockSparkle(TileEntity tile, BlockPos renderLoc, int length, int width, int height) {
+    public void doMultiblockSparkle(BlockEntity tile, BlockPos renderLoc, int length, int width, int height) {
     }
 
     public double getReach(PlayerEntity player) {

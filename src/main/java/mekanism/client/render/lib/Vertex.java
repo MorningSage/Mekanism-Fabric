@@ -4,6 +4,7 @@ import mekanism.common.lib.Color;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class Vertex {
@@ -34,11 +35,11 @@ public class Vertex {
         this.lightV = lightV;
     }
 
-    public static Vertex create(Vector3d pos, Vector3d normal, Color color, TextureAtlasSprite sprite, float texU, float texV, float lightU, float lightV) {
+    public static Vertex create(Vector3d pos, Vector3d normal, Color color, Sprite sprite, float texU, float texV, float lightU, float lightV) {
         return new Vertex(pos, normal, color, sprite.getInterpolatedU(texU), sprite.getInterpolatedV(texV), lightU, lightV);
     }
 
-    public static Vertex create(Vector3d pos, Vector3d normal, TextureAtlasSprite sprite, float u, float v) {
+    public static Vertex create(Vector3d pos, Vector3d normal, Sprite sprite, float u, float v) {
         return create(pos, normal, Color.WHITE, sprite, u, v, 0, 0);
     }
 

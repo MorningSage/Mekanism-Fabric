@@ -1,10 +1,11 @@
 package mekanism.client.render.lib;
 
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public class QuadUtils {
 
@@ -34,7 +35,7 @@ public class QuadUtils {
         return orig.stream().peek(transformation::transform).map(Quad::bake).collect(Collectors.toList());
     }
 
-    public static void remapUVs(Quad quad, TextureAtlasSprite newTexture) {
+    public static void remapUVs(Quad quad, Sprite newTexture) {
         float uMin = quad.getTexture().getMinU(), uMax = quad.getTexture().getMaxU();
         float vMin = quad.getTexture().getMinV(), vMax = quad.getTexture().getMaxV();
         for (Vertex v : quad.getVertices()) {
@@ -47,7 +48,7 @@ public class QuadUtils {
     // this is an adaptation of fry's original UV contractor (pulled from BakedQuadBuilder).
     // ultimately this fixes UVs bleeding over the edge slightly when dealing with smaller models or tight UV bounds
     public static void contractUVs(Quad quad) {
-        TextureAtlasSprite texture = quad.getTexture();
+        Sprite texture = quad.getTexture();
         float sizeX = texture.getWidth() / (texture.getMaxU() - texture.getMinU());
         float sizeY = texture.getHeight() / (texture.getMaxV() - texture.getMinV());
         float ep = 1F / (Math.max(sizeX, sizeY) * 0x100);

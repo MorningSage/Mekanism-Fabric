@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import mekanism.common.lib.multiblock.IValveHandler.ValveData;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 public class ValveRenderData extends FluidRenderData {
 

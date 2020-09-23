@@ -1,7 +1,8 @@
 package mekanism.common.capabilities.holder;
 
+import net.minecraft.util.math.Direction;
+
 import javax.annotation.Nullable;
-import net.minecraft.util.Direction;
 
 public interface IHolder {
 

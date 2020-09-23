@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.custom;
 
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +19,9 @@ import mekanism.common.content.gear.ModuleConfigItem.EnumData;
 import mekanism.common.registries.MekanismSounds;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 
 public class GuiModuleScreen extends GuiRelativeElement {
 
@@ -204,12 +202,12 @@ public class GuiModuleScreen extends GuiRelativeElement {
         public void click(double mouseX, double mouseY) {
             if (!data.get() && mouseX >= getX() + 4 && mouseX < getX() + 12 && mouseY >= getY() + 11 && mouseY < getY() + 19) {
                 data.set(true, callback);
-                minecraft.getSoundManager().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
+                minecraft.getSoundManager().play(PositionedSoundInstance.master(MekanismSounds.BEEP.get(), 1.0F));
             }
 
             if (data.get() && mouseX >= getX() + 50 && mouseX < getX() + 58 && mouseY >= getY() + 11 && mouseY < getY() + 19) {
                 data.set(false, callback);
-                minecraft.getSoundManager().play(SimpleSound.master(MekanismSounds.BEEP.get(), 1.0F));
+                minecraft.getSoundManager().play(PositionedSoundInstance.master(MekanismSounds.BEEP.get(), 1.0F));
             }
         }
     }
@@ -229,11 +227,11 @@ public class GuiModuleScreen extends GuiRelativeElement {
 
         @Override
         public void renderBackground(MatrixStack matrix, int mouseX, int mouseY) {
-            minecraft.textureManager.bindTexture(SLIDER);
+            minecraft.getTextureManager().bindTexture(SLIDER);
             int count = ((EnumData<?>) data.getData()).getSelectableCount();
             int center = (BAR_LENGTH / (count - 1)) * data.get().ordinal();
-            blit(matrix, getX() + BAR_START + center - 2, getY() + 11, 0, 0, 5, 6, 8, 8);
-            blit(matrix, getX() + BAR_START, getY() + 17, 0, 6, BAR_LENGTH, 2, 8, 8);
+            drawTexture(matrix, getX() + BAR_START + center - 2, getY() + 11, 0, 0, 5, 6, 8, 8);
+            drawTexture(matrix, getX() + BAR_START, getY() + 17, 0, 6, BAR_LENGTH, 2, 8, 8);
         }
 
         @Override

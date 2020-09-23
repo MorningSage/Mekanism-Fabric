@@ -8,8 +8,8 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.jei.interfaces.IJEIIngredientHelper;
 import mekanism.common.lib.transmitter.TransmissionType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.text.Text;
 
 public class GuiHybridGauge extends GuiGauge<Void> implements IJEIIngredientHelper {
 
@@ -19,7 +19,7 @@ public class GuiHybridGauge extends GuiGauge<Void> implements IJEIIngredientHelp
     private final GuiGasGauge gasGauge;
     private final GuiFluidGauge fluidGauge;
 
-    private ITextComponent label;
+    private Text label;
 
     public GuiHybridGauge(Supplier<IGasTank> gasTankSupplier, Supplier<List<IGasTank>> gasTanksSupplier,
           Supplier<IExtendedFluidTank> fluidTankSupplier, Supplier<List<IExtendedFluidTank>> fluidTanksSupplier, GaugeType type,
@@ -38,7 +38,7 @@ public class GuiHybridGauge extends GuiGauge<Void> implements IJEIIngredientHelp
         fluidGauge = new GuiFluidGauge(fluidTankSupplier, fluidTanksSupplier, type, gui, x, y, width, height);
     }
 
-    public GuiHybridGauge setLabel(ITextComponent label) {
+    public GuiHybridGauge setLabel(Text label) {
         this.label = label;
         return this;
     }
@@ -70,17 +70,17 @@ public class GuiHybridGauge extends GuiGauge<Void> implements IJEIIngredientHelp
     }
 
     @Override
-    public TextureAtlasSprite getIcon() {
+    public Sprite getIcon() {
         return gasTankSupplier.get() == null || gasTankSupplier.get().isEmpty() ? fluidGauge.getIcon() : gasGauge.getIcon();
     }
 
     @Override
-    public List<ITextComponent> getTooltipText() {
+    public List<Text> getTooltipText() {
         return gasTankSupplier.get() == null || gasTankSupplier.get().isEmpty() ? fluidGauge.getTooltipText() : gasGauge.getTooltipText();
     }
 
     @Override
-    public ITextComponent getLabel() {
+    public Text getLabel() {
         return label;
     }
 

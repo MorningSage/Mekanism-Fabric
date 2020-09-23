@@ -10,14 +10,14 @@ import mekanism.common.inventory.container.entity.IEntityContainer;
 import mekanism.common.network.PacketGuiButtonPress;
 import mekanism.common.network.PacketGuiButtonPress.ClickedEntityButton;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
 
-public abstract class GuiRobit<CONTAINER extends Container & IEntityContainer<EntityRobit>> extends GuiMekanism<CONTAINER> {
+public abstract class GuiRobit<CONTAINER extends ScreenHandler & IEntityContainer<EntityRobit>> extends GuiMekanism<CONTAINER> {
 
     protected final EntityRobit robit;
 
-    protected GuiRobit(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    protected GuiRobit(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         robit = container.getEntity();
     }

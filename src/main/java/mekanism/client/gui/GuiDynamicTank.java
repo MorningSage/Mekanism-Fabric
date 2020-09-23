@@ -19,12 +19,12 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.multiblock.TileEntityDynamicTank;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
+import net.minecraft.text.Text;
 
 public class GuiDynamicTank extends GuiMekanismTile<TileEntityDynamicTank, MekanismTileContainer<TileEntityDynamicTank>> {
 
-    public GuiDynamicTank(MekanismTileContainer<TileEntityDynamicTank> container, PlayerInventory inv, ITextComponent title) {
+    public GuiDynamicTank(MekanismTileContainer<TileEntityDynamicTank> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }
@@ -40,7 +40,7 @@ public class GuiDynamicTank extends GuiMekanismTile<TileEntityDynamicTank, Mekan
         addButton(new GuiSlot(SlotType.INNER_HOLDER_SLOT, this, 145, 20));
         addButton(new GuiSlot(SlotType.INNER_HOLDER_SLOT, this, 145, 50));
         addButton(new GuiInnerScreen(this, 49, 21, 84, 46, () -> {
-            List<ITextComponent> ret = new ArrayList<>();
+            List<Text> ret = new ArrayList<>();
             switch (tile.getMultiblock().mergedTank.getCurrentType()) {
                 case EMPTY:
                     ret.add(MekanismLang.EMPTY.translate());
@@ -71,11 +71,11 @@ public class GuiDynamicTank extends GuiMekanismTile<TileEntityDynamicTank, Mekan
         addButton(new GuiMergedTankGauge<>(() -> tile.getMultiblock().mergedTank, tile::getMultiblock, GaugeType.MEDIUM, this, 7, 16, 34, 56));
     }
 
-    private void addStored(List<ITextComponent> ret, IChemicalTank<?, ?> tank) {
+    private void addStored(List<Text> ret, IChemicalTank<?, ?> tank) {
         addStored(ret, tank.getStack(), ChemicalStack::getAmount);
     }
 
-    private <STACK> void addStored(List<ITextComponent> ret, STACK stack, ToLongFunction<STACK> amountGetter) {
+    private <STACK> void addStored(List<Text> ret, STACK stack, ToLongFunction<STACK> amountGetter) {
         ret.add(MekanismLang.GENERIC_PRE_COLON.translate(stack));
         ret.add(MekanismLang.GENERIC_MB.translate(formatInt(amountGetter.applyAsLong(stack))));
     }

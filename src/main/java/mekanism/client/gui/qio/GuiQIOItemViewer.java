@@ -1,6 +1,8 @@
 package mekanism.client.gui.qio;
 
 import com.google.common.collect.Sets;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +26,8 @@ import mekanism.common.inventory.container.QIOItemViewerContainer.ListSortType;
 import mekanism.common.inventory.container.QIOItemViewerContainer.SortDirection;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
 import mekanism.common.util.text.TextUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IHasContainer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer> extends GuiMekanism<CONTAINER> {
 
@@ -39,19 +39,19 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
         ALLOWED_SPECIAL_CHARS.addAll(QueryType.getPrefixChars());
     }
 
-    protected GuiQIOItemViewer(CONTAINER container, PlayerInventory inv, ITextComponent title) {
+    protected GuiQIOItemViewer(CONTAINER container, PlayerInventory inv, Text title) {
         super(container, inv, title);
-        xSize = 16 + MekanismConfig.client.qioItemViewerSlotsX.get() * 18 + 18;
-        ySize = QIOItemViewerContainer.SLOTS_START_Y + MekanismConfig.client.qioItemViewerSlotsY.get() * 18 + 96;
+        backgroundWidth = 16 + MekanismConfig.client.qioItemViewerSlotsX.get() * 18 + 18;
+        backgroundHeight = QIOItemViewerContainer.SLOTS_START_Y + MekanismConfig.client.qioItemViewerSlotsY.get() * 18 + 96;
     }
 
     @Override
     public void init() {
         super.init();
         int slotsY = MekanismConfig.client.qioItemViewerSlotsY.get();
-        getMinecraft().keyboardListener.enableRepeatEvents(true);
-        addButton(new GuiInnerScreen(this, 7, 15, xSize - 16, 12, () -> {
-            List<ITextComponent> list = new ArrayList<>();
+        client.keyboardListener.enableRepeatEvents(true);
+        addButton(new GuiInnerScreen(this, 7, 15, backgroundWidth - 16, 12, () -> {
+            List<Text> list = new ArrayList<>();
             FrequencyIdentity freq = getFrequency();
             if (freq != null) {
                 list.add(MekanismLang.FREQUENCY.translate(freq.getKey()));
@@ -60,47 +60,47 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
             }
             return list;
         }).tooltip(() -> {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             if (getFrequency() != null) {
                 list.add(MekanismLang.QIO_ITEMS_DETAIL.translateColored(EnumColor.GRAY, EnumColor.INDIGO,
-                      TextUtils.format(container.getTotalItems()), TextUtils.format(container.getCountCapacity())));
+                      TextUtils.format(handler.getTotalItems()), TextUtils.format(handler.getCountCapacity())));
                 list.add(MekanismLang.QIO_TYPES_DETAIL.translateColored(EnumColor.GRAY, EnumColor.INDIGO,
-                      TextUtils.format(container.getTotalTypes()), TextUtils.format(container.getTypeCapacity())));
+                      TextUtils.format(handler.getTotalTypes()), TextUtils.format(handler.getTypeCapacity())));
             }
             return list;
         }));
-        addButton(searchField = new GuiTextField(this, 50, 15 + 12 + 3, xSize - 50 - 10, 10));
+        addButton(searchField = new GuiTextField(this, 50, 15 + 12 + 3, backgroundWidth - 50 - 10, 10));
         searchField.setOffset(0, -1);
         searchField.setInputValidator(this::isValidSearchChar);
-        searchField.setResponder(container::updateSearch);
+        searchField.setResponder(handler::updateSearch);
         searchField.setMaxStringLength(50);
         searchField.setBackground(BackgroundType.ELEMENT_HOLDER);
         searchField.setVisible(true);
         searchField.setTextColor(0xFFFFFF);
         searchField.setFocused(true);
         addButton(new GuiSlotScroll(this, 7, QIOItemViewerContainer.SLOTS_START_Y, MekanismConfig.client.qioItemViewerSlotsX.get(), slotsY,
-              container::getQIOItemList, container));
-        addButton(new GuiDropdown<>(this, xSize - 9 - 54, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
-              41, ListSortType.class, container::getSortType, container::setSortType));
-        addButton(new GuiDigitalIconToggle<>(this, xSize - 9 - 12, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
-              12, 12, SortDirection.class, container::getSortDirection, container::setSortDirection));
-        addButton(new GuiResizeControls(this, (getMinecraft().getMainWindow().getScaledHeight() / 2) - 20 - getGuiTop(), this::resize));
+            handler::getQIOItemList, handler));
+        addButton(new GuiDropdown<>(this, backgroundWidth - 9 - 54, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
+              41, ListSortType.class, handler::getSortType, handler::setSortType));
+        addButton(new GuiDigitalIconToggle<>(this, backgroundWidth - 9 - 12, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
+              12, 12, SortDirection.class, handler::getSortDirection, handler::setSortDirection));
+        addButton(new GuiResizeControls(this, (client.getWindow().getScaledHeight() / 2) - 20 - getGuiTop(), this::resize));
     }
 
     @Override
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         drawString(matrix, MekanismLang.INVENTORY.translate(), 8, (getYSize() - 96) + 4, titleTextColor());
         drawString(matrix, MekanismLang.LIST_SEARCH.translate(), 7, 31, titleTextColor());
-        ITextComponent text = MekanismLang.LIST_SORT.translate();
+        Text text = MekanismLang.LIST_SORT.translate();
         int width = getStringWidth(text);
-        drawString(matrix, text, xSize - 66 - width, (getYSize() - 96) + 4, titleTextColor());
+        drawString(matrix, text, backgroundWidth - 66 - width, (getYSize() - 96) + 4, titleTextColor());
         super.drawForegroundText(matrix, mouseX, mouseY);
     }
 
     @Override
-    public void resize(@Nonnull Minecraft minecraft, int sizeX, int sizeY) {
+    public void resize(@Nonnull MinecraftClient minecraft, int sizeX, int sizeY) {
         super.resize(minecraft, sizeX, sizeY);
-        container.updateSearch(searchField.getText());
+        handler.updateSearch(searchField.getText());
         //Validate the height is still valid, and if it isn't recreate it
         int maxY = QIOItemViewerContainer.getSlotsYMax();
         if (MekanismConfig.client.qioItemViewerSlotsY.get() > maxY) {
@@ -115,7 +115,7 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     @Override
     public void onClose() {
         super.onClose();
-        getMinecraft().keyboardListener.enableRepeatEvents(false);
+        client.keyboardListener.enableRepeatEvents(false);
     }
 
     private boolean isValidSearchChar(char c) {
@@ -151,11 +151,11 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     private void recreateViewer() {
         // here we subtly recreate the entire interface + container, maintaining the same window ID
         @SuppressWarnings("unchecked")
-        CONTAINER c = (CONTAINER) container.recreate();
+        CONTAINER c = (CONTAINER) handler.recreate();
         GuiQIOItemViewer<CONTAINER> s = recreate(c);
-        getMinecraft().currentScreen = null;
-        getMinecraft().player.openContainer = ((IHasContainer<?>) s).getContainer();
-        getMinecraft().displayGuiScreen(s);
+        client.currentScreen = null;
+        client.player.currentScreenHandler = ((ScreenHandlerProvider<?>) s).getScreenHandler();
+        client.displayGuiScreen(s);
         s.searchField.setText(searchField.getText());
         c.updateSearch(searchField.getText());
     }

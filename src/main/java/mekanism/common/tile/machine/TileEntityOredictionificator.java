@@ -13,6 +13,7 @@ import mekanism.api.Action;
 import mekanism.api.IConfigCardAccess.ISpecialConfigData;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
+import mekanism.api._helpers_pls_remove.NBTFlags;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
@@ -41,15 +42,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.tag.ItemTags;
+import net.minecraft.tag.Tag;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -115,10 +114,10 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     }
 
     @Nullable
-    public ResourceLocation getValidName(ItemStack stack) {
+    public Identifier getValidName(ItemStack stack) {
         //TODO: Cache this?
-        Set<ResourceLocation> tags = stack.getItem().getTags();
-        for (ResourceLocation resource : tags) {
+        Set<Identifier> tags = stack.getItem().getTags();
+        for (Identifier resource : tags) {
             List<String> filters = possibleFilters.getOrDefault(resource.getNamespace(), Collections.emptyList());
             String path = resource.getPath();
             for (String pre : filters) {
@@ -131,7 +130,7 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     }
 
     public ItemStack getResult(ItemStack stack) {
-        ResourceLocation resource = getValidName(stack);
+        Identifier resource = getValidName(stack);
         if (resource == null) {
             return ItemStack.EMPTY;
         }
@@ -145,24 +144,24 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
 
     @Nonnull
     @Override
-    public @Nonnull CompoundTag toTag(@Nonnull @Nonnull CompoundTag nbtTags) {
+    public CompoundTag toTag(@Nonnull CompoundTag nbtTags) {
         super.toTag(nbtTags);
         getConfigurationData(nbtTags);
         return nbtTags;
     }
 
     @Override
-    public void fromTag(@Nonnull BlockState state, @Nonnull @Nonnull CompoundTag nbtTags) {
+    public void fromTag(@Nonnull BlockState state, @Nonnull CompoundTag nbtTags) {
         super.fromTag(state, nbtTags);
         setConfigurationData(nbtTags);
     }
 
     @Override
-    public CompoundNBT getConfigurationData(CompoundNBT nbtTags) {
+    public CompoundTag getConfigurationData(CompoundTag nbtTags) {
         if (!filters.isEmpty()) {
-            ListNBT filterTags = new ListNBT();
+            ListTag filterTags = new ListTag();
             for (OredictionificatorFilter filter : filters) {
-                filterTags.add(filter.write(new CompoundNBT()));
+                filterTags.add(filter.write(new CompoundTag()));
             }
             nbtTags.put(NBTConstants.FILTERS, filterTags);
         }
@@ -170,9 +169,9 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     }
 
     @Override
-    public void setConfigurationData(CompoundNBT nbtTags) {
-        if (nbtTags.contains(NBTConstants.FILTERS, NBT.TAG_LIST)) {
-            ListNBT tagList = nbtTags.getList(NBTConstants.FILTERS, NBT.TAG_COMPOUND);
+    public void setConfigurationData(CompoundTag nbtTags) {
+        if (nbtTags.contains(NBTConstants.FILTERS, NBTFlags.LIST)) {
+            ListTag tagList = nbtTags.getList(NBTConstants.FILTERS, NBTFlags.COMPOUND);
             for (int i = 0; i < tagList.size(); i++) {
                 IFilter<?> filter = BaseFilter.readFromNBT(tagList.getCompound(i));
                 if (filter instanceof OredictionificatorFilter) {
@@ -190,9 +189,9 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     @Override
     public void writeSustainedData(ItemStack itemStack) {
         if (!filters.isEmpty()) {
-            ListNBT filterTags = new ListNBT();
+            ListTag filterTags = new ListTag();
             for (OredictionificatorFilter filter : filters) {
-                filterTags.add(filter.write(new CompoundNBT()));
+                filterTags.add(filter.write(new ListTag()));
             }
             ItemDataUtils.setList(itemStack, NBTConstants.FILTERS, filterTags);
         }
@@ -200,8 +199,8 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
 
     @Override
     public void readSustainedData(ItemStack itemStack) {
-        if (ItemDataUtils.hasData(itemStack, NBTConstants.FILTERS, NBT.TAG_LIST)) {
-            ListNBT tagList = ItemDataUtils.getList(itemStack, NBTConstants.FILTERS);
+        if (ItemDataUtils.hasData(itemStack, NBTConstants.FILTERS, NBTFlags.LIST)) {
+            ListTag tagList = ItemDataUtils.getList(itemStack, NBTConstants.FILTERS);
             for (int i = 0; i < tagList.size(); i++) {
                 IFilter<?> filter = BaseFilter.readFromNBT(tagList.getCompound(i));
                 if (filter instanceof OredictionificatorFilter) {
@@ -244,8 +243,8 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     //TODO - V11: Rewrite this to be more efficient and also cache various values, with support for tags for fluids and other types
     public static class OredictionificatorFilter extends BaseFilter<OredictionificatorFilter> {
 
-        private ResourceLocation filterLocation;
-        private ITag<Item> filterTag;
+        private Identifier filterLocation;
+        private Tag<Item> filterTag;
         @Nonnull
         private Item selectedOutput = Items.AIR;
 
@@ -253,7 +252,7 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
             return filterLocation.toString();
         }
 
-        public void setFilter(ResourceLocation location) {
+        public void setFilter(Identifier location) {
             setFilterLocation(location);
             List<Item> matchingItems = getMatchingItems();
             if (matchingItems.isEmpty()) {
@@ -263,9 +262,9 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
             }
         }
 
-        private void setFilterLocation(ResourceLocation location) {
+        private void setFilterLocation(Identifier location) {
             filterLocation = location;
-            if (ItemTags.getCollection().getRegisteredTags().contains(filterLocation)) {
+            if (ItemTags.getTagGroup().getTagIds().contains(filterLocation)) {
                 filterTag = ItemTags.makeWrapperTag(filterLocation.toString());
             } else {
                 //If the filter doesn't exist (because we loaded a tag that is no longer valid), then just set the filter to being empty
@@ -273,12 +272,12 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
             }
         }
 
-        public boolean filterMatches(ResourceLocation location) {
+        public boolean filterMatches(Identifier location) {
             return filterLocation.equals(location);
         }
 
         @Override
-        public CompoundNBT write(CompoundNBT nbtTags) {
+        public CompoundTag write(CompoundTag nbtTags) {
             super.write(nbtTags);
             nbtTags.putString(NBTConstants.FILTER, getFilterText());
             if (selectedOutput != Items.AIR) {
@@ -288,32 +287,31 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
         }
 
         @Override
-        public void read(CompoundNBT nbtTags) {
-            setFilterLocation(new ResourceLocation(nbtTags.getString(NBTConstants.FILTER)));
+        public void read(CompoundTag nbtTags) {
+            setFilterLocation(new Identifier(nbtTags.getString(NBTConstants.FILTER)));
             NBTUtils.setResourceLocationIfPresent(nbtTags, NBTConstants.SELECTED, this::setSelectedOrAir);
         }
 
         @Override
-        public void write(PacketBuffer buffer) {
+        public void write(PacketByteBuf buffer) {
             super.write(buffer);
-            buffer.writeResourceLocation(filterLocation);
-            buffer.writeResourceLocation(selectedOutput.getRegistryName());
+            buffer.writeIdentifier(filterLocation);
+            buffer.writeIdentifier(selectedOutput.getRegistryName());
         }
 
         @Override
-        public void read(PacketBuffer dataStream) {
-            setFilterLocation(dataStream.readResourceLocation());
-            setSelectedOrAir(dataStream.readResourceLocation());
+        public void read(PacketByteBuf dataStream) {
+            setFilterLocation(dataStream.readIdentifier());
+            setSelectedOrAir(dataStream.readIdentifier());
         }
 
-        private void setSelectedOrAir(@Nonnull ResourceLocation resourceLocation) {
-            Item output = ForgeRegistries.ITEMS.getValue(resourceLocation);
-            selectedOutput = output == null ? Items.AIR : output;
+        private void setSelectedOrAir(@Nonnull Identifier resourceLocation) {
+            selectedOutput = Registry.ITEM.get(resourceLocation);
         }
 
         public List<Item> getMatchingItems() {
             if (hasFilter()) {
-                return new ArrayList<>(filterTag.getAllElements());
+                return new ArrayList<>(filterTag.values());
             }
             return Collections.emptyList();
         }

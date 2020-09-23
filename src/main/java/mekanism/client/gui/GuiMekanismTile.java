@@ -37,10 +37,10 @@ public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER
     protected void drawForegroundText(@Nonnull MatrixStack matrix, int mouseX, int mouseY) {
         super.drawForegroundText(matrix, mouseX, mouseY);
         if (tile instanceof ISideConfiguration) {
-            ItemStack stack = getMinecraft().player.inventory.getItemStack();
+            ItemStack stack = client.player.inventory.getCursorStack();
             if (!stack.isEmpty() && stack.getItem() instanceof ItemConfigurator) {
-                for (int i = 0; i < container.inventorySlots.size(); i++) {
-                    Slot slot = container.inventorySlots.get(i);
+                for (int i = 0; i < handler.slots.size(); i++) {
+                    Slot slot = handler.slots.get(i);
                     if (isMouseOverSlot(slot, mouseX, mouseY)) {
                         DataType data = getFromSlot(slot);
                         if (data != null) {

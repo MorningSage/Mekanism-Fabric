@@ -1,15 +1,15 @@
 package mekanism.client.render.lib.effect;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import mekanism.client.render.MekanismRenderType;
 import mekanism.common.lib.effect.BoltEffect;
 import mekanism.common.lib.effect.BoltEffect.BoltQuads;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
@@ -24,14 +24,14 @@ public class BoltRenderer {
     private Timestamp refreshTimestamp = new Timestamp();
 
     private final Random random = new Random();
-    private final Minecraft minecraft = Minecraft.getInstance();
+    private final MinecraftClient minecraft = MinecraftClient.getInstance();
 
     private final Map<Object, BoltOwnerData> boltOwners = new Object2ObjectOpenHashMap<>();
 
-    public void render(float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer bufferIn) {
-        IVertexBuilder buffer = bufferIn.getBuffer(MekanismRenderType.MEK_LIGHTNING);
-        Matrix4f matrix = matrixStack.getLast().getMatrix();
-        Timestamp timestamp = new Timestamp(minecraft.world.getGameTime(), partialTicks);
+    public void render(float partialTicks, MatrixStack matrixStack, VertexConsumerProvider bufferIn) {
+        VertexConsumer buffer = bufferIn.getBuffer(MekanismRenderType.MEK_LIGHTNING);
+        Matrix4f matrix = matrixStack.peek().getModel();
+        Timestamp timestamp = new Timestamp(minecraft.world.getTime(), partialTicks);
         boolean refresh = timestamp.isPassed(refreshTimestamp, (1 / REFRESH_TIME));
         if (refresh) {
             refreshTimestamp = timestamp;
@@ -63,7 +63,7 @@ public class BoltRenderer {
         synchronized (boltOwners) {
             BoltOwnerData data = boltOwners.computeIfAbsent(owner, o -> new BoltOwnerData());
             data.lastBolt = newBoltData;
-            Timestamp timestamp = new Timestamp(minecraft.world.getGameTime(), partialTicks);
+            Timestamp timestamp = new Timestamp(minecraft.world.getTime(), partialTicks);
             if ((!data.lastBolt.getSpawnFunction().isConsecutive() || data.bolts.isEmpty()) && timestamp.isPassed(data.lastBoltTimestamp, data.lastBoltDelay)) {
                 data.addBolt(new BoltInstance(newBoltData, timestamp), timestamp);
             }
@@ -98,13 +98,13 @@ public class BoltRenderer {
             this.createdTimestamp = timestamp;
         }
 
-        public void render(Matrix4f matrix, IVertexBuilder buffer, Timestamp timestamp) {
+        public void render(Matrix4f matrix, VertexConsumer buffer, Timestamp timestamp) {
             float lifeScale = timestamp.subtract(createdTimestamp).value() / bolt.getLifespan();
             Pair<Integer, Integer> bounds = bolt.getFadeFunction().getRenderBounds(renderQuads.size(), lifeScale);
             for (int i = bounds.getLeft(); i < bounds.getRight(); i++) {
-                renderQuads.get(i).getVecs().forEach(v -> buffer.pos(matrix, (float) v.x, (float) v.y, (float) v.z)
+                renderQuads.get(i).getVecs().forEach(v -> buffer.vertex(matrix, (float) v.x, (float) v.y, (float) v.z)
                       .color(bolt.getColor().r(), bolt.getColor().g(), bolt.getColor().b(), bolt.getColor().a())
-                      .endVertex());
+                      .next());
             }
         }
 

@@ -9,7 +9,7 @@ import mekanism.api.fluid.IExtendedFluidHandler;
 import mekanism.api.fluid.ISidedFluidHandler;
 import mekanism.common.capabilities.holder.IHolder;
 import net.minecraft.util.Direction;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 @FieldsAreNonnullByDefault
 @ParametersAreNonnullByDefault

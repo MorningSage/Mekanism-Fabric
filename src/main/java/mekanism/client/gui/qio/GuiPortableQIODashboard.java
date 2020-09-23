@@ -7,11 +7,11 @@ import mekanism.common.inventory.container.item.PortableQIODashboardContainer;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
 import mekanism.common.lib.frequency.IFrequencyItem;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiPortableQIODashboard extends GuiQIOItemViewer<PortableQIODashboardContainer> {
 
-    public GuiPortableQIODashboard(PortableQIODashboardContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiPortableQIODashboard(PortableQIODashboardContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }
@@ -19,7 +19,7 @@ public class GuiPortableQIODashboard extends GuiQIOItemViewer<PortableQIODashboa
     @Override
     public void init() {
         super.init();
-        addButton(new GuiQIOFrequencyTab(this, container.getHand()));
+        addButton(new GuiQIOFrequencyTab(this, handler.getHand()));
     }
 
     @Override
@@ -35,10 +35,10 @@ public class GuiPortableQIODashboard extends GuiQIOItemViewer<PortableQIODashboa
 
     @Override
     public FrequencyIdentity getFrequency() {
-        return ((IFrequencyItem) container.getStack().getItem()).getFrequency(container.getStack());
+        return ((IFrequencyItem) handler.getStack().getItem()).getFrequency(handler.getStack());
     }
 
-    private ITextComponent getName() {
-        return container.getStack().getDisplayName();
+    private Text getName() {
+        return handler.getStack().getName();
     }
 }

@@ -19,13 +19,13 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.util.ChemicalUtil;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.text.Text;
 
 public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>>
       extends GuiTankGauge<CHEMICAL, TANK> {
 
-    protected ITextComponent label;
+    protected Text label;
 
     public GuiChemicalGauge(ITankInfoHandler<TANK> handler, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY, TankType tankType) {
         super(type, gui, x, y, sizeX, sizeY, handler, tankType);
@@ -57,7 +57,7 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
         if (guiObj instanceof GuiMekanismTile) {
             TANK tank = getTank();
             if (tank != null) {
-                TileEntityMekanism tile = ((GuiMekanismTile<?, ?>) guiObj).getContainer().getTileEntity();
+                TileEntityMekanism tile = ((GuiMekanismTile<?, ?>) guiObj).getScreenHandler().getTileEntity();
                 if (tile instanceof ISideConfiguration) {
                     DataType dataType = ((ISideConfiguration) tile).getActiveDataType(tank);
                     if (dataType != null) {
@@ -69,7 +69,7 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
         return GaugeInfo.STANDARD;
     }
 
-    public GuiChemicalGauge<CHEMICAL, STACK, TANK> setLabel(ITextComponent label) {
+    public GuiChemicalGauge<CHEMICAL, STACK, TANK> setLabel(Text label) {
         this.label = label;
         return this;
     }
@@ -88,7 +88,7 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
     }
 
     @Override
-    public TextureAtlasSprite getIcon() {
+    public Sprite getIcon() {
         if (dummy) {
             return MekanismRenderer.getChemicalTexture(dummyType);
         }
@@ -96,12 +96,12 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
     }
 
     @Override
-    public ITextComponent getLabel() {
+    public Text getLabel() {
         return label;
     }
 
     @Override
-    public List<ITextComponent> getTooltipText() {
+    public List<Text> getTooltipText() {
         if (dummy) {
             return Collections.singletonList(TextComponentUtil.build(dummyType));
         }
@@ -109,7 +109,7 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
         if (tank == null || tank.isEmpty()) {
             return Collections.singletonList(MekanismLang.EMPTY.translate());
         }
-        List<ITextComponent> list = new ArrayList<>();
+        List<Text> list = new ArrayList<>();
         long amount = tank.getStored();
         if (amount == Long.MAX_VALUE) {
             list.add(MekanismLang.GENERIC_STORED.translate(tank.getType(), MekanismLang.INFINITE));
@@ -120,7 +120,7 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
         return list;
     }
 
-    protected void addAttributeTooltips(List<ITextComponent> tooltips, CHEMICAL chemical) {
+    protected void addAttributeTooltips(List<Text> tooltips, CHEMICAL chemical) {
         tooltips.addAll(ChemicalUtil.getAttributeTooltips(chemical));
     }
 

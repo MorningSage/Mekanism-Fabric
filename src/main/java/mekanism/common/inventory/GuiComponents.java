@@ -1,25 +1,26 @@
 package mekanism.common.inventory;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiComponents {
 
     public interface IDropdownEnum<TYPE extends Enum<TYPE> & IDropdownEnum<TYPE>> {
 
-        ITextComponent getShortName();
+        Text getShortName();
 
-        ITextComponent getTooltip();
+        Text getTooltip();
 
-        default ResourceLocation getIcon() {
+        default Identifier getIcon() {
             return null;
         }
     }
 
     public interface IToggleEnum<TYPE extends Enum<TYPE> & IToggleEnum<TYPE>> {
 
-        ITextComponent getTooltip();
+        Text getTooltip();
 
-        ResourceLocation getIcon();
+        Identifier getIcon();
     }
 }

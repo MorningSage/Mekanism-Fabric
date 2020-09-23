@@ -1,7 +1,8 @@
 package mekanism.common.content.filter;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
 
 public interface IFilter<FILTER extends IFilter<FILTER>> {
 
@@ -9,13 +10,13 @@ public interface IFilter<FILTER extends IFilter<FILTER>> {
 
     FilterType getFilterType();
 
-    CompoundNBT write(CompoundNBT nbtTags);
+    CompoundTag write(CompoundTag nbtTags);
 
-    void read(CompoundNBT nbtTags);
+    void read(CompoundTag nbtTags);
 
-    void write(PacketBuffer buffer);
+    void write(PacketByteBuf buffer);
 
-    void read(PacketBuffer dataStream);
+    void read(PacketByteBuf dataStream);
 
     boolean hasFilter();
 }

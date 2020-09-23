@@ -27,9 +27,9 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
     public PlayerSound(@Nonnull PlayerEntity player, @Nonnull SoundEvent sound) {
         super(sound, SoundCategory.PLAYERS);
         this.playerReference = new WeakReference<>(player);
-        this.lastX = (float) player.getPosX();
-        this.lastY = (float) player.getPosY();
-        this.lastZ = (float) player.getPosZ();
+        this.lastX = (float) player.getX();
+        this.lastY = (float) player.getY();
+        this.lastZ = (float) player.getZ();
         this.repeat = true;
         this.repeatDelay = 0;
 

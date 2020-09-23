@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.tab;
 
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.api.text.TextComponentUtil;
@@ -11,10 +12,9 @@ import mekanism.client.render.MekanismRenderer;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
-public class GuiConfigTypeTab extends GuiInsetElement<TileEntity> {
+public class GuiConfigTypeTab extends GuiInsetElement<BlockEntity> {
 
     private final TransmissionType transmission;
     private final GuiSideConfiguration config;
@@ -25,7 +25,7 @@ public class GuiConfigTypeTab extends GuiInsetElement<TileEntity> {
         transmission = type;
     }
 
-    private static ResourceLocation getResource(TransmissionType t) {
+    private static Identifier getResource(TransmissionType t) {
         return MekanismUtils.getResource(ResourceType.GUI, t.getTransmission() + ".png");
     }
 

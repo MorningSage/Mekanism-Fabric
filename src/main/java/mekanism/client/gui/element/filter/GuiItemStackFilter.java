@@ -14,8 +14,8 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import mekanism.common.util.StackUtils;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 
 public abstract class GuiItemStackFilter<FILTER extends IItemStackFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>>
       extends GuiFilter<FILTER, TILE> {
@@ -25,10 +25,10 @@ public abstract class GuiItemStackFilter<FILTER extends IItemStackFilter<FILTER>
     }
 
     @Override
-    protected List<ITextComponent> getScreenText() {
-        List<ITextComponent> list = super.getScreenText();
+    protected List<Text> getScreenText() {
+        List<Text> list = super.getScreenText();
         if (filter.hasFilter()) {
-            list.add(filter.getItemStack().getDisplayName());
+            list.add(filter.getItemStack().getName());
         }
         return list;
     }

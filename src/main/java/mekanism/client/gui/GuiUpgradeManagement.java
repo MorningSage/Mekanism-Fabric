@@ -22,7 +22,7 @@ import mekanism.common.network.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.UpgradeUtils;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiUpgradeManagement extends GuiMekanismTile<TileEntityMekanism, MekanismTileContainer<TileEntityMekanism>> {
 
@@ -31,7 +31,7 @@ public class GuiUpgradeManagement extends GuiMekanismTile<TileEntityMekanism, Me
     private int supportedIndex;
     private int delay;
 
-    public GuiUpgradeManagement(MekanismTileContainer<TileEntityMekanism> container, PlayerInventory inv, ITextComponent title) {
+    public GuiUpgradeManagement(MekanismTileContainer<TileEntityMekanism> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }
@@ -79,7 +79,7 @@ public class GuiUpgradeManagement extends GuiMekanismTile<TileEntityMekanism, Me
             renderText(matrix, MekanismLang.UPGRADE_TYPE.translate(selectedType), 92, 8, 0.6F);
             renderText(matrix, MekanismLang.UPGRADE_COUNT.translate(amount, selectedType.getMax()), 92, 16, 0.6F);
             int text = 0;
-            for (ITextComponent component : UpgradeUtils.getInfo(tile, selectedType)) {
+            for (Text component : UpgradeUtils.getInfo(tile, selectedType)) {
                 renderText(matrix, component, 92, 22 + (6 * text++), 0.6F);
             }
         } else {
@@ -97,7 +97,7 @@ public class GuiUpgradeManagement extends GuiMekanismTile<TileEntityMekanism, Me
         super.drawForegroundText(matrix, mouseX, mouseY);
     }
 
-    private void renderText(MatrixStack matrix, ITextComponent component, int x, int y, float size) {
+    private void renderText(MatrixStack matrix, Text component, int x, int y, float size) {
         matrix.push();
         matrix.scale(size, size, size);
         drawString(matrix, component, (int) ((1F / size) * x), (int) ((1F / size) * y), screenTextColor());

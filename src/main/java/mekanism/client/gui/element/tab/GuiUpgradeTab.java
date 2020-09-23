@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.tab;
 
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import javax.annotation.Nonnull;
 import mekanism.client.SpecialColors;
@@ -12,11 +13,10 @@ import mekanism.common.network.PacketGuiButtonPress;
 import mekanism.common.network.PacketGuiButtonPress.ClickedTileButton;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.tileentity.TileEntity;
 
-public class GuiUpgradeTab extends GuiInsetElement<TileEntity> {
+public class GuiUpgradeTab extends GuiInsetElement<BlockEntity> {
 
-    public GuiUpgradeTab(IGuiWrapper gui, TileEntity tile) {
+    public GuiUpgradeTab(IGuiWrapper gui, BlockEntity tile) {
         super(MekanismUtils.getResource(ResourceType.GUI, "upgrade.png"), gui, tile, gui.getWidth(), 6, 26, 18, false);
     }
 

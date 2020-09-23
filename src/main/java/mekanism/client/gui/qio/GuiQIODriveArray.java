@@ -11,14 +11,14 @@ import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.tile.qio.TileEntityQIODriveArray;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiQIODriveArray extends GuiMekanismTile<TileEntityQIODriveArray, MekanismTileContainer<TileEntityQIODriveArray>> {
 
-    public GuiQIODriveArray(MekanismTileContainer<TileEntityQIODriveArray> container, PlayerInventory inv, ITextComponent title) {
+    public GuiQIODriveArray(MekanismTileContainer<TileEntityQIODriveArray> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
-        ySize += 40;
+        backgroundHeight += 40;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class GuiQIODriveArray extends GuiMekanismTile<TileEntityQIODriveArray, M
         super.init();
         addButton(new GuiQIOFrequencyTab(this, tile));
         addButton(new GuiSecurityTab<>(this, tile));
-        addButton(new GuiQIOFrequencyDataScreen(this, 15, 19, xSize - 32, 46, () -> tile.getFrequency(FrequencyType.QIO)));
+        addButton(new GuiQIOFrequencyDataScreen(this, 15, 19, backgroundWidth - 32, 46, () -> tile.getFrequency(FrequencyType.QIO)));
     }
 
     @Override

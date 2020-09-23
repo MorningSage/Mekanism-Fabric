@@ -4,22 +4,22 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import mekanism.common.entity.EntityRobit;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.text.Text;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class PacketRobit {
 
     private final RobitPacketType activeType;
     private final int entityId;
-    private ITextComponent name;
+    private Text name;
 
     public PacketRobit(RobitPacketType type, int entityId) {
         activeType = type;
         this.entityId = entityId;
     }
 
-    public PacketRobit(int entityId, @Nonnull ITextComponent name) {
+    public PacketRobit(int entityId, @Nonnull Text name) {
         activeType = RobitPacketType.NAME;
         this.entityId = entityId;
         this.name = name;
@@ -31,7 +31,7 @@ public class PacketRobit {
             return;
         }
         context.get().enqueueWork(() -> {
-            EntityRobit robit = (EntityRobit) player.world.getEntityByID(message.entityId);
+            EntityRobit robit = (EntityRobit) player.world.getEntityById(message.entityId);
             if (robit != null) {
                 switch (message.activeType) {
                     case FOLLOW:
@@ -52,19 +52,19 @@ public class PacketRobit {
         context.get().setPacketHandled(true);
     }
 
-    public static void encode(PacketRobit pkt, PacketBuffer buf) {
-        buf.writeEnumValue(pkt.activeType);
+    public static void encode(PacketRobit pkt, PacketByteBuf buf) {
+        buf.writeEnumConstant(pkt.activeType);
         buf.writeVarInt(pkt.entityId);
         if (pkt.activeType == RobitPacketType.NAME) {
-            buf.writeTextComponent(pkt.name);
+            buf.writeText(pkt.name);
         }
     }
 
-    public static PacketRobit decode(PacketBuffer buf) {
-        RobitPacketType activeType = buf.readEnumValue(RobitPacketType.class);
+    public static PacketRobit decode(PacketByteBuf buf) {
+        RobitPacketType activeType = buf.readEnumConstant(RobitPacketType.class);
         int entityId = buf.readVarInt();
         if (activeType == RobitPacketType.NAME) {
-            return new PacketRobit(entityId, buf.readTextComponent());
+            return new PacketRobit(entityId, buf.readText());
         }
         return new PacketRobit(activeType, entityId);
     }

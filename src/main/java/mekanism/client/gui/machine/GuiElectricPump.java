@@ -1,5 +1,6 @@
 package mekanism.client.gui.machine;
 
+import mekanism.api._helpers_pls_remove.FluidStack;
 import net.minecraft.client.util.math.MatrixStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +20,12 @@ import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.machine.TileEntityElectricPump;
 import mekanism.common.util.text.EnergyDisplay;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.text.Text;
 
 public class GuiElectricPump extends GuiMekanismTile<TileEntityElectricPump, MekanismTileContainer<TileEntityElectricPump>> {
 
 
-    public GuiElectricPump(MekanismTileContainer<TileEntityElectricPump> container, PlayerInventory inv, ITextComponent title) {
+    public GuiElectricPump(MekanismTileContainer<TileEntityElectricPump> container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }
@@ -34,7 +34,7 @@ public class GuiElectricPump extends GuiMekanismTile<TileEntityElectricPump, Mek
     public void init() {
         super.init();
         addButton(new GuiInnerScreen(this, 54, 23, 80, 41, () -> {
-            List<ITextComponent> list = new ArrayList<>();
+            List<Text> list = new ArrayList<>();
             list.add(EnergyDisplay.of(tile.getEnergyContainer().getEnergy(), tile.getEnergyContainer().getMaxEnergy()).getTextComponent());
             FluidStack fluidStack = tile.fluidTank.getFluid();
             if (fluidStack.isEmpty()) {

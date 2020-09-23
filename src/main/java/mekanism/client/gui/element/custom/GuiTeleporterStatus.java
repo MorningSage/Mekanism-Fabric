@@ -10,16 +10,16 @@ import mekanism.client.gui.element.GuiTexturedElement;
 import mekanism.common.MekanismLang;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class GuiTeleporterStatus extends GuiTexturedElement {
 
-    private static final ResourceLocation NEEDS_ENERGY = MekanismUtils.getResource(ResourceType.GUI, "teleporter_needs_energy.png");
-    private static final ResourceLocation NO_FRAME = MekanismUtils.getResource(ResourceType.GUI, "teleporter_no_frame.png");
-    private static final ResourceLocation NO_FREQUENCY = MekanismUtils.getResource(ResourceType.GUI, "teleporter_no_frequency.png");
-    private static final ResourceLocation NO_LINK = MekanismUtils.getResource(ResourceType.GUI, "teleporter_no_link.png");
-    private static final ResourceLocation READY = MekanismUtils.getResource(ResourceType.GUI, "teleporter_ready.png");
+    private static final Identifier NEEDS_ENERGY = MekanismUtils.getResource(ResourceType.GUI, "teleporter_needs_energy.png");
+    private static final Identifier NO_FRAME = MekanismUtils.getResource(ResourceType.GUI, "teleporter_no_frame.png");
+    private static final Identifier NO_FREQUENCY = MekanismUtils.getResource(ResourceType.GUI, "teleporter_no_frequency.png");
+    private static final Identifier NO_LINK = MekanismUtils.getResource(ResourceType.GUI, "teleporter_no_link.png");
+    private static final Identifier READY = MekanismUtils.getResource(ResourceType.GUI, "teleporter_ready.png");
 
     private final BooleanSupplier hasFrequency;
     private final ByteSupplier statusSupplier;
@@ -37,7 +37,7 @@ public class GuiTeleporterStatus extends GuiTexturedElement {
     }
 
     @Override
-    protected ResourceLocation getResource() {
+    protected Identifier getResource() {
         if (hasFrequency.getAsBoolean()) {
             switch (statusSupplier.getAsByte()) {
                 case 1:
@@ -57,8 +57,8 @@ public class GuiTeleporterStatus extends GuiTexturedElement {
     @Override
     public void drawBackground(@Nonnull MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(matrix, mouseX, mouseY, partialTicks);
-        minecraft.textureManager.bindTexture(getResource());
-        blit(matrix, x, y, 0, 0, width, height, width, height);
+        minecraft.getTextureManager().bindTexture(getResource());
+        drawTexture(matrix, x, y, 0, 0, width, height, width, height);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class GuiTeleporterStatus extends GuiTexturedElement {
         displayTooltip(matrix, getStatusDisplay(), mouseX, mouseY);
     }
 
-    private ITextComponent getStatusDisplay() {
+    private Text getStatusDisplay() {
         if (hasFrequency.getAsBoolean()) {
             switch (statusSupplier.getAsByte()) {
                 case 1:

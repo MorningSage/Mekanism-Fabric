@@ -79,6 +79,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -559,11 +560,11 @@ public class EntityRobit extends PathAwareEntity implements IMekanismInventory, 
         }
     }
 
-    public IWorldPosCallable getWorldPosCallable() {
-        return new IWorldPosCallable() {
+    public ScreenHandlerContext getWorldPosCallable() {
+        return new ScreenHandlerContext() {
             @Nonnull
             @Override
-            public <T> Optional<T> apply(@Nonnull BiFunction<World, BlockPos, T> worldBlockPosTBiFunction) {
+            public <T> Optional<T> run(@Nonnull BiFunction<World, BlockPos, T> worldBlockPosTBiFunction) {
                 //Note: We use an anonymous class implementation rather than using IWorldPosCallable.of, so that if the robit moves
                 // this uses the proper updated position
                 return Optional.of(worldBlockPosTBiFunction.apply(getEntityWorld(), getPosition()));

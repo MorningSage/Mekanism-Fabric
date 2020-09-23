@@ -14,11 +14,11 @@ import mekanism.common.network.PacketGuiSetFrequency;
 import mekanism.common.network.PacketGuiSetFrequency.FrequencyUpdate;
 import mekanism.common.network.PacketQIOSetColor;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 public class GuiQIOItemFrequencySelect extends GuiQIOFrequencySelect<QIOFrequencySelectItemContainer> {
 
-    public GuiQIOItemFrequencySelect(QIOFrequencySelectItemContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiQIOItemFrequencySelect(QIOFrequencySelectItemContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
     }
 
@@ -26,49 +26,49 @@ public class GuiQIOItemFrequencySelect extends GuiQIOFrequencySelect<QIOFrequenc
     public void init() {
         super.init();
         addButton(new MekanismImageButton(this, getGuiLeft() + 6, getGuiTop() + 6, 14, getButtonLocation("back"),
-              () -> Mekanism.packetHandler.sendToServer(new PacketGuiButtonPress(ClickedItemButton.BACK_BUTTON, container.getHand()))));
+              () -> Mekanism.packetHandler.sendToServer(new PacketGuiButtonPress(ClickedItemButton.BACK_BUTTON, handler.getHand()))));
     }
 
     @Override
     public void sendSetFrequency(FrequencyIdentity identity) {
-        Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_ITEM, FrequencyType.QIO, identity, container.getHand()));
+        Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_ITEM, FrequencyType.QIO, identity, handler.getHand()));
     }
 
     @Override
     public void sendRemoveFrequency(FrequencyIdentity identity) {
-        Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_ITEM, FrequencyType.QIO, identity, container.getHand()));
+        Mekanism.packetHandler.sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_ITEM, FrequencyType.QIO, identity, handler.getHand()));
     }
 
     @Override
     public void sendColorUpdate(int extra) {
         QIOFrequency freq = getFrequency();
         if (freq != null) {
-            Mekanism.packetHandler.sendToServer(PacketQIOSetColor.create(container.getHand(), freq, extra));
+            Mekanism.packetHandler.sendToServer(PacketQIOSetColor.create(handler.getHand(), freq, extra));
         }
     }
 
     @Override
     public QIOFrequency getFrequency() {
-        return container.getFrequency();
+        return handler.getFrequency();
     }
 
     @Override
     public String getOwnerUsername() {
-        return container.getOwnerUsername();
+        return handler.getOwnerUsername();
     }
 
     @Override
     public UUID getOwnerUUID() {
-        return container.getOwnerUUID();
+        return handler.getOwnerUUID();
     }
 
     @Override
     public List<QIOFrequency> getPublicFrequencies() {
-        return container.getPublicCache();
+        return handler.getPublicCache();
     }
 
     @Override
     public List<QIOFrequency> getPrivateFrequencies() {
-        return container.getPrivateCache();
+        return handler.getPrivateCache();
     }
 }

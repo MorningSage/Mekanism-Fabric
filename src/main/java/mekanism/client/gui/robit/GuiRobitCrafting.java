@@ -5,13 +5,13 @@ import mekanism.client.gui.element.GuiRightArrow;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.entity.robit.CraftingRobitContainer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 import javax.annotation.Nonnull;
 
 public class GuiRobitCrafting extends GuiRobit<CraftingRobitContainer> {
 
-    public GuiRobitCrafting(CraftingRobitContainer container, PlayerInventory inv, ITextComponent title) {
+    public GuiRobitCrafting(CraftingRobitContainer container, PlayerInventory inv, Text title) {
         super(container, inv, title);
         dynamicSlots = true;
     }

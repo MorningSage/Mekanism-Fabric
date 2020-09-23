@@ -9,7 +9,7 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.AutomationType;
 import mekanism.common.capabilities.merged.MergedTank;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api._helpers_pls_remove.FluidStack;
 
 /**
  * Like {@link mekanism.api.chemical.merged.ChemicalTankWrapper}
