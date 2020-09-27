@@ -3,8 +3,8 @@ package mekanism.common.block.transmitter;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.VoxelShapeUtils;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
 
 public abstract class BlockLargeTransmitter extends BlockTransmitter {
 
@@ -14,18 +14,18 @@ public abstract class BlockLargeTransmitter extends BlockTransmitter {
     public static final VoxelShape center;
 
     static {
-        VoxelShapeUtils.setShape(makeCuboidShape(4, 0, 4, 12, 4, 12), SIDES, true);
+        VoxelShapeUtils.setShape(createCuboidShape(4, 0, 4, 12, 4, 12), SIDES, true);
         VoxelShapeUtils.setShape(VoxelShapeUtils.combine(
-              makeCuboidShape(4, 3, 4, 12, 4, 12),
-              makeCuboidShape(5, 2, 5, 11, 3, 11),
-              makeCuboidShape(3, 0, 3, 13, 2, 13)
+            createCuboidShape(4, 3, 4, 12, 4, 12),
+            createCuboidShape(5, 2, 5, 11, 3, 11),
+            createCuboidShape(3, 0, 3, 13, 2, 13)
         ), SIDES_PULL, true);
         VoxelShapeUtils.setShape(VoxelShapeUtils.combine(
-              makeCuboidShape(4, 3, 4, 12, 4, 12),
-              makeCuboidShape(5, 1, 5, 11, 3, 11),
-              makeCuboidShape(6, 0, 6, 10, 1, 10)
+            createCuboidShape(4, 3, 4, 12, 4, 12),
+            createCuboidShape(5, 1, 5, 11, 3, 11),
+            createCuboidShape(6, 0, 6, 10, 1, 10)
         ), SIDES_PUSH, true);
-        center = makeCuboidShape(4, 4, 4, 12, 12, 12);
+        center = createCuboidShape(4, 4, 4, 12, 12, 12);
     }
 
     public static VoxelShape getSideForType(ConnectionType type, Direction side) {
@@ -36,6 +36,8 @@ public abstract class BlockLargeTransmitter extends BlockTransmitter {
         } //else normal
         return SIDES[side.ordinal()];
     }
+
+
 
     @Override
     protected VoxelShape getCenter() {

@@ -8,14 +8,14 @@ import mekanism.api.inventory.IInventorySlot;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.Direction;
+import net.minecraft.item.ItemUsageContext;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 public final class StackUtils {
@@ -58,7 +58,7 @@ public final class StackUtils {
         if (toAdd.isEmpty() || !ItemHandlerHelper.canItemStacksStack(orig, toAdd)) {
             return orig;
         }
-        return size(orig, Math.min(orig.getMaxStackSize(), orig.getCount() + toAdd.getCount()));
+        return size(orig, Math.min(orig.getMaxCount(), orig.getCount() + toAdd.getCount()));
     }
 
     private static ItemStack getMergeReject(ItemStack orig, ItemStack toAdd) {
@@ -69,8 +69,8 @@ public final class StackUtils {
             return orig;
         }
         int newSize = orig.getCount() + toAdd.getCount();
-        if (newSize > orig.getMaxStackSize()) {
-            return size(orig, newSize - orig.getMaxStackSize());
+        if (newSize > orig.getMaxCount()) {
+            return size(orig, newSize - orig.getMaxCount());
         }
         return size(orig, newSize);
     }
@@ -82,11 +82,11 @@ public final class StackUtils {
      * @param pos    where
      * @param player our fake player, usually
      *
-     * @return the result of {@link Block#getStateForPlacement(BlockItemUseContext)}, or null if it cannot be placed in that location
+     * @return the result of {@link Block#getPlacementState(ItemPlacementContext)}, or null if it cannot be placed in that location
      */
     @Nullable
     public static BlockState getStateForPlacement(ItemStack stack, BlockPos pos, PlayerEntity player) {
-        return Block.getBlockFromItem(stack.getItem()).getStateForPlacement(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND,
-              new BlockRayTraceResult(Vector3d.ZERO, Direction.UP, pos, false))));
+        return Block.getBlockFromItem(stack.getItem()).getPlacementState(new ItemPlacementContext(new ItemUsageContext(player, Hand.MAIN_HAND,
+              new BlockHitResult(Vec3d.ZERO, Direction.UP, pos, false))));
     }
 }

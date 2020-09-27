@@ -8,7 +8,6 @@ import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.TransporterTier;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.tileentity.TileEntityType;
 
 public class BlockLogisticalTransporter extends BlockLargeTransmitter implements ITypeBlock, IHasTileEntity<TileEntityLogisticalTransporterBase> {
 

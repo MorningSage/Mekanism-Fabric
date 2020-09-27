@@ -13,7 +13,8 @@ import net.minecraft.screen.NamedScreenHandlerFactory;
 public class AttributeGui implements Attribute {
 
     private final Supplier<ContainerTypeRegistryObject<? extends MekanismContainer>> containerRegistrar;
-    private Function<TileEntityMekanism, NamedScreenHandlerFactory> containerSupplier = (tile) -> new ContainerProvider(TextComponentUtil.translate(tile.getBlockType().getTranslationKey()),
+    private Function<TileEntityMekanism, NamedScreenHandlerFactory> containerSupplier =
+        (tile) -> new ContainerProvider(TextComponentUtil.translate(tile.getBlockType().getTranslationKey()),
           (i, inv, player) -> new MekanismTileContainer<>(getContainerType(), i, inv, tile));
 
     public AttributeGui(Supplier<ContainerTypeRegistryObject<? extends MekanismContainer>> containerRegistrar) {

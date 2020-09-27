@@ -7,17 +7,17 @@ import mekanism.common.util.StorageUtils;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import mekanism.common.util.text.TextUtils;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class HUDElement {
 
-    private final ResourceLocation icon;
-    private final ITextComponent text;
+    private final Identifier icon;
+    private final Text text;
     private HUDColor color;
 
-    private HUDElement(ResourceLocation icon, ITextComponent text) {
+    private HUDElement(Identifier icon, Text text) {
         this.icon = icon;
         this.text = text;
     }
@@ -27,31 +27,31 @@ public class HUDElement {
         return this;
     }
 
-    public static HUDElement of(ResourceLocation rl, ITextComponent text) {
+    public static HUDElement of(Identifier rl, Text text) {
         return new HUDElement(rl, text);
     }
 
-    public static HUDElement enabled(ResourceLocation rl, boolean enabled) {
+    public static HUDElement enabled(Identifier rl, boolean enabled) {
         HUDElement ret = of(rl, OnOff.caps(enabled, false).getTextComponent());
         ret.color(enabled ? HUDColor.REGULAR : HUDColor.FADED);
         return ret;
     }
 
-    public static HUDElement percent(ResourceLocation rl, double ratio) {
-        HUDElement ret = of(rl, new StringTextComponent(TextUtils.getPercent(ratio)));
+    public static HUDElement percent(Identifier rl, double ratio) {
+        HUDElement ret = of(rl, new LiteralText(TextUtils.getPercent(ratio)));
         ret.color(ratio > 0.2 ? HUDColor.REGULAR : (ratio > 0.1 ? HUDColor.WARNING : HUDColor.DANGER));
         return ret;
     }
 
-    public static HUDElement energyPercent(ResourceLocation rl, ItemStack stack) {
+    public static HUDElement energyPercent(Identifier rl, ItemStack stack) {
         return percent(rl, StorageUtils.getEnergyRatio(stack));
     }
 
-    public ResourceLocation getIcon() {
+    public Identifier getIcon() {
         return icon;
     }
 
-    public ITextComponent getText() {
+    public Text getText() {
         return text;
     }
 

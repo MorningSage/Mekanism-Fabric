@@ -2,6 +2,7 @@ package mekanism.common.content.gear.mekatool;
 
 import java.util.Objects;
 import mekanism.api.Action;
+import mekanism.api._helpers_pls_remove.BlockFlags;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.inventory.AutomationType;
 import mekanism.api.math.FloatingLong;
@@ -16,26 +17,22 @@ import mekanism.common.network.PacketLightningRender.LightningPreset;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.StorageUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.RotatedPillarBlock;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
-import net.minecraftforge.common.util.Constants.BlockFlags;
 
 public class ModuleFarmingUnit extends ModuleMekaTool {
 
@@ -48,7 +45,7 @@ public class ModuleFarmingUnit extends ModuleMekaTool {
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
+    public ActionResult onItemUse(ItemUsageContext context) {
         return MekanismUtils.performActions(
               //First try to use the disassembler as an axe
               stripLogsAOE(context),
@@ -69,15 +66,15 @@ public class ModuleFarmingUnit extends ModuleMekaTool {
         ULTRA(7);
 
         private final int radius;
-        private final ITextComponent label;
+        private final Text label;
 
         FarmingRadius(int radius) {
             this.radius = radius;
-            this.label = new StringTextComponent(Integer.toString(radius));
+            this.label = new LiteralText(Integer.toString(radius));
         }
 
         @Override
-        public ITextComponent getTextComponent() {
+        public Text getTextComponent() {
             return label;
         }
 
@@ -86,51 +83,51 @@ public class ModuleFarmingUnit extends ModuleMekaTool {
         }
     }
 
-    private ActionResultType tillAOE(ItemUseContext context, ToolType toolType, SoundEvent sound, FloatingLong energyUsage) {
+    private ActionResult tillAOE(ItemUsageContext context, ToolType toolType, SoundEvent sound, FloatingLong energyUsage) {
         PlayerEntity player = context.getPlayer();
         if (player == null || player.isSneaking()) {
             //Skip if we don't have a player or they are sneaking
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
-        Direction sideHit = context.getFace();
+        Direction sideHit = context.getSide();
         if (sideHit == Direction.DOWN) {
             //Don't allow tilling a block from underneath
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
-        Hand hand = context.getHand();
-        ItemStack stack = player.getHeldItem(hand);
         int diameter = farmingRadius.get().getRadius();
         if (diameter == 0) {
             //If we don't have any blocks we are going to want to do, then skip it
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
+        Hand hand = context.getHand();
+        ItemStack stack = player.getStackInHand(hand);
         IEnergyContainer energyContainer = StorageUtils.getEnergyContainer(stack, 0);
         if (energyContainer == null) {
-            return ActionResultType.FAIL;
+            return ActionResult.FAIL;
         }
         FloatingLong energy = energyContainer.getEnergy();
         if (energy.smallerThan(energyUsage)) {
             //Fail if we don't have enough energy or using the item failed
-            return ActionResultType.FAIL;
+            return ActionResult.FAIL;
         }
         World world = context.getWorld();
-        BlockPos pos = context.getPos();
+        BlockPos pos = context.getBlockPos();
         BlockState tilledState = world.getBlockState(pos).getToolModifiedState(world, pos, player, stack, toolType);
         if (tilledState == null) {
             //Skip tilling the blocks if the one we clicked cannot be tilled
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
         BlockPos abovePos = pos.up();
         BlockState aboveState = world.getBlockState(abovePos);
         //Check to make sure the block above is not opaque
         if (aboveState.isOpaqueCube(world, abovePos)) {
             //If the block above our source is opaque, just skip tiling in general
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
-        if (world.isRemote) {
-            return ActionResultType.SUCCESS;
+        if (world.isClient) {
+            return ActionResult.SUCCESS;
         }
-        //Processing did not happen in the hook so we need to process it
+        //Processing did not happen, so we need to process it
         world.setBlockState(pos, tilledState, BlockFlags.DEFAULT_AND_RERENDER);
         Material aboveMaterial = aboveState.getMaterial();
         if (aboveMaterial == Material.PLANTS || aboveMaterial == Material.TALL_PLANTS) {
@@ -139,7 +136,7 @@ public class ModuleFarmingUnit extends ModuleMekaTool {
         world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1.0F, 1.0F);
         FloatingLong energyUsed = energyUsage.copy();
         int radius = (diameter - 1) / 2;
-        for (BlockPos newPos : BlockPos.getAllInBoxMutable(pos.add(-radius, 0, -radius), pos.add(radius, 0, radius))) {
+        for (BlockPos newPos : BlockPos.iterate(pos.add(-radius, 0, -radius), pos.add(radius, 0, radius))) {
             if (pos.equals(newPos)) {
                 //Skip the source position as it is free and we manually handled it before the loop
                 continue;
@@ -168,50 +165,47 @@ public class ModuleFarmingUnit extends ModuleMekaTool {
             }
         }
         energyContainer.extract(energyUsed, Action.EXECUTE, AutomationType.MANUAL);
-        return ActionResultType.SUCCESS;
+        return ActionResult.SUCCESS;
     }
 
-    private ActionResultType stripLogsAOE(ItemUseContext context) {
+    private ActionResult stripLogsAOE(ItemUsageContext context) {
         PlayerEntity player = context.getPlayer();
         if (player == null || player.isSneaking()) {
             //Skip if we don't have a player or they are sneaking
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
-        Hand hand = context.getHand();
-        ItemStack stack = player.getHeldItem(hand);
         int diameter = farmingRadius.get().getRadius();
         if (diameter == 0) {
             //If we don't have any blocks we are going to want to do, then skip it
-            return ActionResultType.PASS;
+            return ActionResult.PASS;
         }
+        Hand hand = context.getHand();
+        ItemStack stack = player.getStackInHand(hand);
         IEnergyContainer energyContainer = StorageUtils.getEnergyContainer(stack, 0);
         if (energyContainer == null) {
-            return ActionResultType.FAIL;
+            return ActionResult.FAIL;
         }
         FloatingLong energy = energyContainer.getEnergy();
         FloatingLong energyUsage = MekanismConfig.gear.mekaToolEnergyUsageAxe.get();
         if (energy.smallerThan(energyUsage)) {
             //Fail if we don't have enough energy or using the item failed
-            return ActionResultType.FAIL;
+            return ActionResult.FAIL;
         }
         World world = context.getWorld();
-        BlockPos pos = context.getPos();
+        BlockPos pos = context.getBlockPos();
         BlockState clickedState = world.getBlockState(pos);
         BlockState strippedState = clickedState.getToolModifiedState(world, pos, player, stack, ToolType.AXE);
         if (strippedState == null) {
             //Skip stripping the blocks if the one we clicked cannot be stripped
-            return ActionResultType.PASS;
-        }
-        //Note: We don't need to fire a check for the tool being used here as we never would have had our current method get called
-        // if a generic interact was not allowed
-        if (world.isRemote) {
-            return ActionResultType.SUCCESS;
+            return ActionResult.PASS;
+        } else if (world.isClient) {
+            return ActionResult.SUCCESS;
         }
         Axis axis = clickedState.get(RotatedPillarBlock.AXIS);
         //Process the block we interacted with initially and play the sound
         world.setBlockState(pos, strippedState, BlockFlags.DEFAULT_AND_RERENDER);
         world.playSound(null, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
-        Direction side = context.getFace();
+        Direction side = context.getSide();
         FloatingLong energyUsed = energyUsage.copy();
         Vector3d offset = Vector3d.copy(side.getDirectionVec()).scale(0.44);
         for (BlockPos newPos : getStrippingArea(pos, side, (diameter - 1) / 2)) {
@@ -238,27 +232,27 @@ public class ModuleFarmingUnit extends ModuleMekaTool {
             }
         }
         energyContainer.extract(energyUsed, Action.EXECUTE, AutomationType.MANUAL);
-        return ActionResultType.SUCCESS;
+        return ActionResult.SUCCESS;
     }
 
     private static Iterable<BlockPos> getStrippingArea(BlockPos pos, Direction direction, int radius) {
-        AxisAlignedBB box;
+        Box box;
         switch (direction) {
             case EAST:
             case WEST:
-                box = new AxisAlignedBB(pos.getX(), pos.getY() - radius, pos.getZ() - radius, pos.getX(), pos.getY() + radius, pos.getZ() + radius);
+                box = new Box(pos.getX(), pos.getY() - radius, pos.getZ() - radius, pos.getX(), pos.getY() + radius, pos.getZ() + radius);
                 break;
             case UP:
             case DOWN:
-                box = new AxisAlignedBB(pos.getX() - radius, pos.getY(), pos.getZ() - radius, pos.getX() + radius, pos.getY(), pos.getZ() + radius);
+                box = new Box(pos.getX() - radius, pos.getY(), pos.getZ() - radius, pos.getX() + radius, pos.getY(), pos.getZ() + radius);
                 break;
             case SOUTH:
             case NORTH:
-                box = new AxisAlignedBB(pos.getX() - radius, pos.getY() - radius, pos.getZ(), pos.getX() + radius, pos.getY() + radius, pos.getZ());
+                box = new Box(pos.getX() - radius, pos.getY() - radius, pos.getZ(), pos.getX() + radius, pos.getY() + radius, pos.getZ());
                 break;
             default:
-                return BlockPos.getAllInBoxMutable(BlockPos.ZERO, BlockPos.ZERO);
+                return BlockPos.iterate(BlockPos.ORIGIN, BlockPos.ORIGIN);
         }
-        return BlockPos.getAllInBoxMutable(new BlockPos(box.minX, box.minY, box.minZ), new BlockPos(box.maxX, box.maxY, box.maxZ));
+        return BlockPos.iterate(new BlockPos(box.minX, box.minY, box.minZ), new BlockPos(box.maxX, box.maxY, box.maxZ));
     }
 }

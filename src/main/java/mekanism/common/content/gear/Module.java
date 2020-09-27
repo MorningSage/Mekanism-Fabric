@@ -21,9 +21,9 @@ import mekanism.common.util.StorageUtils;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
 
 public abstract class Module {
 
@@ -63,7 +63,7 @@ public abstract class Module {
 
     public void tick(PlayerEntity player) {
         if (isEnabled()) {
-            if (!player.world.isRemote()) {
+            if (!player.world.isClient()) {
                 tickServer(player);
             } else {
                 tickClient(player);
@@ -90,7 +90,7 @@ public abstract class Module {
     protected void tickClient(PlayerEntity player) {
     }
 
-    public final void read(CompoundNBT nbt) {
+    public final void read(CompoundTag nbt) {
         if (nbt.contains(NBTConstants.AMOUNT)) {
             installed = nbt.getInt(NBTConstants.AMOUNT);
         }
@@ -106,8 +106,8 @@ public abstract class Module {
      * @param callback - will run after the NBTFlags data is saved
      */
     public final void save(Consumer<ItemStack> callback) {
-        CompoundNBT modulesTag = ItemDataUtils.getCompound(container, NBTConstants.MODULES);
-        CompoundNBT nbt = modulesTag.getCompound(data.getName());
+        CompoundTag modulesTag = ItemDataUtils.getCompound(container, NBTConstants.MODULES);
+        CompoundTag nbt = modulesTag.getCompound(data.getName());
 
         nbt.putInt(NBTConstants.AMOUNT, installed);
         for (ModuleConfigItem<?> item : configItems) {
@@ -155,7 +155,7 @@ public abstract class Module {
         return configItems;
     }
 
-    public void addHUDStrings(List<ITextComponent> list) {
+    public void addHUDStrings(List<Text> list) {
     }
 
     public void addHUDElements(List<HUDElement> list) {
@@ -196,16 +196,16 @@ public abstract class Module {
     public void onRemoved(boolean last) {
     }
 
-    protected void displayModeChange(PlayerEntity player, ITextComponent modeName, IHasTextComponent mode) {
-        player.sendMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM,
-              MekanismLang.MODULE_MODE_CHANGE.translateColored(EnumColor.GRAY, modeName, EnumColor.INDIGO, mode.getTextComponent())), Util.DUMMY_UUID);
+    protected void displayModeChange(PlayerEntity player, Text modeName, IHasTextComponent mode) {
+        player.sendSystemMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM,
+              MekanismLang.MODULE_MODE_CHANGE.translateColored(EnumColor.GRAY, modeName, EnumColor.INDIGO, mode.getTextComponent())), Util.NIL_UUID);
     }
 
-    protected void toggleEnabled(PlayerEntity player, ITextComponent modeName) {
+    protected void toggleEnabled(PlayerEntity player, Text modeName) {
         enabled.set(!isEnabled(), null);
         ILangEntry lang = isEnabled() ? MekanismLang.MODULE_ENABLED_LOWER : MekanismLang.MODULE_DISABLED_LOWER;
-        player.sendMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM,
+        player.sendSystemMessage(MekanismLang.LOG_FORMAT.translateColored(EnumColor.DARK_BLUE, MekanismLang.MEKANISM,
               MekanismLang.GENERIC_STORED.translateColored(EnumColor.GRAY, EnumColor.GRAY, modeName, isEnabled() ? EnumColor.BRIGHT_GREEN : EnumColor.DARK_RED, lang.translate())),
-              Util.DUMMY_UUID);
+              Util.NIL_UUID);
     }
 }

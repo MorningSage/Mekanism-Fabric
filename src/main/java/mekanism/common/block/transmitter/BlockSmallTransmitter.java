@@ -3,8 +3,8 @@ package mekanism.common.block.transmitter;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.VoxelShapeUtils;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
 
 public abstract class BlockSmallTransmitter extends BlockTransmitter {
 
@@ -15,18 +15,18 @@ public abstract class BlockSmallTransmitter extends BlockTransmitter {
 
     static {
         //VoxelShapes.create(0.3, 0.0, 0.3, 0.7, 0.3, 0.7)
-        VoxelShapeUtils.setShape(makeCuboidShape(5, 0, 5, 11, 5, 11), SIDES, true);
+        VoxelShapeUtils.setShape(createCuboidShape(5, 0, 5, 11, 5, 11), SIDES, true);
         VoxelShapeUtils.setShape(VoxelShapeUtils.combine(
-              makeCuboidShape(5, 4, 5, 11, 5, 11),
-              makeCuboidShape(6, 2, 6, 10, 4, 10),
-              makeCuboidShape(4, 0, 4, 12, 2, 12)
+            createCuboidShape(5, 4, 5, 11, 5, 11),
+            createCuboidShape(6, 2, 6, 10, 4, 10),
+            createCuboidShape(4, 0, 4, 12, 2, 12)
         ), SIDES_PULL, true);
         VoxelShapeUtils.setShape(VoxelShapeUtils.combine(
-              makeCuboidShape(5, 3, 5, 11, 5, 11),
-              makeCuboidShape(6, 1, 6, 10, 3, 10),
-              makeCuboidShape(7, 0, 7, 9, 1, 9)
+            createCuboidShape(5, 3, 5, 11, 5, 11),
+            createCuboidShape(6, 1, 6, 10, 3, 10),
+            createCuboidShape(7, 0, 7, 9, 1, 9)
         ), SIDES_PUSH, true);
-        center = makeCuboidShape(5, 5, 5, 11, 11, 11);
+        center = createCuboidShape(5, 5, 5, 11, 11, 11);
         //center = VoxelShapes.create(0.3, 0.3, 0.3, 0.7, 0.7, 0.7);
     }
 

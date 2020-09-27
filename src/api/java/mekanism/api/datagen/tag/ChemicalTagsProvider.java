@@ -11,56 +11,50 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 
-public abstract class ChemicalTagsProvider<CHEMICAL extends Chemical<CHEMICAL>> extends ForgeRegistryTagProvider<CHEMICAL> {
+// ToDo: Fix this...
+public abstract class ChemicalTagsProvider<CHEMICAL extends Chemical<CHEMICAL>> /*extends ForgeRegistryTagProvider<CHEMICAL>*/ {
 
     private final String baseName;
-    private final String path;
 
-    protected ChemicalTagsProvider(DataGenerator gen, String modid, Registry<CHEMICAL> registry, String baseName, String path) {
-        super(gen, modid, registry);
+    protected ChemicalTagsProvider(DataGenerator gen, Registry<CHEMICAL> registry, String modid, @Nullable ExistingFileHelper existingFileHelper, String baseName) {
+        //super(gen, registry, modid, existingFileHelper);
         this.baseName = baseName;
-        this.path = path;
     }
 
-    @Nonnull
-    @Override
-    public String getName() {
-        return baseName + " Tags: " + modid;
-    }
-
-    @Nonnull
-    @Override
-    protected Path makePath(Identifier id) {
-        return gen.getOutput().resolve("data/" + id.getNamespace() + "/tags/" + path + "/" + id.getPath() + ".json");
-    }
+    //@Nonnull
+    //@Override
+    //public String getName() {
+    //    return baseName + " Tags: " + modId;
+    //}
 
     public abstract static class GasTagsProvider extends ChemicalTagsProvider<Gas> {
 
-        protected GasTagsProvider(DataGenerator gen, String modid) {
-            super(gen, modid, MekanismAPI.gasRegistry(), "Gas", "gases");
+        protected GasTagsProvider(DataGenerator gen, String modid, @Nullable ExistingFileHelper existingFileHelper) {
+            super(gen, MekanismAPI.gasRegistry(), modid, existingFileHelper, "Gas");
         }
     }
 
     public abstract static class InfuseTypeTagsProvider extends ChemicalTagsProvider<InfuseType> {
 
-        protected InfuseTypeTagsProvider(DataGenerator gen, String modid) {
-            super(gen, modid, MekanismAPI.infuseTypeRegistry(), "Infuse Type", "infuse_types");
+        protected InfuseTypeTagsProvider(DataGenerator gen, String modid, @Nullable ExistingFileHelper existingFileHelper) {
+            super(gen, MekanismAPI.infuseTypeRegistry(), modid, existingFileHelper, "Infuse Type");
         }
     }
 
     public abstract static class PigmentTagsProvider extends ChemicalTagsProvider<Pigment> {
 
-        protected PigmentTagsProvider(DataGenerator gen, String modid) {
-            super(gen, modid, MekanismAPI.pigmentRegistry(), "Pigment", "pigments");
+        protected PigmentTagsProvider(DataGenerator gen, String modid, @Nullable ExistingFileHelper existingFileHelper) {
+            super(gen, MekanismAPI.pigmentRegistry(), modid, existingFileHelper, "Pigment");
         }
     }
 
     public abstract static class SlurryTagsProvider extends ChemicalTagsProvider<Slurry> {
 
-        protected SlurryTagsProvider(DataGenerator gen, String modid) {
-            super(gen, modid, MekanismAPI.slurryRegistry(), "Slurry", "slurries");
+        protected SlurryTagsProvider(DataGenerator gen, String modid, @Nullable ExistingFileHelper existingFileHelper) {
+            super(gen, MekanismAPI.slurryRegistry(), modid, existingFileHelper, "Slurry");
         }
     }
 }

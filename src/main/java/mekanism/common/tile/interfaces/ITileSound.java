@@ -1,6 +1,6 @@
 package mekanism.common.tile.interfaces;
 
-import net.minecraft.util.SoundCategory;
+import net.minecraft.sound.SoundCategory;
 
 public interface ITileSound {
 

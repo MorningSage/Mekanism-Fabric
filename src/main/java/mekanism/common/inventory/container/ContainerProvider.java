@@ -3,37 +3,37 @@ package mekanism.common.inventory.container;
 import mekanism.api.text.ILangEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerProvider;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerFactory;
+import net.minecraft.text.Text;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ContainerProvider implements INamedContainerProvider {
+public class ContainerProvider implements NamedScreenHandlerFactory {
 
-    private final ITextComponent displayName;
-    private final IContainerProvider provider;
+    private final Text displayName;
+    private final ScreenHandlerFactory provider;
 
-    public ContainerProvider(ILangEntry translationHelper, IContainerProvider provider) {
+    public ContainerProvider(ILangEntry translationHelper, ScreenHandlerFactory provider) {
         this(translationHelper.translate(), provider);
     }
 
-    public ContainerProvider(ITextComponent displayName, IContainerProvider provider) {
+    public ContainerProvider(Text displayName, ScreenHandlerFactory provider) {
         this.displayName = displayName;
         this.provider = provider;
     }
 
     @Nullable
     @Override
-    public Container createMenu(int i, @Nonnull PlayerInventory inv, @Nonnull PlayerEntity player) {
+    public ScreenHandler createMenu(int i, @Nonnull PlayerInventory inv, @Nonnull PlayerEntity player) {
         return provider.createMenu(i, inv, player);
     }
 
     @Nonnull
     @Override
-    public ITextComponent getDisplayName() {
+    public Text getDisplayName() {
         return displayName;
     }
 }

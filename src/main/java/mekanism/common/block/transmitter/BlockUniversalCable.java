@@ -8,7 +8,6 @@ import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.CableTier;
 import mekanism.common.tile.transmitter.TileEntityUniversalCable;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.tileentity.TileEntityType;
 
 public class BlockUniversalCable extends BlockSmallTransmitter implements ITypeBlock, IHasTileEntity<TileEntityUniversalCable> {
 

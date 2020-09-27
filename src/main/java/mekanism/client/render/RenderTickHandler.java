@@ -1,7 +1,11 @@
 package mekanism.client.render;
 
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -54,34 +58,19 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.StorageUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MainWindow;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.Atlases;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult.Type;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector4f;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -96,14 +85,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class RenderTickHandler {
 
-    public final Minecraft minecraft = Minecraft.getInstance();
+    public final MinecraftClient minecraft = MinecraftClient.getInstance();
 
-    private static final ResourceLocation POWER_BAR = MekanismUtils.getResource(ResourceType.GUI_BAR, "horizontal_power_long.png");
+    private static final Identifier POWER_BAR = MekanismUtils.getResource(ResourceType.GUI_BAR, "horizontal_power_long.png");
     private static final Map<BlockState, List<Vertex[]>> cachedWireFrames = new HashMap<>();
     private static final Map<Direction, Map<TransmissionType, Model3D>> cachedOverlays = new EnumMap<>(Direction.class);
-    private static final EquipmentSlotType[] EQUIPMENT_ORDER = new EquipmentSlotType[]{EquipmentSlotType.OFFHAND, EquipmentSlotType.MAINHAND,
-                                                                                       EquipmentSlotType.HEAD, EquipmentSlotType.CHEST, EquipmentSlotType.LEGS,
-                                                                                       EquipmentSlotType.FEET};
+    private static final EquipmentSlot[] EQUIPMENT_ORDER = new EquipmentSlot[]{EquipmentSlot.OFFHAND, EquipmentSlot.MAINHAND,
+        EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
+        EquipmentSlot.FEET
+    };
 
     private static final float HUD_SCALE = 0.6F;
 
@@ -131,7 +121,7 @@ public class RenderTickHandler {
         Vector3d camVec = minecraft.gameRenderer.getActiveRenderInfo().getProjectedView();
         matrix.translate(-camVec.x, -camVec.y, -camVec.z);
         IRenderTypeBuffer.Impl renderer = minecraft.getRenderTypeBuffers().getBufferSource();
-        boltRenderer.render(minecraft.getRenderPartialTicks(), matrix, renderer);
+        boltRenderer.render(minecraft.getTickDelta(), matrix, renderer);
         renderer.finish(MekanismRenderType.MEK_LIGHTNING);
         matrix.pop();
     }
@@ -140,7 +130,7 @@ public class RenderTickHandler {
     public void renderOverlay(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == ElementType.ARMOR) {
             FloatingLong capacity = FloatingLong.ZERO, stored = FloatingLong.ZERO;
-            for (ItemStack stack : minecraft.player.inventory.armorInventory) {
+            for (ItemStack stack : minecraft.player.inventory.armor) {
                 IEnergyContainer container = StorageUtils.getEnergyContainer(stack, 0);
                 if (stack.getItem() instanceof ItemMekaSuitArmor && container != null) {
                     capacity = capacity.plusEqual(container.getMaxEnergy());
@@ -154,7 +144,7 @@ public class RenderTickHandler {
                 MatrixStack matrix = event.getMatrixStack();
                 GuiUtils.renderExtendedTexture(matrix, GuiBar.BAR, 2, 2, x, y, 81, 6);
                 minecraft.getTextureManager().bindTexture(POWER_BAR);
-                AbstractGui.blit(matrix, x + 1, y + 1, length, 4, 0, 0, length, 4, 79, 4);
+                DrawableHelper.drawTexture(matrix, x + 1, y + 1, length, 4, 0, 0, length, 4, 79, 4);
                 minecraft.getTextureManager().bindTexture(ForgeIngameGui.GUI_ICONS_LOCATION);
                 ForgeIngameGui.left_height += 8;
             }
@@ -166,11 +156,11 @@ public class RenderTickHandler {
         if (event.getType() == ElementType.HOTBAR) {
             if (!minecraft.player.isSpectator() && MekanismConfig.client.enableHUD.get() && MekanismClient.renderHUD) {
                 int count = 0;
-                Map<EquipmentSlotType, List<ITextComponent>> renderStrings = new LinkedHashMap<>();
-                for (EquipmentSlotType slotType : EQUIPMENT_ORDER) {
-                    ItemStack stack = minecraft.player.getItemStackFromSlot(slotType);
+                Map<EquipmentSlot, List<Text>> renderStrings = new LinkedHashMap<>();
+                for (EquipmentSlot slotType : EQUIPMENT_ORDER) {
+                    ItemStack stack = minecraft.player.getEquippedStack(slotType);
                     if (stack.getItem() instanceof IItemHUDProvider) {
-                        List<ITextComponent> list = new ArrayList<>();
+                        List<Text> list = new ArrayList<>();
                         ((IItemHUDProvider) stack.getItem()).addHUDStrings(list, stack, slotType);
                         int size = list.size();
                         if (size > 0) {
@@ -186,8 +176,8 @@ public class RenderTickHandler {
                 MatrixStack matrix = event.getMatrixStack();
                 matrix.push();
                 matrix.scale(HUD_SCALE, HUD_SCALE, HUD_SCALE);
-                for (Map.Entry<EquipmentSlotType, List<ITextComponent>> entry : renderStrings.entrySet()) {
-                    for (ITextComponent text : entry.getValue()) {
+                for (Map.Entry<EquipmentSlot, List<Text>> entry : renderStrings.entrySet()) {
+                    for (Text text : entry.getValue()) {
                         drawString(window, matrix, text, alignLeft, (int) (y * (1 / HUD_SCALE)) - start, 0xC8C8C8);
                         start -= 9;
                     }
@@ -195,7 +185,7 @@ public class RenderTickHandler {
                 }
                 matrix.pop();
 
-                if (minecraft.player.getItemStackFromSlot(EquipmentSlotType.HEAD).getItem() instanceof ItemMekaSuitArmor) {
+                if (minecraft.player.getEquippedStack(EquipmentSlot.HEAD).getItem() instanceof ItemMekaSuitArmor) {
                     hudRenderer.renderHUD(matrix, event.getPartialTicks());
                 }
             }
@@ -205,7 +195,7 @@ public class RenderTickHandler {
     @SubscribeEvent
     public void tickEnd(RenderTickEvent event) {
         if (event.phase == Phase.END) {
-            if (minecraft.player != null && minecraft.player.world != null && !minecraft.isGamePaused()) {
+            if (minecraft.player != null && minecraft.player.world != null && !minecraft.isPaused()) {
                 PlayerEntity player = minecraft.player;
                 World world = minecraft.player.world;
                 //TODO: Check if we have another matrix stack we should use
@@ -216,24 +206,24 @@ public class RenderTickHandler {
                     PlayerEntity p = world.getPlayerByUuid(uuid);
                     if (p != null) {
                         Pos3D playerPos = new Pos3D(p).translate(0, p.getEyeHeight(), 0);
-                        Vector3d playerMotion = p.getMotion();
-                        float random = (world.rand.nextFloat() - 0.5F) * 0.1F;
-                        Pos3D vLeft = new Pos3D(-0.43, -0.55, -0.54).rotatePitch(p.isCrouching() ? 20 : 0).rotateYaw(p.renderYawOffset);
+                        Vec3d playerMotion = p.getVelocity();
+                        float random = (world.random.nextFloat() - 0.5F) * 0.1F;
+                        Pos3D vLeft = new Pos3D(-0.43, -0.55, -0.54).rotatePitch(p.isSneaking() ? 20 : 0).rotateYaw(p.renderYawOffset);
                         renderJetpackSmoke(world, playerPos.translate(vLeft, playerMotion), vLeft.scale(0.2).translate(playerMotion, vLeft.scale(random)));
-                        Pos3D vRight = new Pos3D(0.43, -0.55, -0.54).rotatePitch(p.isCrouching() ? 20 : 0).rotateYaw(p.renderYawOffset);
+                        Pos3D vRight = new Pos3D(0.43, -0.55, -0.54).rotatePitch(p.isSneaking() ? 20 : 0).rotateYaw(p.renderYawOffset);
                         renderJetpackSmoke(world, playerPos.translate(vRight, playerMotion), vRight.scale(0.2).translate(playerMotion, vRight.scale(random)));
-                        Pos3D vCenter = new Pos3D((world.rand.nextFloat() - 0.5) * 0.4, -0.86, -0.30).rotatePitch(p.isCrouching() ? 25 : 0).rotateYaw(p.renderYawOffset);
+                        Pos3D vCenter = new Pos3D((world.random.nextFloat() - 0.5) * 0.4, -0.86, -0.30).rotatePitch(p.isCrouching() ? 25 : 0).rotateYaw(p.renderYawOffset);
                         renderJetpackSmoke(world, playerPos.translate(vCenter, playerMotion), vCenter.scale(0.2).translate(playerMotion));
                     }
                 }
 
-                if (world.getGameTime() % 4 == 0) {
+                if (world.getTime() % 4 == 0) {
                     //Traverse active scuba masks and do animations
                     for (UUID uuid : Mekanism.playerState.getActiveScubaMasks()) {
                         PlayerEntity p = world.getPlayerByUuid(uuid);
                         if (p != null && p.isInWater()) {
                             Pos3D vec = new Pos3D(0.4, 0.4, 0.4).multiply(p.getLook(1)).translate(0, -0.2, 0);
-                            Pos3D motion = vec.scale(0.2).translate(p.getMotion());
+                            Pos3D motion = vec.scale(0.2).translate(p.getVelocity());
                             Pos3D v = new Pos3D(p).translate(0, p.getEyeHeight(), 0).translate(vec);
                             world.addParticle((BasicParticleType) MekanismParticleTypes.SCUBA_BUBBLE.getParticleType(), v.x, v.y, v.z, motion.x, motion.y + 0.2, motion.z);
                         }
@@ -241,22 +231,22 @@ public class RenderTickHandler {
                     //Traverse players and do animations for idle flame throwers
                     for (PlayerEntity p : world.getPlayers()) {
                         if (!p.isSwingInProgress && !Mekanism.playerState.isFlamethrowerOn(p)) {
-                            ItemStack currentItem = p.getHeldItemMainhand();
+                            ItemStack currentItem = p.getMainHandStack();
                             if (!currentItem.isEmpty() && currentItem.getItem() instanceof ItemFlamethrower && ChemicalUtil.hasGas(currentItem)) {
                                 Pos3D flameVec;
-                                if (player == p && minecraft.gameSettings.thirdPersonView == 0) {
+                                if (player == p && minecraft.options.getPerspective().isFirstPerson()) {
                                     flameVec = new Pos3D(1, 1, 1).multiply(p.getLook(1)).rotateYaw(5).translate(0, p.getEyeHeight() - 0.1, 0);
                                 } else {
                                     double flameXCoord = -0.2;
                                     double flameYCoord = 1;
                                     double flameZCoord = 1.2;
-                                    if (p.isCrouching()) {
+                                    if (p.isSneaking()) {
                                         flameYCoord -= 0.65;
                                         flameZCoord -= 0.15;
                                     }
                                     flameVec = new Pos3D(flameXCoord, flameYCoord, flameZCoord).rotateYaw(p.renderYawOffset);
                                 }
-                                Vector3d motion = p.getMotion();
+                                Vec3d motion = p.getVelocity();
                                 Pos3D flameMotion = new Pos3D(motion.getX(), p.isOnGround() ? 0 : motion.getY(), motion.getZ());
                                 Pos3D playerPos = new Pos3D(p);
                                 Pos3D mergedVec = playerPos.translate(flameVec);
@@ -280,7 +270,7 @@ public class RenderTickHandler {
                         if (severity > RadiationManager.BASELINE) {
                             int effect = (int) (prevRadiation * 255);
                             int color = (0x701E1E << 8) + effect;
-                            MekanismRenderer.renderColorOverlay(matrix, 0, 0, minecraft.getMainWindow().getScaledWidth(), minecraft.getMainWindow().getScaledHeight(), color);
+                            MekanismRenderer.renderColorOverlay(matrix, 0, 0, minecraft.getWindow().getScaledWidth(), minecraft.getMainWindow().getScaledHeight(), color);
                         }
                     });
                 }
@@ -294,17 +284,17 @@ public class RenderTickHandler {
         if (player == null) {
             return;
         }
-        BlockRayTraceResult rayTraceResult = event.getTarget();
-        if (!rayTraceResult.getType().equals(Type.MISS)) {
+        BlockHitResult rayTraceResult = event.getTarget();
+        if (!rayTraceResult.getType().equals(HitResult.Type.MISS)) {
             World world = player.getEntityWorld();
-            BlockPos pos = rayTraceResult.getPos();
+            BlockPos pos = rayTraceResult.getBlockPos();
             IRenderTypeBuffer renderer = event.getBuffers();
             ActiveRenderInfo info = event.getInfo();
             MatrixStack matrix = event.getMatrix();
-            IProfiler profiler = world.getProfiler();
+            Profiler profiler = world.getProfiler();
             BlockState blockState = world.getBlockState(pos);
             boolean shouldCancel = false;
-            profiler.startSection(ProfilerConstants.MEKANISM_OUTLINE);
+            profiler.push(ProfilerConstants.MEKANISM_OUTLINE);
             if (!blockState.isAir(world, pos) && world.getWorldBorder().contains(pos)) {
                 BlockPos actualPos = pos;
                 BlockState actualState = blockState;
@@ -319,9 +309,9 @@ public class RenderTickHandler {
                     WireFrameRenderer renderWireFrame = null;
                     if (Attribute.get(actualState.getBlock(), AttributeCustomSelectionBox.class).isJavaModel()) {
                         //If we use a TER to render the wire frame, grab the tile
-                        TileEntity tile = MekanismUtils.getTileEntity(world, actualPos);
+                        BlockEntity tile = MekanismUtils.getTileEntity(world, actualPos);
                         if (tile != null) {
-                            TileEntityRenderer<TileEntity> tileRenderer = TileEntityRendererDispatcher.instance.getRenderer(tile);
+                            BlockEntityRenderer<BlockEntity> tileRenderer = BlockEntityRenderDispatcher.INSTANCE.get(tile);
                             if (tileRenderer instanceof IWireFrameRenderer) {
                                 renderWireFrame = (buffer, matrixStack, red, green, blue, alpha) ->
                                       ((IWireFrameRenderer) tileRenderer).renderWireFrame(tile, event.getPartialTicks(), matrixStack, buffer, red, green, blue, alpha);
@@ -343,12 +333,12 @@ public class RenderTickHandler {
                     }
                 }
             }
-            profiler.endSection();
+            profiler.pop();
 
-            ItemStack stack = player.getHeldItem(Hand.MAIN_HAND);
+            ItemStack stack = player.getStackInHand(Hand.MAIN_HAND);
             if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
                 //If we are not holding a configurator, look if we are in the offhand
-                stack = player.getHeldItem(Hand.OFF_HAND);
+                stack = player.getStackInHand(Hand.OFF_HAND);
                 if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
                     if (shouldCancel) {
                         event.setCanceled(true);
@@ -356,16 +346,16 @@ public class RenderTickHandler {
                     return;
                 }
             }
-            profiler.startSection(ProfilerConstants.CONFIGURABLE_MACHINE);
+            profiler.push(ProfilerConstants.CONFIGURABLE_MACHINE);
             ConfiguratorMode state = ((ItemConfigurator) stack.getItem()).getMode(stack);
             if (state.isConfigurating()) {
                 TransmissionType type = Objects.requireNonNull(state.getTransmission(), "Configurating state requires transmission type");
-                TileEntity tile = MekanismUtils.getTileEntity(world, pos);
+                BlockEntity tile = MekanismUtils.getTileEntity(world, pos);
                 if (tile instanceof ISideConfiguration) {
                     ISideConfiguration configurable = (ISideConfiguration) tile;
                     TileComponentConfig config = configurable.getConfig();
                     if (config.supports(type)) {
-                        Direction face = rayTraceResult.getFace();
+                        Direction face = rayTraceResult.getSide();
                         DataType dataType = config.getDataType(type, RelativeSide.fromDirections(configurable.getOrientation(), face));
                         if (dataType != null) {
                             Vector3d viewPosition = info.getProjectedView();
@@ -378,7 +368,7 @@ public class RenderTickHandler {
                     }
                 }
             }
-            profiler.endSection();
+            profiler.pop();
             if (shouldCancel) {
                 event.setCanceled(true);
             }
@@ -386,9 +376,9 @@ public class RenderTickHandler {
     }
 
     private void renderQuadsWireFrame(BlockState state, IVertexBuilder buffer, Matrix4f matrix, Random rand, float red, float green, float blue,
-          float alpha) {
+                                      float alpha) {
         List<Vertex[]> allVertices = cachedWireFrames.computeIfAbsent(state, s -> {
-            IBakedModel bakedModel = Minecraft.getInstance().getBlockRendererDispatcher().getModelForState(s);
+            IBakedModel bakedModel = MinecraftClient.getInstance().getBlockRendererDispatcher().getModelForState(s);
             //TODO: Eventually we may want to add support for Model data
             IModelData modelData = EmptyModelData.INSTANCE;
             List<Vertex[]> vertices = new ArrayList<>();

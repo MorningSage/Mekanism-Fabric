@@ -3,10 +3,13 @@ package mekanism.common.base;
 import com.mojang.authlib.GameProfile;
 import java.lang.ref.WeakReference;
 import javax.annotation.Nonnull;
+
+import mekanism.api._helpers_pls_remove.FakePlayer;
 import mekanism.common.Mekanism;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraftforge.common.util.FakePlayer;
+import net.minecraft.world.WorldAccess;
 
 // Global, shared FakePlayer for Mekanism-specific uses
 //
@@ -45,11 +48,11 @@ public class MekFakePlayer extends FakePlayer {
         }
 
         INSTANCE.world = world;
-        INSTANCE.setRawPosition(x, y, z);
+        INSTANCE.setPos(x, y, z);
         return new WeakReference<>(INSTANCE);
     }
 
-    public static void releaseInstance(IWorld world) {
+    public static void releaseInstance(WorldAccess world) {
         // If the fake player has a reference to the world getting unloaded,
         // null out the fake player so that the world can unload
         if (INSTANCE != null && INSTANCE.world == world) {
@@ -57,8 +60,5 @@ public class MekFakePlayer extends FakePlayer {
         }
     }
 
-    @Override
-    public boolean isPotionApplicable(@Nonnull EffectInstance effect) {
-        return false;
-    }
+    @Override public boolean canHaveStatusEffect(StatusEffectInstance effect) { return false; }
 }

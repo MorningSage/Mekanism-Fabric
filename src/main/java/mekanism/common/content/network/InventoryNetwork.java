@@ -20,6 +20,7 @@ import mekanism.common.lib.inventory.TransitRequest;
 import mekanism.common.lib.inventory.TransitRequest.TransitResponse;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.util.MekanismUtils;
+import net.minecraft.text.Text;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -59,7 +60,7 @@ public class InventoryNetwork extends DynamicNetwork<IItemHandler, InventoryNetw
                 AcceptorData data = null;
                 Coord4D position = Coord4D.get(acceptor);
                 for (Entry<Direction, LazyOptional<IItemHandler>> acceptorEntry : entry.getValue().entrySet()) {
-                    Optional<IItemHandler> handler = MekanismUtils.toOptional(acceptorEntry.getValue());
+                    Optional<IItemHandler> handler = acceptorEntry.getValue().resolve();
                     if (handler.isPresent()) {
                         Direction side = acceptorEntry.getKey();
                         //TODO: Figure out how we want to best handle the color check, as without doing it here we don't
@@ -100,7 +101,7 @@ public class InventoryNetwork extends DynamicNetwork<IItemHandler, InventoryNetw
     }
 
     @Override
-    public ITextComponent getTextComponent() {
+    public Text getTextComponent() {
         return MekanismLang.NETWORK_DESCRIPTION.translate(MekanismLang.INVENTORY_NETWORK, transmitters.size(), getAcceptorCount());
     }
 

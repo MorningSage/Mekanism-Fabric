@@ -6,10 +6,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
+import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.annotations.NonNull;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -34,13 +34,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     @Nullable
     protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>>
     HANDLER getCapability(ItemStack stack, Capability<HANDLER> capability) {
-        if (!stack.isEmpty()) {
-            Optional<HANDLER> cap = MekanismUtils.toOptional(stack.getCapability(capability));
-            if (cap.isPresent()) {
-                return cap.get();
-            }
-        }
-        return null;
+        return stack.isEmpty() ? null : stack.getCapability(capability).resolve().orElse(null);
     }
 
     /**

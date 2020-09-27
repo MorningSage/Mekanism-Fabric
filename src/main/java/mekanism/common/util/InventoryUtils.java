@@ -3,9 +3,9 @@ package mekanism.common.util;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import mekanism.common.Mekanism;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -13,7 +13,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 public final class InventoryUtils {
 
     /**
-     * Like {@link ItemHandlerHelper#canItemStacksStack(ItemStack, ItemStack)} but empty stacks mean equal (either param). Thiakil: not sure why.
+     * Empty stacks mean equal (either param). Thiakil: not sure why.
      *
      * @param toInsert stack a
      * @param inSlot   stack b
@@ -28,8 +28,8 @@ public final class InventoryUtils {
     }
 
     @Nullable
-    public static IItemHandler assertItemHandler(String desc, TileEntity tile, Direction side) {
-        Optional<IItemHandler> capability = MekanismUtils.toOptional(CapabilityUtils.getCapability(tile, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side));
+    public static IItemHandler assertItemHandler(String desc, BlockEntity tile, Direction side) {
+        Optional<IItemHandler> capability = CapabilityUtils.getCapability(tile, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side).resolve();
         if (capability.isPresent()) {
             return capability.get();
         }
@@ -42,7 +42,7 @@ public final class InventoryUtils {
         return null;
     }
 
-    public static boolean isItemHandler(TileEntity tile, Direction side) {
+    public static boolean isItemHandler(BlockEntity tile, Direction side) {
         return CapabilityUtils.getCapability(tile, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side).isPresent();
     }
 }

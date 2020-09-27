@@ -6,7 +6,7 @@ import mekanism.api.math.MathUtils;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class ModuleConfigItem<TYPE> {
 
@@ -56,13 +56,13 @@ public class ModuleConfigItem<TYPE> {
         module.save(callback);
     }
 
-    public void read(CompoundNBT tag) {
+    public void read(CompoundTag tag) {
         if (tag.contains(name)) {
             data.read(name, tag);
         }
     }
 
-    public void write(CompoundNBT tag) {
+    public void write(CompoundTag tag) {
         data.write(name, tag);
     }
 
@@ -76,9 +76,9 @@ public class ModuleConfigItem<TYPE> {
 
         void set(TYPE val);
 
-        void read(String name, CompoundNBT tag);
+        void read(String name, CompoundTag tag);
 
-        void write(String name, CompoundNBT tag);
+        void write(String name, CompoundTag tag);
     }
 
     public static class DisableableModuleConfigItem extends ModuleConfigItem<Boolean> {
@@ -123,12 +123,12 @@ public class ModuleConfigItem<TYPE> {
         }
 
         @Override
-        public void read(String name, CompoundNBT tag) {
+        public void read(String name, CompoundTag tag) {
             value = tag.getBoolean(name);
         }
 
         @Override
-        public void write(String name, CompoundNBT tag) {
+        public void write(String name, CompoundTag tag) {
             tag.putBoolean(name, value);
         }
     }
@@ -159,13 +159,13 @@ public class ModuleConfigItem<TYPE> {
         }
 
         @Override
-        public void read(String name, CompoundNBT tag) {
+        public void read(String name, CompoundTag tag) {
             int index = Math.min(tag.getInt(name), selectableCount - 1);
             value = MathUtils.getByIndexMod(getEnums(), index);
         }
 
         @Override
-        public void write(String name, CompoundNBT tag) {
+        public void write(String name, CompoundTag tag) {
             tag.putInt(name, value.ordinal());
         }
 

@@ -17,25 +17,18 @@ import mekanism.common.lib.radiation.RadiationManager.RadiationScale;
 import mekanism.common.tile.interfaces.ITileSound;
 import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.client.Minecraft;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.audio.SoundEngine;
-import net.minecraft.client.audio.TickableSound;
-import net.minecraft.client.sound.Sound;
+import net.minecraft.client.sound.MovingSoundInstance;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.client.sound.SoundSystem;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
@@ -72,7 +65,7 @@ public class SoundHandler {
 
     private static final Long2ObjectMap<SoundInstance> soundMap = new Long2ObjectOpenHashMap<>();
     private static boolean IN_MUFFLED_CHECK = false;
-    private static SoundEngine soundEngine;
+    private static SoundSystem soundEngine;
 
     public static void clearPlayerSounds() {
         jetpackSounds.clear();
@@ -133,7 +126,7 @@ public class SoundHandler {
     }
 
     public static void playSound(SoundEvent sound) {
-        playSound(SimpleSound.master(sound, 1, MekanismConfig.client.baseSoundVolume.get()));
+        playSound(PositionedSoundInstance.master(sound, 1, MekanismConfig.client.baseSoundVolume.get()));
     }
 
     public static void playSound(SoundInstance sound) {
@@ -159,12 +152,12 @@ public class SoundHandler {
     }
 
     public static void stopTileSound(BlockPos pos) {
-        long posKey = pos.toLong();
-        ISound s = soundMap.get(posKey);
+        long posKey = pos.asLong();
+        SoundInstance s = soundMap.get(posKey);
         if (s != null) {
             // TODO: Saw some code that suggests there is a soundMap MC already tracks; investigate further
             // and maybe we can avoid this dedicated soundMap
-            Minecraft.getInstance().getSoundHandler().stop(s);
+            MinecraftClient.getInstance().getSoundManager().stop(s);
             soundMap.remove(posKey);
         }
     }
@@ -182,13 +175,13 @@ public class SoundHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onTilePlaySound(PlaySoundEvent event) {
         // Ignore any sound event which is null or is happening in a muffled check
-        ISound resultSound = event.getResultSound();
+        SoundInstance resultSound = event.getResultSound();
         if (resultSound == null || IN_MUFFLED_CHECK) {
             return;
         }
 
         // Ignore any sound event outside this mod namespace
-        ResourceLocation soundLoc = event.getSound().getSoundLocation();
+        Identifier soundLoc = event.getSound().getSoundLocation();
         //If it is mekanism or one of the sub modules let continue
         if (!soundLoc.getNamespace().startsWith(Mekanism.MODID)) {
             return;
@@ -209,11 +202,11 @@ public class SoundHandler {
             // need to "unoffset" the sound position so that we build the correct key for the sound map
             // Aside: I really, really, wish Forge returned the final result sound as part of playSound :/
             BlockPos pos = new BlockPos(resultSound.getX() - 0.5, resultSound.getY() - 0.5, resultSound.getZ() - 0.5);
-            soundMap.put(pos.toLong(), resultSound);
+            soundMap.put(pos.asLong(), resultSound);
         }
     }
 
-    private static class TileTickableSound extends TickableSound {
+    private static class TileTickableSound extends MovingSoundInstance {
 
         private final float originalVolume;
 
@@ -238,7 +231,7 @@ public class SoundHandler {
         @Override
         public void tick() {
             // Every configured interval, see if we need to adjust muffling
-            if (Minecraft.getInstance().world.getGameTime() % checkInterval == 0) {
+            if (MinecraftClient.getInstance().world.getTime() % checkInterval == 0) {
                 // Run the event bus with the original sound. Note that we must making sure to set the GLOBAL/STATIC
                 // flag that ensures we don't wrap already muffled sounds. This is...NOT ideal and makes some
                 // significant (hopefully well-informed) assumptions about locking/ordering of all these calls.
@@ -246,7 +239,7 @@ public class SoundHandler {
                 //Make sure we set our volume back to what it actually would be for purposes of letting other mods know
                 // what volume to use
                 volume = originalVolume;
-                ISound s = ForgeHooksClient.playSound(soundEngine, this);
+                SoundInstance s = ForgeHooksClient.playSound(soundEngine, this);
                 IN_MUFFLED_CHECK = false;
 
                 if (s == this) {
@@ -254,7 +247,7 @@ public class SoundHandler {
                     volume = originalVolume * getTileVolumeFactor();
                 } else if (s == null) {
                     // Full on mute; go ahead and shutdown
-                    func_239509_o_();
+                    setDone();
                 } else {
                     // Altered sound returned; adjust volume
                     volume = s.getVolume() * getTileVolumeFactor();
@@ -265,7 +258,7 @@ public class SoundHandler {
         private float getTileVolumeFactor() {
             // Pull the TE from the sound position and see if supports muffling upgrades. If it does, calculate what
             // percentage of the original volume should be muted
-            TileEntity tile = MekanismUtils.getTileEntity(Minecraft.getInstance().world, new BlockPos(getX(), getY(), getZ()));
+            BlockEntity tile = MekanismUtils.getTileEntity(MinecraftClient.getInstance().world, new BlockPos(getX(), getY(), getZ()));
             float retVolume = 1.0F;
 
             if (tile instanceof IUpgradeTile) {
@@ -286,13 +279,14 @@ public class SoundHandler {
         @Override
         public float getVolume() {
             if (this.sound == null) {
-                this.createAccessor(Minecraft.getInstance().getSoundHandler());
+                this.getSoundSet(MinecraftClient.getInstance().getSoundManager());
             }
+
             return super.getVolume();
         }
 
         @Override
-        public boolean canBeSilent() {
+        public boolean shouldAlwaysPlay() {
             return true;
         }
     }

@@ -4,12 +4,12 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.Property;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Property;
 
 public class AttributeStateActive extends AttributeState {
 
-    private static final BooleanProperty activeProperty = BooleanProperty.create("active");
+    private static final BooleanProperty activeProperty = BooleanProperty.of("active");
 
     public boolean isActive(BlockState state) {
         return state.get(activeProperty);

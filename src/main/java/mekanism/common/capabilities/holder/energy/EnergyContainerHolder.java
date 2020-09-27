@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import mekanism.api.RelativeSide;
 import mekanism.api.energy.IEnergyContainer;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public class EnergyContainerHolder implements IEnergyContainerHolder {
 

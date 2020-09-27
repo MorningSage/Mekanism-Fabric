@@ -10,14 +10,14 @@ import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.Property;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.Property;
+import net.minecraft.text.Text;
+import net.minecraft.util.StringIdentifiable;
 
 public class AttributeStateBoilerValveMode extends AttributeState {
 
-    public static final EnumProperty<BoilerValveMode> modeProperty = EnumProperty.create("mode", BoilerValveMode.class);
+    public static final EnumProperty<BoilerValveMode> modeProperty = EnumProperty.of("mode", BoilerValveMode.class);
 
     @Override
     public BlockState copyStateData(BlockState oldState, BlockState newState) {
@@ -37,7 +37,7 @@ public class AttributeStateBoilerValveMode extends AttributeState {
         properties.add(modeProperty);
     }
 
-    public enum BoilerValveMode implements IStringSerializable, IHasTextComponent, IIncrementalEnum<BoilerValveMode> {
+    public enum BoilerValveMode implements StringIdentifiable, IHasTextComponent, IIncrementalEnum<BoilerValveMode> {
         INPUT("input", MekanismLang.BOILER_VALVE_MODE_INPUT, EnumColor.BRIGHT_GREEN),
         OUTPUT_STEAM("output_steam", MekanismLang.BOILER_VALVE_MODE_OUTPUT_STEAM, EnumColor.GRAY),
         OUTPUT_COOLANT("output_coolant", MekanismLang.BOILER_VALVE_MODE_OUTPUT_COOLANT, EnumColor.DARK_AQUA);
@@ -56,12 +56,12 @@ public class AttributeStateBoilerValveMode extends AttributeState {
 
         @Nonnull
         @Override
-        public String getString() {
+        public String asString() {
             return name;
         }
 
         @Override
-        public ITextComponent getTextComponent() {
+        public Text getTextComponent() {
             return langEntry.translateColored(color);
         }
 

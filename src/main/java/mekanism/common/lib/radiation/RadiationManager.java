@@ -163,7 +163,7 @@ public class RadiationManager {
         double resistance = 0;
         for (EquipmentSlot type : EnumUtils.ARMOR_SLOTS) {
             ItemStack stack = entity.getEquippedStack(type);
-            Optional<IRadiationShielding> shielding = MekanismUtils.toOptional(CapabilityUtils.getCapability(stack, Capabilities.RADIATION_SHIELDING_CAPABILITY, null));
+            Optional<IRadiationShielding> shielding = CapabilityUtils.getCapability(stack, Capabilities.RADIATION_SHIELDING_CAPABILITY, null).resolve();
             if (shielding.isPresent()) {
                 resistance += shielding.get().getRadiationShielding();
             }

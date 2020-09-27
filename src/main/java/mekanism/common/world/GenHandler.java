@@ -16,19 +16,13 @@ import mekanism.common.resource.OreType;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.Category;
-import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
-import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
-import net.minecraft.world.gen.feature.SphereReplaceConfig;
-import net.minecraft.world.gen.placement.CountRangeConfig;
-import net.minecraft.world.gen.placement.FrequencyConfig;
-import net.minecraft.world.gen.placement.Placement;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class GenHandler {
@@ -43,7 +37,8 @@ public class GenHandler {
         for (OreType type : EnumUtils.ORE_TYPES) {
             ORES.put(type, getOreFeature(MekanismBlocks.ORES.get(type), MekanismConfig.world.ores.get(type), Feature.ORE));
         }
-        SALT_FEATURE = getSaltFeature(MekanismBlocks.SALT_BLOCK, MekanismConfig.world.salt, Placement.COUNT_TOP_SOLID);
+        //TODO - 1.16.2: Figure out world gen
+        //SALT_FEATURE = getSaltFeature(MekanismBlocks.SALT_BLOCK, MekanismConfig.world.salt, Placement.COUNT_TOP_SOLID);
         //Retrogen features
         if (MekanismConfig.world.enableRegeneration.get()) {
             for (OreType type : EnumUtils.ORE_TYPES) {
@@ -70,28 +65,31 @@ public class GenHandler {
 
     private static void addFeature(Biome biome, @Nullable ConfiguredFeature<?, ?> feature) {
         if (feature != null) {
-            biome.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES, feature);
+            //TODO - 1.16.2: Figure out world gen
+            //biome.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES, feature);
         }
     }
 
     @Nullable
     private static ConfiguredFeature<?, ?> getOreFeature(IBlockProvider blockProvider, OreConfig oreConfig, Feature<OreFeatureConfig> feature) {
-        if (oreConfig.shouldGenerate.get()) {
+        //TODO - 1.16.2: Figure out world gen
+        /*if (oreConfig.shouldGenerate.get()) {
             return feature.withConfiguration(new OreFeatureConfig(FillerBlockType.NATURAL_STONE,
                   blockProvider.getBlock().getDefaultState(), oreConfig.maxVeinSize.get())).withPlacement(Placement.COUNT_RANGE.configure(
                   new CountRangeConfig(oreConfig.perChunk.get(), oreConfig.bottomOffset.get(), oreConfig.topOffset.get(), oreConfig.maxHeight.get())));
-        }
+        }*/
         return null;
     }
 
     @Nullable
     private static ConfiguredFeature<?, ?> getSaltFeature(IBlockProvider blockProvider, SaltConfig saltConfig, Placement<FrequencyConfig> placement) {
-        if (saltConfig.shouldGenerate.get()) {
+        //TODO - 1.16.2: Figure out world gen
+        /*if (saltConfig.shouldGenerate.get()) {
             BlockState state = blockProvider.getBlock().getDefaultState();
             return Feature.DISK.withConfiguration(new SphereReplaceConfig(state, saltConfig.maxVeinSize.get(), saltConfig.ySize.get(),
                   Lists.newArrayList(Blocks.DIRT.getDefaultState(), Blocks.CLAY.getDefaultState(), state)))
                   .withPlacement(placement.configure(new FrequencyConfig(saltConfig.perChunk.get())));
-        }
+        }*/
         return null;
     }
 
@@ -113,7 +111,8 @@ public class GenHandler {
 
     private static boolean placeFeature(@Nullable ConfiguredFeature<?, ?> feature, ServerWorld world, Random random, BlockPos blockPos) {
         if (feature != null) {
-            feature.func_236265_a_(world, world.func_241112_a_(), world.getChunkProvider().getChunkGenerator(), random, blockPos);
+            //TODO - 1.16.2: Test this
+            feature.generate(world, world.getChunkManager().getChunkGenerator(), random, blockPos);
             return true;
         }
         return false;

@@ -80,7 +80,7 @@ public abstract class ChemicalRecipeData<CHEMICAL extends Chemical<CHEMICAL>, ST
             return true;
         }
         HANDLER handler;
-        Optional<HANDLER> capability = MekanismUtils.toOptional(stack.getCapability(getCapability()));
+        Optional<HANDLER> capability = stack.getCapability(getCapability()).resolve();
         if (capability.isPresent()) {
             handler = capability.get();
         } else if (stack.getItem() instanceof BlockItem) {

@@ -1,7 +1,6 @@
 package mekanism.common.integration.lookingat.hwyla;
 
 import java.util.Optional;
-import mcp.mobius.waila.api.IServerDataProvider;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.merged.MergedChemicalTank.Current;
@@ -17,11 +16,6 @@ import mekanism.common.tile.TileEntityBoundingBlock;
 import mekanism.common.tile.base.TileEntityUpdateable;
 import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.MekanismUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import mekanism.api._helpers_pls_remove.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -48,7 +42,7 @@ public class HwylaDataProvider implements IServerDataProvider<TileEntity> {
         }
         HwylaLookingAtHelper helper = new HwylaLookingAtHelper();
         MultiblockData structure = LookingAtUtils.getMultiblock(tile);
-        Optional<IStrictEnergyHandler> energyCapability = MekanismUtils.toOptional(CapabilityUtils.getCapability(tile, Capabilities.STRICT_ENERGY_CAPABILITY, null));
+        Optional<IStrictEnergyHandler> energyCapability = CapabilityUtils.getCapability(tile, Capabilities.STRICT_ENERGY_CAPABILITY, null).resolve();
         if (energyCapability.isPresent()) {
             LookingAtUtils.displayEnergy(helper, energyCapability.get());
         } else if (structure != null && structure.isFormed()) {
@@ -57,7 +51,7 @@ public class HwylaDataProvider implements IServerDataProvider<TileEntity> {
         }
         //Fluid - only add it to our own tiles in which we disable the default display for
         if (tile instanceof TileEntityUpdateable) {
-            Optional<IFluidHandler> fluidCapability = MekanismUtils.toOptional(CapabilityUtils.getCapability(tile, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null));
+            Optional<IFluidHandler> fluidCapability = CapabilityUtils.getCapability(tile, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).resolve();
             if (fluidCapability.isPresent()) {
                 LookingAtUtils.displayFluid(helper, fluidCapability.get());
             } else if (structure != null && structure.isFormed()) {

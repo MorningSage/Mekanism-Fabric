@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 import mekanism.common.Mekanism;
 import net.minecraft.block.Block;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.BlockRotation;
+import net.minecraft.util.function.BooleanBiFunction;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 
 public final class VoxelShapeUtils {
 
-    private static final Vector3d fromOrigin = new Vector3d(-0.5, -0.5, -0.5);
+    private static final Vec3d fromOrigin = new Vec3d(-0.5, -0.5, -0.5);
 
     public static void print(double x1, double y1, double z1, double x2, double y2, double z2) {
         Mekanism.logger.info("makeCuboidShape({}, {}, {}, {}, {}, {}),", Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2),
@@ -28,75 +28,75 @@ public final class VoxelShapeUtils {
      */
     public static void printSimplified(String name, VoxelShape shape) {
         Mekanism.logger.info("Simplified: {}", name);
-        shape.simplify().toBoundingBoxList().forEach(box -> print(box.minX * 16, box.minY * 16, box.minZ * 16, box.maxX * 16, box.maxY * 16, box.maxZ * 16));
+        shape.simplify().getBoundingBoxes().forEach(box -> print(box.minX * 16, box.minY * 16, box.minZ * 16, box.maxX * 16, box.maxY * 16, box.maxZ * 16));
     }
 
     /**
-     * Rotates an {@link AxisAlignedBB} to a specific side, similar to how the block states rotate models.
+     * Rotates an {@link Box} to a specific side, similar to how the block states rotate models.
      *
-     * @param box  The {@link AxisAlignedBB} to rotate
+     * @param box  The {@link Box} to rotate
      * @param side The side to rotate it to.
      *
-     * @return The rotated {@link AxisAlignedBB}
+     * @return The rotated {@link Box}
      */
-    public static AxisAlignedBB rotate(AxisAlignedBB box, Direction side) {
+    public static Box rotate(Box box, Direction side) {
         switch (side) {
             case DOWN:
                 return box;
             case UP:
-                return new AxisAlignedBB(box.minX, -box.minY, -box.minZ, box.maxX, -box.maxY, -box.maxZ);
+                return new Box(box.minX, -box.minY, -box.minZ, box.maxX, -box.maxY, -box.maxZ);
             case NORTH:
-                return new AxisAlignedBB(box.minX, -box.minZ, box.minY, box.maxX, -box.maxZ, box.maxY);
+                return new Box(box.minX, -box.minZ, box.minY, box.maxX, -box.maxZ, box.maxY);
             case SOUTH:
-                return new AxisAlignedBB(-box.minX, box.minZ, -box.minY, -box.maxX, box.maxZ, -box.maxY);
+                return new Box(-box.minX, box.minZ, -box.minY, -box.maxX, box.maxZ, -box.maxY);
             case WEST:
-                return new AxisAlignedBB(box.minY, -box.minZ, -box.minX, box.maxY, -box.maxZ, -box.maxX);
+                return new Box(box.minY, -box.minZ, -box.minX, box.maxY, -box.maxZ, -box.maxX);
             case EAST:
-                return new AxisAlignedBB(-box.minY, box.minZ, box.minX, -box.maxY, box.maxZ, box.maxX);
+                return new Box(-box.minY, box.minZ, box.minX, -box.maxY, box.maxZ, box.maxX);
         }
         return box;
     }
 
     /**
-     * Rotates an {@link AxisAlignedBB} to a according to a specific rotation.
+     * Rotates an {@link Box} to a according to a specific rotation.
      *
-     * @param box      The {@link AxisAlignedBB} to rotate
+     * @param box      The {@link Box} to rotate
      * @param rotation The rotation we are performing.
      *
-     * @return The rotated {@link AxisAlignedBB}
+     * @return The rotated {@link Box}
      */
-    public static AxisAlignedBB rotate(AxisAlignedBB box, Rotation rotation) {
+    public static Box rotate(Box box, BlockRotation rotation) {
         switch (rotation) {
             case NONE:
                 return box;
             case CLOCKWISE_90:
-                return new AxisAlignedBB(-box.minZ, box.minY, box.minX, -box.maxZ, box.maxY, box.maxX);
+                return new Box(-box.minZ, box.minY, box.minX, -box.maxZ, box.maxY, box.maxX);
             case CLOCKWISE_180:
-                return new AxisAlignedBB(-box.minX, box.minY, -box.minZ, -box.maxX, box.maxY, -box.maxZ);
+                return new Box(-box.minX, box.minY, -box.minZ, -box.maxX, box.maxY, -box.maxZ);
             case COUNTERCLOCKWISE_90:
-                return new AxisAlignedBB(box.minZ, box.minY, -box.minX, box.maxZ, box.maxY, -box.maxX);
+                return new Box(box.minZ, box.minY, -box.minX, box.maxZ, box.maxY, -box.maxX);
         }
         return box;
     }
 
     /**
-     * Rotates an {@link AxisAlignedBB} to a specific side horizontally. This is a default most common rotation setup as to {@link #rotate(AxisAlignedBB, Rotation)}
+     * Rotates an {@link Box} to a specific side horizontally. This is a default most common rotation setup as to {@link #rotate(Box, BlockRotation)}
      *
-     * @param box  The {@link AxisAlignedBB} to rotate
+     * @param box  The {@link Box} to rotate
      * @param side The side to rotate it to.
      *
-     * @return The rotated {@link AxisAlignedBB}
+     * @return The rotated {@link Box}
      */
-    public static AxisAlignedBB rotateHorizontal(AxisAlignedBB box, Direction side) {
+    public static Box rotateHorizontal(Box box, Direction side) {
         switch (side) {
             case NORTH:
-                return rotate(box, Rotation.NONE);
+                return rotate(box, BlockRotation.NONE);
             case SOUTH:
-                return rotate(box, Rotation.CLOCKWISE_180);
+                return rotate(box, BlockRotation.CLOCKWISE_180);
             case WEST:
-                return rotate(box, Rotation.COUNTERCLOCKWISE_90);
+                return rotate(box, BlockRotation.COUNTERCLOCKWISE_90);
             case EAST:
-                return rotate(box, Rotation.CLOCKWISE_90);
+                return rotate(box, BlockRotation.CLOCKWISE_90);
         }
         return box;
     }
@@ -121,12 +121,12 @@ public final class VoxelShapeUtils {
      *
      * @return The rotated {@link VoxelShape}
      */
-    public static VoxelShape rotate(VoxelShape shape, Rotation rotation) {
+    public static VoxelShape rotate(VoxelShape shape, BlockRotation rotation) {
         return rotate(shape, box -> rotate(box, rotation));
     }
 
     /**
-     * Rotates a {@link VoxelShape} to a specific side horizontally. This is a default most common rotation setup as to {@link #rotate(VoxelShape, Rotation)}
+     * Rotates a {@link VoxelShape} to a specific side horizontally. This is a default most common rotation setup as to {@link #rotate(VoxelShape, BlockRotation)}
      *
      * @param shape The {@link VoxelShape} to rotate
      * @param side  The side to rotate it to.
@@ -138,21 +138,21 @@ public final class VoxelShapeUtils {
     }
 
     /**
-     * Rotates a {@link VoxelShape} using a specific transformation function for each {@link AxisAlignedBB} in the {@link VoxelShape}.
+     * Rotates a {@link VoxelShape} using a specific transformation function for each {@link Box} in the {@link VoxelShape}.
      *
      * @param shape          The {@link VoxelShape} to rotate
-     * @param rotateFunction The transformation function to apply to each {@link AxisAlignedBB} in the {@link VoxelShape}.
+     * @param rotateFunction The transformation function to apply to each {@link Box} in the {@link VoxelShape}.
      *
      * @return The rotated {@link VoxelShape}
      */
-    public static VoxelShape rotate(VoxelShape shape, UnaryOperator<AxisAlignedBB> rotateFunction) {
+    public static VoxelShape rotate(VoxelShape shape, UnaryOperator<Box> rotateFunction) {
         List<VoxelShape> rotatedPieces = new ArrayList<>();
         //Explode the voxel shape into bounding boxes
-        List<AxisAlignedBB> sourceBoundingBoxes = shape.toBoundingBoxList();
+        List<Box> sourceBoundingBoxes = shape.getBoundingBoxes();
         //Rotate them and convert them each back into a voxel shape
-        for (AxisAlignedBB sourceBoundingBox : sourceBoundingBoxes) {
+        for (Box sourceBoundingBox : sourceBoundingBoxes) {
             //Make the bounding box be centered around the middle, and then move it back after rotating
-            rotatedPieces.add(VoxelShapes.create(rotateFunction.apply(sourceBoundingBox.offset(fromOrigin.x, fromOrigin.y, fromOrigin.z))
+            rotatedPieces.add(VoxelShapes.cuboid(rotateFunction.apply(sourceBoundingBox.offset(fromOrigin.x, fromOrigin.y, fromOrigin.z))
                   .offset(-fromOrigin.x, -fromOrigin.z, -fromOrigin.z)));
         }
         //return the recombined rotated voxel shape
@@ -167,7 +167,7 @@ public final class VoxelShapeUtils {
      * @return A simplified {@link VoxelShape} including everything that is part of any of the input shapes.
      */
     public static VoxelShape combine(VoxelShape... shapes) {
-        return batchCombine(VoxelShapes.empty(), IBooleanFunction.OR, true, shapes);
+        return batchCombine(VoxelShapes.empty(), BooleanBiFunction.OR, true, shapes);
     }
 
     /**
@@ -182,7 +182,7 @@ public final class VoxelShapeUtils {
     }
 
     public static VoxelShape combine(Collection<VoxelShape> shapes, boolean simplify) {
-        return batchCombine(VoxelShapes.empty(), IBooleanFunction.OR, simplify, shapes);
+        return batchCombine(VoxelShapes.empty(), BooleanBiFunction.OR, simplify, shapes);
     }
 
     /**
@@ -193,14 +193,14 @@ public final class VoxelShapeUtils {
      * @return A {@link VoxelShape} including everything that is not part of any of the input shapes.
      */
     public static VoxelShape exclude(VoxelShape... shapes) {
-        return batchCombine(VoxelShapes.fullCube(), IBooleanFunction.ONLY_FIRST, true, shapes);
+        return batchCombine(VoxelShapes.fullCube(), BooleanBiFunction.ONLY_FIRST, true, shapes);
     }
 
     /**
-     * Used for mass combining shapes using a specific {@link IBooleanFunction} and a given start shape.
+     * Used for mass combining shapes using a specific {@link BooleanBiFunction} and a given start shape.
      *
      * @param initial  The {@link VoxelShape} to start with
-     * @param function The {@link IBooleanFunction} to perform
+     * @param function The {@link BooleanBiFunction} to perform
      * @param simplify True if the returned shape should run {@link VoxelShape#simplify()}, False otherwise
      * @param shapes   The collection of {@link VoxelShape}s to include
      *
@@ -209,7 +209,7 @@ public final class VoxelShapeUtils {
      * @implNote We do not do any simplification until after combining all the shapes, and then only if the {@code simplify} is True. This is because there is a
      * performance hit in calculating the simplified shape each time if we still have more changers we are making to it.
      */
-    public static VoxelShape batchCombine(VoxelShape initial, IBooleanFunction function, boolean simplify, Collection<VoxelShape> shapes) {
+    public static VoxelShape batchCombine(VoxelShape initial, BooleanBiFunction function, boolean simplify, Collection<VoxelShape> shapes) {
         VoxelShape combinedShape = initial;
         for (VoxelShape shape : shapes) {
             combinedShape = VoxelShapes.combine(combinedShape, shape, function);
@@ -218,10 +218,10 @@ public final class VoxelShapeUtils {
     }
 
     /**
-     * Used for mass combining shapes using a specific {@link IBooleanFunction} and a given start shape.
+     * Used for mass combining shapes using a specific {@link BooleanBiFunction} and a given start shape.
      *
      * @param initial  The {@link VoxelShape} to start with
-     * @param function The {@link IBooleanFunction} to perform
+     * @param function The {@link BooleanBiFunction} to perform
      * @param simplify True if the returned shape should run {@link VoxelShape#simplify()}, False otherwise
      * @param shapes   The list of {@link VoxelShape}s to include
      *
@@ -230,7 +230,7 @@ public final class VoxelShapeUtils {
      * @implNote We do not do any simplification until after combining all the shapes, and then only if the {@code simplify} is True. This is because there is a
      * performance hit in calculating the simplified shape each time if we still have more changers we are making to it.
      */
-    public static VoxelShape batchCombine(VoxelShape initial, IBooleanFunction function, boolean simplify, VoxelShape... shapes) {
+    public static VoxelShape batchCombine(VoxelShape initial, BooleanBiFunction function, boolean simplify, VoxelShape... shapes) {
         VoxelShape combinedShape = initial;
         for (VoxelShape shape : shapes) {
             combinedShape = VoxelShapes.combine(combinedShape, shape, function);
@@ -252,7 +252,7 @@ public final class VoxelShapeUtils {
                 print(-maxX + shiftX, -maxY + shiftY, maxZ + shiftZ, -minX + shiftX, -minY + shiftY, minZ + shiftZ);
                 return VoxelShapes.empty();
             }
-            return Block.makeCuboidShape(-maxX + shiftX, -maxY + shiftY, maxZ + shiftZ, -minX + shiftX, -minY + shiftY, minZ + shiftZ);
+            return Block.createCuboidShape(-maxX + shiftX, -maxY + shiftY, maxZ + shiftZ, -minX + shiftX, -minY + shiftY, minZ + shiftZ);
         } else if (print) {
             Vec3f min = rotateVector(minX, minY, minZ, rotateAngleX, rotateAngleY, rotateAngleZ).mul(-1, -1, 1);
             Vec3f max = rotateVector(maxX, minY, maxZ, rotateAngleX, rotateAngleY, rotateAngleZ).mul(-1, -1, 1);
@@ -297,7 +297,7 @@ public final class VoxelShapeUtils {
         //Mekanism.logger.info("Shift: {}, {}, {}", shiftX, shiftY, shiftZ);
         //Mekanism.logger.info("Positions: {}, {}, {}, {}, {}, {}", startX, startY, startZ, endX, endY, endZ);
 
-        ShapeCreator shapeCreator = (x, y, z) -> Block.makeCuboidShape(x - 0.5F, y - 0.5F, z - 0.5F, x + 0.5F, y + 0.5F, z + 0.5F);
+        ShapeCreator shapeCreator = (x, y, z) -> Block.createCuboidShape(x - 0.5F, y - 0.5F, z - 0.5F, x + 0.5F, y + 0.5F, z + 0.5F);
         //float xHalf = -(minX + maxX) / 2F;
         //float yHalf = -(minY + maxY) / 2F;
         //float zHalf = (minZ + maxZ) / 2F;
@@ -390,11 +390,11 @@ public final class VoxelShapeUtils {
         return combine(shapes, false);
     }
 
-    public static VoxelShape translate(VoxelShape shape, Vector3d translation) {
+    public static VoxelShape translate(VoxelShape shape, Vec3d translation) {
         List<VoxelShape> rotatedPieces = new ArrayList<>();
-        List<AxisAlignedBB> sourceBoundingBoxes = shape.toBoundingBoxList();
-        for (AxisAlignedBB sourceBoundingBox : sourceBoundingBoxes) {
-            rotatedPieces.add(VoxelShapes.create(sourceBoundingBox.offset(translation)));
+        List<Box> sourceBoundingBoxes = shape.getBoundingBoxes();
+        for (Box sourceBoundingBox : sourceBoundingBoxes) {
+            rotatedPieces.add(VoxelShapes.cuboid(sourceBoundingBox.offset(translation)));
         }
         return combine(rotatedPieces);
     }

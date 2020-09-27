@@ -50,6 +50,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.item.Rarity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stats.Stats;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
@@ -244,7 +245,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
             player.addStat(Stats.ITEM_USED.get(this));
             if (exp > 0) {
                 //If we have xp drop it
-                block.dropXpOnBlockBreak(world, pos, exp);
+                block.dropXpOnBlockBreak((ServerWorld) world, pos, exp);
             }
             //Use energy
             energyContainer.extract(destroyEnergy, Action.EXECUTE, AutomationType.MANUAL);

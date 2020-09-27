@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.FieldsAreNonnullByDefault;
+import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
@@ -28,7 +28,7 @@ import mekanism.api.chemical.slurry.ISlurryHandler.IMekanismSlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 @FieldsAreNonnullByDefault
 @ParametersAreNonnullByDefault

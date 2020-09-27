@@ -17,6 +17,8 @@ import mekanism.common.util.EnumUtils;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
+import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.Tag;
 
@@ -137,7 +139,7 @@ public class MekanismTags {
         public static final Tag.Identified<Item> GEMS_LAPIS = forgeTag("lapis_lazulis");
 
         private static Tag.Identified<Item> forgeTag(String name) {
-            return ItemTags..makeWrapperTag("forge:" + name);
+            return ItemTags.makeWrapperTag("forge:" + name);
         }
 
         private static Tag.Identified<Item> tag(String name) {
@@ -210,7 +212,7 @@ public class MekanismTags {
         public static final Tag.Identified<Gas> WATER_VAPOR = tag("water_vapor");
 
         private static Tag.Identified<Gas> tag(String name) {
-            return ChemicalTags.gasTag(Mekanism.rl(name));
+            return ChemicalTags.GAS.tag(Mekanism.rl(name));
         }
     }
 
@@ -226,14 +228,14 @@ public class MekanismTags {
         public static final Tag.Identified<InfuseType> TIN = tag("tin");
 
         private static Tag.Identified<InfuseType> tag(String name) {
-            return ChemicalTags.infusionTag(Mekanism.rl(name));
+            return ChemicalTags.INFUSE_TYPE.tag(Mekanism.rl(name));
         }
     }
 
     public static class Pigments {
 
         private static Tag.Identified<Pigment> tag(String name) {
-            return ChemicalTags.pigmentTag(Mekanism.rl(name));
+            return ChemicalTags.PIGMENT.tag(Mekanism.rl(name));
         }
     }
 
@@ -243,7 +245,7 @@ public class MekanismTags {
         public static final Tag.Identified<Slurry> CLEAN = tag("clean");
 
         private static Tag.Identified<Slurry> tag(String name) {
-            return ChemicalTags.slurryTag(Mekanism.rl(name));
+            return ChemicalTags.SLURRY.tag(Mekanism.rl(name));
         }
     }
 }

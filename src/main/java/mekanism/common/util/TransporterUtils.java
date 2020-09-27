@@ -15,10 +15,10 @@ import mekanism.common.tile.TileEntityLogisticalSorter;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -36,7 +36,7 @@ public final class TransporterUtils {
         return color == null ? -1 : TransporterUtils.colors.indexOf(color);
     }
 
-    public static boolean isValidAcceptorOnSide(TileEntity tile, Direction side) {
+    public static boolean isValidAcceptorOnSide(BlockEntity tile, Direction side) {
         if (tile instanceof TileEntityTransmitter && TransmissionType.ITEM.checkTransmissionType((TileEntityTransmitter) tile)) {
             return false;
         }
@@ -66,13 +66,13 @@ public final class TransporterUtils {
             blockPos = blockPos.add(pos[0], pos[1], pos[2]);
         }
         TransporterManager.remove(transporter.getTileWorld(), stack);
-        Block.spawnAsEntity(transporter.getTileWorld(), blockPos, stack.itemStack);
+        Block.dropStack(transporter.getTileWorld(), blockPos, stack.itemStack);
     }
 
     public static float[] getStackPosition(LogisticalTransporterBase transporter, TransporterStack stack, float partial) {
         Direction side = stack.getSide(transporter);
         float progress = ((stack.progress + partial) / 100F) - 0.5F;
-        return new float[]{0.5F + side.getXOffset() * progress, 0.25F + side.getYOffset() * progress, 0.5F + side.getZOffset() * progress};
+        return new float[]{0.5F + side.getOffsetX() * progress, 0.25F + side.getOffsetY() * progress, 0.5F + side.getOffsetZ() * progress};
     }
 
     public static void incrementColor(LogisticalTransporter tile) {
@@ -89,7 +89,7 @@ public final class TransporterUtils {
         }
     }
 
-    public static boolean canInsert(TileEntity tile, EnumColor color, ItemStack itemStack, Direction side, boolean force) {
+    public static boolean canInsert(BlockEntity tile, EnumColor color, ItemStack itemStack, Direction side, boolean force) {
         if (force && tile instanceof TileEntityLogisticalSorter) {
             return ((TileEntityLogisticalSorter) tile).canSendHome(itemStack);
         }
@@ -103,7 +103,7 @@ public final class TransporterUtils {
                 }
             }
         }
-        Optional<IItemHandler> capability = MekanismUtils.toOptional(CapabilityUtils.getCapability(tile, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side.getOpposite()));
+        Optional<IItemHandler> capability = CapabilityUtils.getCapability(tile, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side.getOpposite()).resolve();
         if (capability.isPresent()) {
             IItemHandler inventory = capability.get();
             for (int i = 0; i < inventory.getSlots(); i++) {

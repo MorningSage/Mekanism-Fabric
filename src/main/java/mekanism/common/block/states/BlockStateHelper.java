@@ -13,7 +13,10 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -25,7 +28,7 @@ public class BlockStateHelper {
     //Cardboard Box storage
     public static final BooleanProperty storageProperty = BooleanProperty.of("storage");
     //Fluid logged. TODO: We may eventually want to make this not be using the same exact property as WATERLOGGED but name it differently
-    public static final BooleanProperty FLUID_LOGGED = BlockStateProperties.WATERLOGGED;
+    public static final BooleanProperty FLUID_LOGGED = Properties.WATERLOGGED;
 
     public static BlockState getDefaultState(@Nonnull BlockState state) {
         Block block = state.getBlock();
@@ -42,7 +45,7 @@ public class BlockStateHelper {
         return state;
     }
 
-    public static void fillBlockStateContainer(Block block, StateContainer.Builder<Block, BlockState> builder) {
+    public static void fillBlockStateContainer(Block block, StateManager.Builder<Block, BlockState> builder) {
         List<Property<?>> properties = new ArrayList<>();
 
         for (Attribute attr : Attribute.getAll(block)) {
@@ -62,8 +65,8 @@ public class BlockStateHelper {
     }
 
     @Contract("_, null, _ -> null")
-    public static BlockState getStateForPlacement(Block block, @Nullable BlockState state, BlockItemUseContext context) {
-        return getStateForPlacement(block, state, context.getWorld(), context.getPos(), context.getPlayer(), context.getFace());
+    public static BlockState getStateForPlacement(Block block, @Nullable BlockState state, ItemPlacementContext context) {
+        return getStateForPlacement(block, state, context.getWorld(), context.getBlockPos(), context.getPlayer(), context.getSide());
     }
 
     @Contract("_, null, _, _, _, _ -> null")

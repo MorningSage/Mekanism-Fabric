@@ -32,18 +32,19 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import mekanism.common.util.StorageUtils;
 import mekanism.common.util.UnitDisplayUtils;
 import mekanism.common.util.UnitDisplayUtils.RadiationUnit;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.tag.FluidTags;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 
 public abstract class ModuleMekaSuit extends Module {
 
@@ -56,7 +57,7 @@ public abstract class ModuleMekaSuit extends Module {
             //Note: Being in water is checked first to ensure that if it is raining and the player is in water
             // they get the full strength production
             double maskHeight = player.getPosYEye() - 0.15;
-            BlockPos headPos = new BlockPos(player.getPosX(), maskHeight, player.getPosZ());
+            BlockPos headPos = new BlockPos(player.getX(), maskHeight, player.getZ());
             FluidState fluidstate = player.getEntityWorld().getFluidState(headPos);
             if (fluidstate.isTagged(FluidTags.WATER) && maskHeight <= headPos.getY() + fluidstate.getActualHeight(player.getEntityWorld(), headPos)) {
                 //If the position the bottom of the mask is in is water set the production rate to our max rate
@@ -70,14 +71,14 @@ public abstract class ModuleMekaSuit extends Module {
                 int maxRate = Math.min(productionRate, getContainerEnergy().divide(usage).intValue());
                 long hydrogenUsed = 0;
                 GasStack hydrogenStack = MekanismGases.HYDROGEN.getStack(maxRate * 2L);
-                ItemStack chestStack = player.getItemStackFromSlot(EquipmentSlotType.CHEST);
-                Optional<IGasHandler> chestCapability = MekanismUtils.toOptional(chestStack.getCapability(Capabilities.GAS_HANDLER_CAPABILITY));
+                ItemStack chestStack = player.getEquippedStack(EquipmentSlot.CHEST);
+                Optional<IGasHandler> chestCapability = chestStack.getCapability(Capabilities.GAS_HANDLER_CAPABILITY).resolve();
                 if (checkChestPlate(chestStack) && chestCapability.isPresent()) {
                     hydrogenUsed = maxRate * 2L - chestCapability.get().insertChemical(hydrogenStack, Action.EXECUTE).getAmount();
                     hydrogenStack.shrink(hydrogenUsed);
                 }
-                ItemStack handStack = player.getItemStackFromSlot(EquipmentSlotType.MAINHAND);
-                Optional<IGasHandler> handCapability = MekanismUtils.toOptional(handStack.getCapability(Capabilities.GAS_HANDLER_CAPABILITY));
+                ItemStack handStack = player.getEquippedStack(EquipmentSlot.MAINHAND);
+                Optional<IGasHandler> handCapability = handStack.getCapability(Capabilities.GAS_HANDLER_CAPABILITY).resolve();
                 if (handCapability.isPresent()) {
                     hydrogenUsed = maxRate * 2L - handCapability.get().insertChemical(hydrogenStack, Action.EXECUTE).getAmount();
                 }
@@ -123,8 +124,8 @@ public abstract class ModuleMekaSuit extends Module {
 
         @Override
         public void tickServer(PlayerEntity player) {
-            for (EffectInstance effect : player.getActivePotionEffects()) {
-                EffectType effectType = effect.getPotion().getEffectType();
+            for (StatusEffectInstance effect : player.getStatusEffects()) {
+                StatusEffectType effectType = effect.getEffectType().getType();
                 if (!canHandle(effectType)) {
                     continue;
                 } else if (getContainerEnergy().smallerThan(MekanismConfig.gear.mekaSuitEnergyUsagePotionTick.get())) {
@@ -132,12 +133,12 @@ public abstract class ModuleMekaSuit extends Module {
                 }
                 useEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsagePotionTick.get());
                 for (int i = 0; i < 9; i++) {
-                    effect.tick(player, () -> MekanismUtils.onChangedPotionEffect(player, effect, true));
+                    effect.update(player, () -> MekanismUtils.onChangedPotionEffect(player, effect, true));
                 }
             }
         }
 
-        private boolean canHandle(EffectType effectType) {
+        private boolean canHandle(StatusEffectType effectType) {
             switch (effectType) {
                 case BENEFICIAL:
                     return beneficialEffects.get();
@@ -152,7 +153,7 @@ public abstract class ModuleMekaSuit extends Module {
 
     public static class ModuleVisionEnhancementUnit extends ModuleMekaSuit {
 
-        private static final ResourceLocation icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "vision_enhancement_unit.png");
+        private static final Identifier icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "vision_enhancement_unit.png");
 
         @Override
         public void tickServer(PlayerEntity player) {
@@ -175,7 +176,7 @@ public abstract class ModuleMekaSuit extends Module {
 
     public static class ModuleGravitationalModulatingUnit extends ModuleMekaSuit {
 
-        private static final ResourceLocation icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "gravitational_modulation_unit.png");
+        private static final Identifier icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "gravitational_modulation_unit.png");
 
         // we share with locomotive boosting unit
         private ModuleConfigItem<SprintBoost> speedBoost;
@@ -231,15 +232,15 @@ public abstract class ModuleMekaSuit extends Module {
             ULTRA(5);
 
             private final float boost;
-            private final ITextComponent label;
+            private final Text label;
 
             JumpBoost(float boost) {
                 this.boost = boost;
-                this.label = new StringTextComponent(Float.toString(boost));
+                this.label = new LiteralText(Float.toString(boost));
             }
 
             @Override
-            public ITextComponent getTextComponent() {
+            public Text getTextComponent() {
                 return label;
             }
 
@@ -256,15 +257,15 @@ public abstract class ModuleMekaSuit extends Module {
             ULTRA(2);
 
             private final float height;
-            private final ITextComponent label;
+            private final Text label;
 
             StepAssist(float height) {
                 this.height = height;
-                this.label = new StringTextComponent(Float.toString(height));
+                this.label = new LiteralText(Float.toString(height));
             }
 
             @Override
-            public ITextComponent getTextComponent() {
+            public Text getTextComponent() {
                 return label;
             }
 
@@ -280,7 +281,7 @@ public abstract class ModuleMekaSuit extends Module {
         public void tickServer(PlayerEntity player) {
             super.tickServer(player);
             IEnergyContainer energyContainer = StorageUtils.getEnergyContainer(getContainer(), 0);
-            if (energyContainer != null && !energyContainer.getNeeded().isZero() && player.world.isDaytime() &&
+            if (energyContainer != null && !energyContainer.getNeeded().isZero() && player.world.isDay() &&
                 player.world.canSeeSky(new BlockPos(player.getPositionVec())) && !player.world.isRaining() && player.world.func_230315_m_().hasSkyLight()) {
                 FloatingLong rate = MekanismConfig.gear.mekaSuitSolarRechargingRate.get().multiply(getInstalledCount());
                 energyContainer.insert(rate, Action.EXECUTE, AutomationType.MANUAL);
@@ -290,19 +291,19 @@ public abstract class ModuleMekaSuit extends Module {
 
     public static class ModuleNutritionalInjectionUnit extends ModuleMekaSuit {
 
-        private static final ResourceLocation icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "nutritional_injection_unit.png");
+        private static final Identifier icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "nutritional_injection_unit.png");
 
         @Override
         public void tickServer(PlayerEntity player) {
             super.tickServer(player);
             FloatingLong usage = MekanismConfig.gear.mekaSuitEnergyUsageNutritionalInjection.get();
-            if (MekanismUtils.isPlayingMode(player) && player.canEat(false) && getContainerEnergy().greaterOrEqual(usage)) {
+            if (MekanismUtils.isPlayingMode(player) && player.canConsume(false) && getContainerEnergy().greaterOrEqual(usage)) {
                 ItemMekaSuitArmor item = (ItemMekaSuitArmor) getContainer().getItem();
                 long toFeed = Math.min(1, item.getContainedGas(getContainer(), MekanismGases.NUTRITIONAL_PASTE.get()).getAmount() / MekanismConfig.general.nutritionalPasteMBPerFood.get());
                 if (toFeed > 0) {
                     useEnergy(player, usage.multiply(toFeed));
                     item.useGas(getContainer(), MekanismGases.NUTRITIONAL_PASTE.get(), toFeed * MekanismConfig.general.nutritionalPasteMBPerFood.get());
-                    player.getFoodStats().addStats(1, MekanismConfig.general.nutritionalPasteSaturation.get());
+                    player.getHungerManager().add(1, MekanismConfig.general.nutritionalPasteSaturation.get());
                 }
             }
         }
@@ -320,15 +321,14 @@ public abstract class ModuleMekaSuit extends Module {
 
     public static class ModuleDosimeterUnit extends ModuleMekaSuit {
 
-        private static final ResourceLocation icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "dosimeter.png");
+        private static final Identifier icon = MekanismUtils.getResource(ResourceType.GUI_HUD, "dosimeter.png");
 
         @Override
         public void addHUDElements(List<HUDElement> list) {
             if (!isEnabled()) {
                 return;
             }
-            Optional<IRadiationEntity> capability = MekanismUtils.toOptional(CapabilityUtils.getCapability(Minecraft.getInstance().player,
-                  Capabilities.RADIATION_ENTITY_CAPABILITY, null));
+            Optional<IRadiationEntity> capability = CapabilityUtils.getCapability(MinecraftClient.getInstance().player, Capabilities.RADIATION_ENTITY_CAPABILITY, null).resolve();
             if (capability.isPresent()) {
                 double radiation = capability.get().getRadiation();
                 HUDElement e = HUDElement.of(icon, UnitDisplayUtils.getDisplayShort(radiation, RadiationUnit.SV, 2));

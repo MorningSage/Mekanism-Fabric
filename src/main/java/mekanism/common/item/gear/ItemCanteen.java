@@ -17,35 +17,36 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IGasItem;
 import mekanism.common.registries.MekanismGases;
 import mekanism.common.util.ChemicalUtil;
-import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.StorageUtils;
-import net.minecraft.client.util.ITooltipFlag;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
-import net.minecraft.item.UseAction;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.text.Text;
+import net.minecraft.util.*;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 public class ItemCanteen extends Item implements IGasItem {
 
-    public ItemCanteen(Properties properties) {
-        super(properties.rarity(Rarity.UNCOMMON).maxStackSize(1).setNoRepair());
+    public ItemCanteen(Settings properties) {
+        super(properties.rarity(Rarity.UNCOMMON).maxCount(1)/*.setNoRepair()*/);
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void addInformation(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
+    public boolean canRepair(ItemStack stack, ItemStack ingredient) {
+        return false;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void appendTooltip(@Nonnull ItemStack stack, @Nullable World world, @Nonnull List<Text> tooltip, @Nonnull TooltipContext flag) {
         StorageUtils.addStoredGas(stack, tooltip, true, false, MekanismLang.EMPTY);
     }
 
@@ -65,21 +66,21 @@ public class ItemCanteen extends Item implements IGasItem {
     }
 
     @Override
-    public void fillItemGroup(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
-        super.fillItemGroup(group, items);
-        if (isInGroup(group)) {
+    public void appendStacks(@Nonnull ItemGroup group, @Nonnull DefaultedList<ItemStack> items) {
+        super.appendStacks(group, items);
+        if (isIn(group)) {
             items.add(ChemicalUtil.getFilledVariant(new ItemStack(this), MekanismConfig.gear.canteenMaxStorage.get(), MekanismGases.NUTRITIONAL_PASTE));
         }
     }
 
     @Nonnull
     @Override
-    public ItemStack onItemUseFinish(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entityLiving) {
-        if (!world.isRemote && entityLiving instanceof PlayerEntity) {
+    public ItemStack finishUsing(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull LivingEntity entityLiving) {
+        if (!world.isClient && entityLiving instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entityLiving;
-            long needed = Math.min(20 - player.getFoodStats().getFoodLevel(), getGas(stack).getAmount() / MekanismConfig.general.nutritionalPasteMBPerFood.get());
+            long needed = Math.min(20 - player.getHungerManager().getFoodLevel(), getGas(stack).getAmount() / MekanismConfig.general.nutritionalPasteMBPerFood.get());
             if (needed > 0) {
-                player.getFoodStats().addStats((int) needed, MekanismConfig.general.nutritionalPasteSaturation.get());
+                player.getHungerManager().add((int) needed, MekanismConfig.general.nutritionalPasteSaturation.get());
                 useGas(stack, needed * MekanismConfig.general.nutritionalPasteMBPerFood.get());
             }
         }
@@ -87,7 +88,7 @@ public class ItemCanteen extends Item implements IGasItem {
     }
 
     @Override
-    public int getUseDuration(@Nonnull ItemStack stack) {
+    public int getMaxUseTime(@Nonnull ItemStack stack) {
         return 32;
     }
 
@@ -98,13 +99,13 @@ public class ItemCanteen extends Item implements IGasItem {
     }
 
     @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, CompoundNBT nbt) {
+    public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt) {
         return new ItemCapabilityWrapper(stack, RateLimitGasHandler.create(MekanismConfig.gear.canteenTransferRate, MekanismConfig.gear.canteenMaxStorage,
-              ChemicalTankBuilder.GAS.alwaysTrueBi, ChemicalTankBuilder.GAS.alwaysTrueBi, gas -> gas == MekanismGases.NUTRITIONAL_PASTE.getChemical()));
+            ChemicalTankBuilder.GAS.alwaysTrueBi, ChemicalTankBuilder.GAS.alwaysTrueBi, gas -> gas == MekanismGases.NUTRITIONAL_PASTE.getChemical()));
     }
 
     private GasStack getGas(ItemStack stack) {
-        Optional<IGasHandler> capability = MekanismUtils.toOptional(stack.getCapability(Capabilities.GAS_HANDLER_CAPABILITY));
+        Optional<IGasHandler> capability = stack.getCapability(Capabilities.GAS_HANDLER_CAPABILITY).resolve();
         if (capability.isPresent()) {
             IGasHandler gasHandlerItem = capability.get();
             if (gasHandlerItem instanceof IMekanismGasHandler) {
@@ -120,10 +121,10 @@ public class ItemCanteen extends Item implements IGasItem {
 
     @Nonnull
     @Override
-    public ActionResult<ItemStack> onItemRightClick(@Nonnull World worldIn, PlayerEntity playerIn, @Nonnull Hand handIn) {
-        if (!playerIn.isCreative() && playerIn.canEat(false) && getGas(playerIn.getHeldItem(handIn)).getAmount() >= 50) {
-            playerIn.setActiveHand(handIn);
+    public TypedActionResult<ItemStack> use(@Nonnull World worldIn, PlayerEntity playerIn, @Nonnull Hand handIn) {
+        if (!playerIn.isCreative() && playerIn.canConsume(false) && getGas(playerIn.getStackInHand(handIn)).getAmount() >= 50) {
+            playerIn.setCurrentHand(handIn);
         }
-        return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
+        return TypedActionResult.pass(playerIn.getStackInHand(handIn));
     }
 }

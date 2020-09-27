@@ -8,6 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.IWorldReader;
 import net.minecraftforge.common.ToolType;
 
@@ -36,7 +37,7 @@ public class BlockResource extends BlockMekanism {
     }
 
     @Override
-    public boolean isPortalFrame(BlockState state, IWorldReader world, BlockPos pos) {
+    public boolean isPortalFrame(BlockState state, BlockView world, BlockPos pos) {
         return resource.isPortalFrame();
     }
 }

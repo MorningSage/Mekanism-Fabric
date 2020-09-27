@@ -8,7 +8,6 @@ import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.TubeTier;
 import mekanism.common.tile.transmitter.TileEntityPressurizedTube;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.tileentity.TileEntityType;
 
 public class BlockPressurizedTube extends BlockSmallTransmitter implements ITypeBlock, IHasTileEntity<TileEntityPressurizedTube> {
 

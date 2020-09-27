@@ -12,27 +12,23 @@ import mekanism.common.block.interfaces.IHasDescription;
 import mekanism.common.block.interfaces.ITypeBlock;
 import mekanism.common.block.states.IStateFluidLoggable;
 import mekanism.common.content.blocktype.BlockType;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
+import net.minecraft.block.Material;
 import net.minecraft.entity.EntityType;
-import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.util.shape.VoxelShape;
 
 public class BlockBase<TYPE extends BlockType> extends BlockMekanism implements IHasDescription, ITypeBlock {
 
     protected final TYPE type;
 
     public BlockBase(TYPE type) {
-        this(type, Block.Properties.create(Material.IRON).hardnessAndResistance(3.5F, 16F).setRequiresTool());
+        this(type, AbstractBlock.Settings.of(Material.METAL).strength(3.5F, 16F).requiresTool());
     }
 
-    public BlockBase(TYPE type, Block.Properties properties) {
+    public BlockBase(TYPE type, AbstractBlock.Settings properties) {
         super(hack(type, properties));
         this.type = type;
     }
@@ -40,7 +36,7 @@ public class BlockBase<TYPE extends BlockType> extends BlockMekanism implements 
     // ugly hack but required to have a reference to our block type before setting state info; assumes single-threaded startup
     private static BlockType cacheType;
 
-    private static <TYPE extends BlockType> Block.Properties hack(TYPE type, Block.Properties props) {
+    private static <TYPE extends BlockType> AbstractBlock.Settings hack(TYPE type, AbstractBlock.Settings props) {
         cacheType = type;
         type.getAll().forEach(a -> a.adjustProperties(props));
         return props;

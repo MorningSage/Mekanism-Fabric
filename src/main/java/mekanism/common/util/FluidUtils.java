@@ -6,32 +6,32 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import mekanism.api.Action;
+import mekanism.api._helpers_pls_remove.FluidAction;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.AutomationType;
 import mekanism.common.content.network.distribution.FluidHandlerTarget;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import mekanism.api._helpers_pls_remove.FluidStack;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 public final class FluidUtils {
 
-    public static void emit(IExtendedFluidTank tank, TileEntity from) {
+    public static void emit(IExtendedFluidTank tank, BlockEntity from) {
         emit(EnumSet.allOf(Direction.class), tank, from);
     }
 
-    public static void emit(Set<Direction> outputSides, IExtendedFluidTank tank, TileEntity from) {
+    public static void emit(Set<Direction> outputSides, IExtendedFluidTank tank, BlockEntity from) {
         emit(outputSides, tank, from, tank.getCapacity());
     }
 
-    public static void emit(Set<Direction> outputSides, IExtendedFluidTank tank, TileEntity from, int maxOutput) {
+    public static void emit(Set<Direction> outputSides, IExtendedFluidTank tank, BlockEntity from, int maxOutput) {
         if (!tank.isEmpty() && maxOutput > 0) {
             tank.extract(emit(outputSides, tank.extract(maxOutput, Action.SIMULATE, AutomationType.INTERNAL), from), Action.EXECUTE, AutomationType.INTERNAL);
         }
@@ -46,7 +46,7 @@ public final class FluidUtils {
      *
      * @return the amount of fluid emitted
      */
-    public static int emit(Set<Direction> sides, @Nonnull FluidStack stack, TileEntity from) {
+    public static int emit(Set<Direction> sides, @Nonnull FluidStack stack, BlockEntity from) {
         if (stack.isEmpty() || sides.isEmpty()) {
             return 0;
         }
@@ -80,7 +80,7 @@ public final class FluidUtils {
 
     public static boolean handleTankInteraction(PlayerEntity player, Hand hand, ItemStack itemStack, IExtendedFluidTank fluidTank) {
         ItemStack copyStack = StackUtils.size(itemStack, 1);
-        Optional<IFluidHandlerItem> fluidHandlerItem = MekanismUtils.toOptional(FluidUtil.getFluidHandler(copyStack));
+        Optional<IFluidHandlerItem> fluidHandlerItem = FluidUtil.getFluidHandler(copyStack).resolve();
         if (fluidHandlerItem.isPresent()) {
             IFluidHandlerItem handler = fluidHandlerItem.get();
             FluidStack fluidInItem;
@@ -99,12 +99,12 @@ public final class FluidUtils {
                     ItemStack container = handler.getContainer();
                     if (filled > 0) {
                         if (itemStack.getCount() == 1) {
-                            player.setHeldItem(hand, container);
-                        } else if (itemStack.getCount() > 1 && player.inventory.addItemStackToInventory(container)) {
-                            itemStack.shrink(1);
+                            player.setStackInHand(hand, container);
+                        } else if (itemStack.getCount() > 1 && player.inventory.insertStack(container)) {
+                            itemStack.decrement(1);
                         } else {
                             player.dropItem(container, false, true);
-                            itemStack.shrink(1);
+                            itemStack.decrement(1);
                         }
                         fluidTank.extract(filled, Action.EXECUTE, AutomationType.MANUAL);
                         return true;
@@ -123,16 +123,16 @@ public final class FluidUtils {
                             filled = true;
                         } else if (!container.isEmpty()) {
                             if (container.getCount() == 1) {
-                                player.setHeldItem(hand, container);
+                                player.setStackInHand(hand, container);
                                 filled = true;
-                            } else if (player.inventory.addItemStackToInventory(container)) {
-                                itemStack.shrink(1);
+                            } else if (player.inventory.insertStack(container)) {
+                                itemStack.decrement(1);
                                 filled = true;
                             }
                         } else {
-                            itemStack.shrink(1);
+                            itemStack.decrement(1);
                             if (itemStack.isEmpty()) {
-                                player.setHeldItem(hand, ItemStack.EMPTY);
+                                player.setStackInHand(hand, ItemStack.EMPTY);
                             }
                             filled = true;
                         }

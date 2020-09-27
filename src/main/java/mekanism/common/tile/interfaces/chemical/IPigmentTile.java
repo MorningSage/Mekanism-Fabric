@@ -2,7 +2,8 @@ package mekanism.common.tile.interfaces.chemical;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import mcp.MethodsReturnNonnullByDefault;
+
+import mekanism.api.annotations.MethodsReturnNonnullByDefault;
 import mekanism.api.chemical.pigment.IPigmentTank;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
@@ -10,7 +11,7 @@ import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.Dyna
 import mekanism.common.capabilities.chemical.dynamic.IPigmentTracker;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.resolver.manager.ChemicalHandlerManager.PigmentHandlerManager;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 @MethodsReturnNonnullByDefault
 public interface IPigmentTile extends IPigmentTracker {

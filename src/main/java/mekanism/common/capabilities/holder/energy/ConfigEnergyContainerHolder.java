@@ -14,7 +14,7 @@ import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.slot.EnergySlotInfo;
 import mekanism.common.tile.component.config.slot.ISlotInfo;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 public class ConfigEnergyContainerHolder extends ConfigHolder implements IEnergyContainerHolder {
 

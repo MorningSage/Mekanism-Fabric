@@ -1,7 +1,7 @@
 package mekanism.common;
 
 import mekanism.api.text.ILangEntry;
-import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.util.Util;
 
 public enum MekanismLang implements ILangEntry {
@@ -778,7 +778,7 @@ public enum MekanismLang implements ILangEntry {
     private final String key;
 
     MekanismLang(String type, String path) {
-        this(Util.makeTranslationKey(type, Mekanism.rl(path)));
+        this(Util.createTranslationKey(type, Mekanism.rl(path)));
     }
 
     MekanismLang(String key) {
@@ -790,7 +790,7 @@ public enum MekanismLang implements ILangEntry {
         return key;
     }
 
-    public static MekanismLang get(EquipmentSlotType type) {
+    public static MekanismLang get(EquipmentSlot type) {
         switch (type) {
             case HEAD:
                 return HEAD;

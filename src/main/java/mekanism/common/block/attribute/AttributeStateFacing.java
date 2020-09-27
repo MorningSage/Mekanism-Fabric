@@ -7,17 +7,16 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.Property;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
+import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.state.property.Property;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Contract;
 
 public class AttributeStateFacing extends AttributeState {
@@ -31,7 +30,7 @@ public class AttributeStateFacing extends AttributeState {
     }
 
     public AttributeStateFacing(boolean canRotate) {
-        this(BlockStateProperties.HORIZONTAL_FACING, canRotate);
+        this(Properties.HORIZONTAL_FACING, canRotate);
     }
 
     public AttributeStateFacing(DirectionProperty facingProperty) {
@@ -75,7 +74,7 @@ public class AttributeStateFacing extends AttributeState {
     }
 
     public Collection<Direction> getSupportedDirections() {
-        return getFacingProperty().getAllowedValues();
+        return getFacingProperty().getValues();
     }
 
     public boolean supportsDirection(Direction direction) {
@@ -98,8 +97,8 @@ public class AttributeStateFacing extends AttributeState {
 
     @Override
     @Contract("_, null, _, _, _, _ -> null")
-    public BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull @Nonnull World world, @Nonnull BlockPos pos, @Nullable PlayerEntity player,
-                                           @Nonnull @Nonnull Direction face) {
+    public BlockState getStateForPlacement(Block block, @Nullable BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nullable PlayerEntity player,
+           @Nonnull Direction face) {
         if (state == null) {
             return null;
         }
@@ -108,7 +107,7 @@ public class AttributeStateFacing extends AttributeState {
         if (blockFacing.getPlacementType() == FacePlacementType.PLAYER_LOCATION) {
             //TODO: Somehow weight this stuff towards context.getFace(), so that it has a higher likelihood of going with the face that was clicked on
             if (blockFacing.supportsDirection(Direction.DOWN) && blockFacing.supportsDirection(Direction.UP)) {
-                float rotationPitch = player == null ? 0 : player.rotationPitch;
+                float rotationPitch = player == null ? 0 : player.pitch;
                 int height = Math.round(rotationPitch);
                 if (height >= 65) {
                     newDirection = Direction.UP;
@@ -118,7 +117,7 @@ public class AttributeStateFacing extends AttributeState {
             }
             if (newDirection != Direction.DOWN && newDirection != Direction.UP) {
                 //TODO: Can this just use newDirection = context.getPlacementHorizontalFacing().getOpposite(); or is that not accurate
-                float placementYaw = player == null ? 0 : player.rotationYaw;
+                float placementYaw = player == null ? 0 : player.yaw;
                 int side = MathHelper.floor((placementYaw * 4.0F / 360.0F) + 0.5D) & 3;
                 switch (side) {
                     case 0:
@@ -144,11 +143,11 @@ public class AttributeStateFacing extends AttributeState {
         return state;
     }
 
-    public static BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation rotation) {
+    public static BlockState rotate(BlockState state, WorldAccess world, BlockPos pos, BlockRotation rotation) {
         return rotate(state, rotation);
     }
 
-    public static BlockState rotate(BlockState state, Rotation rotation) {
+    public static BlockState rotate(BlockState state, BlockRotation rotation) {
         Block block = state.getBlock();
         if (Attribute.has(block, AttributeStateFacing.class)) {
             AttributeStateFacing blockFacing = Attribute.get(block, AttributeStateFacing.class);
@@ -159,19 +158,19 @@ public class AttributeStateFacing extends AttributeState {
         return state;
     }
 
-    public static BlockState mirror(BlockState state, Mirror mirror) {
+    public static BlockState mirror(BlockState state, BlockMirror mirror) {
         Block block = state.getBlock();
         if (Attribute.has(block, AttributeStateFacing.class)) {
             AttributeStateFacing blockFacing = Attribute.get(block, AttributeStateFacing.class);
             if (blockFacing.canRotate()) {
                 DirectionProperty property = blockFacing.getFacingProperty();
-                return rotate(blockFacing, property, state, mirror.toRotation(state.get(property)));
+                return rotate(blockFacing, property, state, mirror.getRotation(state.get(property)));
             }
         }
         return state;
     }
 
-    private static BlockState rotate(AttributeStateFacing blockFacing, DirectionProperty property, BlockState state, Rotation rotation) {
+    private static BlockState rotate(AttributeStateFacing blockFacing, DirectionProperty property, BlockState state, BlockRotation rotation) {
         return blockFacing.setDirection(state, rotation.rotate(state.get(property)));
     }
 

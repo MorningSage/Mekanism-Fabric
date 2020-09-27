@@ -65,7 +65,7 @@ public class ItemRecipeData implements RecipeUpgradeData<ItemRecipeData> {
         }
         Item item = stack.getItem();
         boolean isBin = item instanceof ItemBlockBin;
-        Optional<IItemHandler> capability = MekanismUtils.toOptional(stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY));
+        Optional<IItemHandler> capability = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve();
         List<IInventorySlot> slots = new ArrayList<>();
         if (capability.isPresent()) {
             IItemHandler itemHandler = capability.get();

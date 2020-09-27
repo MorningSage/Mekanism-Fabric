@@ -89,7 +89,7 @@ public class ChemicalIngredientDeserializer<CHEMICAL extends Chemical<CHEMICAL>,
         if (type == IngredientType.SINGLE) {
             return stackToIngredient.apply(fromPacket.apply(buffer));
         } else if (type == IngredientType.TAGGED) {
-            return tagToIngredient.create(ChemicalTags.chemicalTag(buffer.readIdentifier(), tags), buffer.readVarLong());
+            return tagToIngredient.create(tags.tag(buffer.readIdentifier()), buffer.readVarLong());
         }
         INGREDIENT[] ingredients = arrayCreator.apply(buffer.readVarInt());
         for (int i = 0; i < ingredients.length; i++) {

@@ -71,6 +71,7 @@ import net.minecraft.tag.FluidTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
@@ -78,8 +79,6 @@ import net.minecraft.world.*;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraftforge.common.UsernameCache;
-import net.minecraftforge.common.util.Constants.BlockFlags;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.items.IItemHandler;
@@ -92,7 +91,7 @@ import org.jetbrains.annotations.Contract;
  */
 public final class MekanismUtils {
 
-    public static final Codec<Direction> DIRECTION_CODEC = IStringSerializable.createEnumCodec(Direction::values, Direction::byName);
+    public static final Codec<Direction> DIRECTION_CODEC = StringIdentifiable.createCodec(Direction::values, Direction::byName);
 
     public static final float ONE_OVER_ROOT_TWO = (float) (1 / Math.sqrt(2));
 
@@ -113,32 +112,6 @@ public final class MekanismUtils {
         if (!actual.isZero()) {
             Mekanism.logger.error("Energy value changed by a different amount (" + actual + ") than requested (zero).", new Exception());
         }
-    }
-
-    /**
-     * REMOVE THIS AS SOON AS POSSIBLE, this is to make it easier to just add a small if statement to early exit out of events if we are in an invalid state so that we
-     * don't get blamed for crashes by https://github.com/MinecraftForge/MinecraftForge/issues/6374
-     */
-    @Deprecated
-    public static boolean isGameStateInvalid() {
-        return !MekanismItems.ATOMIC_ALLOY.doesItemExist();
-    }
-
-    /**
-     * ToDo: I don't expect to need this at all since Fabric doesn't have LazyOptionals
-     *
-     * Converts a LazyOptional to a normal {@link Optional}. This is useful for if we are going to resolve the value anyways if it is present.
-     *
-     * @param lazyOptional The lazy optional to convert
-     * @param <T>          The type of the optional
-     *
-     * @return A normal {@link Optional} or {@link Optional#empty()} if the lazy optional is not present.
-     */
-    public static <T> Optional<T> toOptional(@Nonnull Optional<T> lazyOptional) {
-        if (lazyOptional.isPresent()) {
-            return Optional.of(lazyOptional.orElseThrow(() -> new RuntimeException("Failed to retrieve value of lazy optional when it claimed it was present.")));
-        }
-        return Optional.empty();
     }
 
     /**
@@ -229,15 +202,15 @@ public final class MekanismUtils {
         return prevScale;
     }
 
-    //Vanilla copy of ClientWorld#getSunBrightness used to be World#getSunBrightness
+    //Vanilla copy of ClientWorld#method_23783 used to be World#getSunBrightness
     public static float getSunBrightness(World world, float partialTicks) {
-        float f = world.getSkyAngle(partialTicks);
-        float f1 = 1.0F - (MathHelper.cos(f * ((float) Math.PI * 2F)) * 2.0F + 0.2F);
-        f1 = MathHelper.clamp(f1, 0.0F, 1.0F);
-        f1 = 1.0F - f1;
-        f1 = (float) (f1 * (1.0D - world.getRainGradient(partialTicks) * 5.0F / 16.0D));
-        f1 = (float) (f1 * (1.0D - world.getThunderGradient(partialTicks) * 5.0F / 16.0D));
-        return f1 * 0.8F + 0.2F;
+        float g = world.getSkyAngle(partialTicks);
+        float h = 1.0F - (MathHelper.cos(g * ((float) Math.PI * 2F)) * 2.0F + 0.2F);
+        h = MathHelper.clamp(h, 0.0F, 1.0F);
+        h = 1.0F - h;
+        h = (float)((double)h * (1.0D - (double)(world.getRainGradient(partialTicks) * 5.0F) / 16.0D));
+        h = (float)((double)h * (1.0D - (double)(world.getThunderGradient(partialTicks) * 5.0F) / 16.0D));
+        return h * 0.8F + 0.2F;
     }
 
     /**

@@ -133,7 +133,7 @@ public class ThermodynamicConductor extends Transmitter<IHeatHandler, HeatNetwor
         if (connectionMapContainsSide(getAllCurrentConnections(), side)) {
             //Note: We use the acceptor cache as the heat network is different and the transmitters count the other transmitters in the
             // network as valid acceptors
-            return MekanismUtils.toOptional(getAcceptorCache().getConnectedAcceptor(side)).orElse(null);
+            return getAcceptorCache().getConnectedAcceptor(side).resolve().orElse(null);
         }
         return null;
     }

@@ -7,7 +7,7 @@ import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.cache.ICachedRecipeHolder;
 import mekanism.common.CommonWorldTickHandler;
 import mekanism.common.recipe.MekanismRecipeType;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.world.World;
 
 public interface ITileCachedRecipeHolder<RECIPE extends MekanismRecipe> extends ICachedRecipeHolder<RECIPE> {
@@ -17,8 +17,8 @@ public interface ITileCachedRecipeHolder<RECIPE extends MekanismRecipe> extends 
     // implemented. This implementation allows for wrapping around that getWorld properly in this case.
     @Nullable
     default World getTileWorld() {
-        if (this instanceof TileEntity) {
-            return ((TileEntity) this).getWorld();
+        if (this instanceof BlockEntity) {
+            return ((BlockEntity) this).getWorld();
         }
         return null;
     }

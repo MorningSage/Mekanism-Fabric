@@ -8,7 +8,6 @@ import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tier.PipeTier;
 import mekanism.common.tile.transmitter.TileEntityMechanicalPipe;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.tileentity.TileEntityType;
 
 public class BlockMechanicalPipe extends BlockLargeTransmitter implements ITypeBlock, IHasTileEntity<TileEntityMechanicalPipe> {
 

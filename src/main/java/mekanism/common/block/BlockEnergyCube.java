@@ -18,18 +18,17 @@ import mekanism.common.tile.component.config.DataType;
 import mekanism.common.tile.component.config.slot.ISlotInfo;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.VoxelShapeUtils;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 
 /**
@@ -44,58 +43,58 @@ public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machin
 
     static {
         VoxelShape frame = VoxelShapeUtils.combine(
-              makeCuboidShape(0, 0, 0, 3, 3, 16),
-              makeCuboidShape(0, 3, 0, 3, 16, 3),
-              makeCuboidShape(0, 3, 13, 3, 16, 16),
-              makeCuboidShape(0, 13, 3, 3, 16, 13),
-              makeCuboidShape(3, 0, 0, 16, 3, 3),
-              makeCuboidShape(3, 0, 13, 16, 3, 16),
-              makeCuboidShape(3, 13, 0, 16, 16, 3),
-              makeCuboidShape(3, 13, 13, 16, 16, 16),
-              makeCuboidShape(13, 0, 3, 16, 3, 13),
-              makeCuboidShape(13, 3, 0, 16, 13, 3),
-              makeCuboidShape(13, 3, 13, 16, 13, 16),
-              makeCuboidShape(13, 13, 3, 16, 16, 13),
-              makeCuboidShape(12.5, 14.9, 7.5, 13.5, 15.9, 8.5),//ledTop1
-              makeCuboidShape(2.5, 14.9, 7.5, 3.5, 15.9, 8.5),//ledTop2
-              makeCuboidShape(12.5, 7.5, 0.1, 13.5, 8.5, 1.1),//ledBack1
-              makeCuboidShape(2.5, 7.5, 0.1, 3.5, 8.5, 1.1),//ledBack2
-              makeCuboidShape(2.5, 0.1, 7.5, 3.5, 1.1, 8.5),//ledBottom2
-              makeCuboidShape(12.5, 0.1, 7.5, 13.5, 1.1, 8.5),//ledBottom1
-              makeCuboidShape(12.5, 7.5, 14.9, 13.5, 8.5, 15.9),//ledFront1
-              makeCuboidShape(2.5, 7.5, 14.9, 3.5, 8.5, 15.9),//ledFront2
-              makeCuboidShape(0.1, 7.5, 2.5, 1.1, 8.5, 3.5),//ledRight2
-              makeCuboidShape(0.1, 7.5, 12.5, 1.1, 8.5, 13.5),//ledRight1
-              makeCuboidShape(14.9, 7.5, 2.5, 15.9, 8.5, 3.5),//ledLeft1
-              makeCuboidShape(14.9, 7.5, 12.5, 15.9, 8.5, 13.5)//ledLeft2
+              createCuboidShape(0, 0, 0, 3, 3, 16),
+              createCuboidShape(0, 3, 0, 3, 16, 3),
+              createCuboidShape(0, 3, 13, 3, 16, 16),
+              createCuboidShape(0, 13, 3, 3, 16, 13),
+              createCuboidShape(3, 0, 0, 16, 3, 3),
+              createCuboidShape(3, 0, 13, 16, 3, 16),
+              createCuboidShape(3, 13, 0, 16, 16, 3),
+              createCuboidShape(3, 13, 13, 16, 16, 16),
+              createCuboidShape(13, 0, 3, 16, 3, 13),
+              createCuboidShape(13, 3, 0, 16, 13, 3),
+              createCuboidShape(13, 3, 13, 16, 13, 16),
+              createCuboidShape(13, 13, 3, 16, 16, 13),
+              createCuboidShape(12.5, 14.9, 7.5, 13.5, 15.9, 8.5),//ledTop1
+              createCuboidShape(2.5, 14.9, 7.5, 3.5, 15.9, 8.5),//ledTop2
+              createCuboidShape(12.5, 7.5, 0.1, 13.5, 8.5, 1.1),//ledBack1
+              createCuboidShape(2.5, 7.5, 0.1, 3.5, 8.5, 1.1),//ledBack2
+              createCuboidShape(2.5, 0.1, 7.5, 3.5, 1.1, 8.5),//ledBottom2
+              createCuboidShape(12.5, 0.1, 7.5, 13.5, 1.1, 8.5),//ledBottom1
+              createCuboidShape(12.5, 7.5, 14.9, 13.5, 8.5, 15.9),//ledFront1
+              createCuboidShape(2.5, 7.5, 14.9, 3.5, 8.5, 15.9),//ledFront2
+              createCuboidShape(0.1, 7.5, 2.5, 1.1, 8.5, 3.5),//ledRight2
+              createCuboidShape(0.1, 7.5, 12.5, 1.1, 8.5, 13.5),//ledRight1
+              createCuboidShape(14.9, 7.5, 2.5, 15.9, 8.5, 3.5),//ledLeft1
+              createCuboidShape(14.9, 7.5, 12.5, 15.9, 8.5, 13.5)//ledLeft2
         );
         VoxelShape frontPanel = VoxelShapeUtils.combine(
-              makeCuboidShape(3, 5, 14, 13, 11, 15),//connectorFrontToggle
-              makeCuboidShape(4, 4, 15, 12, 12, 16)//portFrontToggle
+            createCuboidShape(3, 5, 14, 13, 11, 15),//connectorFrontToggle
+            createCuboidShape(4, 4, 15, 12, 12, 16)//portFrontToggle
         );
         VoxelShape rightPanel = VoxelShapeUtils.combine(
-              makeCuboidShape(1, 5, 3, 2, 11, 13),//connectorRightToggle
-              makeCuboidShape(0, 4, 4, 1, 12, 12)//portRightToggle
+            createCuboidShape(1, 5, 3, 2, 11, 13),//connectorRightToggle
+            createCuboidShape(0, 4, 4, 1, 12, 12)//portRightToggle
         );
         VoxelShape leftPanel = VoxelShapeUtils.combine(
-              makeCuboidShape(14, 5, 3, 15, 11, 13),//connectorLeftToggle
-              makeCuboidShape(15, 4, 4, 16, 12, 12)//portLeftToggle
+            createCuboidShape(14, 5, 3, 15, 11, 13),//connectorLeftToggle
+            createCuboidShape(15, 4, 4, 16, 12, 12)//portLeftToggle
         );
         VoxelShape backPanel = VoxelShapeUtils.combine(
-              makeCuboidShape(3, 5, 1, 13, 11, 2),//connectorBackToggle
-              makeCuboidShape(4, 4, 0, 12, 12, 1)//portBackToggle
+            createCuboidShape(3, 5, 1, 13, 11, 2),//connectorBackToggle
+            createCuboidShape(4, 4, 0, 12, 12, 1)//portBackToggle
         );
         VoxelShape topPanel = VoxelShapeUtils.combine(
-              makeCuboidShape(3, 14, 5, 13, 15, 11),//connectorTopToggle
-              makeCuboidShape(4, 15, 4, 12, 16, 12)//portTopToggle
+            createCuboidShape(3, 14, 5, 13, 15, 11),//connectorTopToggle
+            createCuboidShape(4, 15, 4, 12, 16, 12)//portTopToggle
         );
         VoxelShape bottomPanel = VoxelShapeUtils.combine(
-              makeCuboidShape(3, 1, 5, 13, 2, 11),//connectorBottomToggle
-              makeCuboidShape(4, 0, 4, 12, 1, 12)//portBottomToggle
+            createCuboidShape(3, 1, 5, 13, 2, 11),//connectorBottomToggle
+            createCuboidShape(4, 0, 4, 12, 1, 12)//portBottomToggle
         );
-        VoxelShape frameRotated = VoxelShapeUtils.rotate(frame, Rotation.CLOCKWISE_90);
-        VoxelShape topRotated = VoxelShapeUtils.rotate(topPanel, Rotation.CLOCKWISE_90);
-        VoxelShape bottomRotated = VoxelShapeUtils.rotate(bottomPanel, Rotation.CLOCKWISE_90);
+        VoxelShape frameRotated = VoxelShapeUtils.rotate(frame, BlockRotation.CLOCKWISE_90);
+        VoxelShape topRotated = VoxelShapeUtils.rotate(topPanel, BlockRotation.CLOCKWISE_90);
+        VoxelShape bottomRotated = VoxelShapeUtils.rotate(bottomPanel, BlockRotation.CLOCKWISE_90);
         VoxelShape frameRotatedAlt = VoxelShapeUtils.rotate(frame, Direction.NORTH);
         VoxelShape rightRotated = VoxelShapeUtils.rotate(rightPanel, Direction.NORTH);
         VoxelShape leftRotated = VoxelShapeUtils.rotate(leftPanel, Direction.NORTH);
@@ -139,7 +138,7 @@ public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machin
     public BlockEnergyCube(Machine<TileEntityEnergyCube> type) {
         //Note: We require setting variable opacity so that the block state does not cache the ability of if blocks can be placed on top of the energy cube
         // this may change based on what sides are enabled. Torches cannot be placed on the sides due to vanilla checking the incorrect shape
-        super(type, Block.Properties.create(Material.IRON).hardnessAndResistance(2F, 4F).setRequiresTool().variableOpacity());
+        super(type, Block.Settings.of(Material.METAL).strength(2F, 4F).requiresTool().dynamicBounds());
     }
 
     @Override
@@ -149,7 +148,7 @@ public class BlockEnergyCube extends BlockTileModel<TileEntityEnergyCube, Machin
                 //TODO: Move this to being set in the variant added to the item group
                 ConfigInfo energyConfig = ((TileEntityEnergyCube) tile).configComponent.getConfig(TransmissionType.ENERGY);
                 if (energyConfig != null) {
-                    Optional<IStrictEnergyHandler> capability = MekanismUtils.toOptional(stack.getCapability(Capabilities.STRICT_ENERGY_CAPABILITY));
+                    Optional<IStrictEnergyHandler> capability = stack.getCapability(Capabilities.STRICT_ENERGY_CAPABILITY).resolve();
                     if (capability.isPresent()) {
                         IStrictEnergyHandler energyHandlerItem = capability.get();
                         if (energyHandlerItem.getEnergyContainerCount() > 0) {

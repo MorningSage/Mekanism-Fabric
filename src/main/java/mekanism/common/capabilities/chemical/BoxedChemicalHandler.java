@@ -26,7 +26,7 @@ public class BoxedChemicalHandler {
     @Nullable
     public <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> IChemicalHandler<CHEMICAL, STACK> getHandlerFor(ChemicalType chemicalType) {
         if (handlers.containsKey(chemicalType)) {
-            Optional<? extends IChemicalHandler<?, ?>> handler = MekanismUtils.toOptional(handlers.get(chemicalType));
+            Optional<? extends IChemicalHandler<?, ?>> handler = handlers.get(chemicalType).resolve();
             if (handler.isPresent()) {
                 return (IChemicalHandler<CHEMICAL, STACK>) handler.get();
             }

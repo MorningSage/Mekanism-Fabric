@@ -32,21 +32,18 @@ import mekanism.common.util.MultipartUtils.AdvancedRayTraceResult;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Tickable;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.model.data.ModelProperty;
 import org.apache.commons.lang3.tuple.Pair;
 
-public abstract class TileEntityTransmitter extends CapabilityTileEntity implements IConfigurable, ITickableTileEntity, IAlloyInteraction {
+public abstract class TileEntityTransmitter extends CapabilityTileEntity implements IConfigurable, Tickable, IAlloyInteraction {
 
     public static final ModelProperty<TransmitterModelData> TRANSMITTER_PROPERTY = new ModelProperty<>();
 
@@ -83,18 +80,18 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
 
     @Nonnull
     @Override
-    public CompoundNBT getReducedUpdateTag() {
+    public CompoundTag getReducedUpdateTag() {
         return getTransmitter().getReducedUpdateTag(super.getReducedUpdateTag());
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, @Nonnull CompoundNBT tag) {
+    public void handleUpdateTag(BlockState state, @Nonnull CompoundTag tag) {
         super.handleUpdateTag(state, tag);
         getTransmitter().handleUpdateTag(tag);
     }
 
     @Override
-    public void handleUpdatePacket(@Nonnull CompoundNBT tag) {
+    public void handleUpdatePacket(@Nonnull CompoundTag tag) {
         super.handleUpdatePacket(tag);
         //Delay requesting the model data update and actually updating the packet until we have finished parsing the update tag
         requestModelDataUpdate();
@@ -102,14 +99,14 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
     }
 
     @Override
-    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT nbtTags) {
+    public void read(@Nonnull BlockState state, @Nonnull CompoundTag nbtTags) {
         super.read(state, nbtTags);
         getTransmitter().read(nbtTags);
     }
 
     @Nonnull
     @Override
-    public CompoundNBT write(@Nonnull CompoundNBT nbtTags) {
+    public CompoundTag write(@Nonnull CompoundTag nbtTags) {
         return getTransmitter().write(super.write(nbtTags));
     }
 
@@ -169,7 +166,7 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
     }
 
     @Override
-    public ActionResultType onSneakRightClick(PlayerEntity player, Direction side) {
+    public ActionResult onSneakRightClick(PlayerEntity player, Direction side) {
         if (!isRemote()) {
             Pair<Vector3d, Vector3d> vecs = MultipartUtils.getRayTraceVectors(player);
             AdvancedRayTraceResult result = MultipartUtils.collisionRayTrace(getPos(), vecs.getLeft(), vecs.getRight(), getCollisionBoxes());

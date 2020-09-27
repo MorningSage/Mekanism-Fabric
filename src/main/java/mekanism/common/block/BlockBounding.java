@@ -12,37 +12,17 @@ import mekanism.common.util.MekanismUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.PushReaction;
-import net.minecraft.client.particle.DiggingParticle;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.renderer.chunk.ChunkRenderCache;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.RayTraceResult.Type;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 //TODO: Extend MekanismBlock. Not done yet as checking is needed to ensure how drops happen still happens correctly and things in the super class don't mess this up
 public class BlockBounding extends Block implements IHasTileEntity<TileEntityBoundingBlock>, IStateFluidLoggable {
@@ -63,7 +43,7 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
     public BlockBounding(boolean advanced) {
         //Note: We require setting variable opacity so that the block state does not cache the ability of if blocks can be placed on top of the bounding block
         // Torches cannot be placed on the sides due to vanilla checking the incorrect shape
-        super(Block.Properties.create(Material.IRON).hardnessAndResistance(3.5F, 8F).setRequiresTool().variableOpacity());
+        super(Block.Settings.of(Material.METAL).strength(3.5F, 8F).requiresTool().dynamicBounds());
         this.advanced = advanced;
         setDefaultState(BlockStateHelper.getDefaultState(stateContainer.getBaseState()));
     }
@@ -74,12 +54,13 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
         BlockStateHelper.fillBlockStateContainer(this, builder);
     }
 
+
     @Nonnull
     @Override
     @Deprecated
-    public PushReaction getPushReaction(@Nonnull BlockState state) {
+    public PistonBehavior getPistonBehavior(@Nonnull BlockState state) {
         //Protect against mods like Quark that allow blocks with TEs to be moved
-        return PushReaction.BLOCK;
+        return PistonBehavior.BLOCK;
     }
 
     @Nullable

@@ -3,6 +3,7 @@ package mekanism.common.integration.energy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,12 +14,11 @@ import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.integration.energy.forgeenergy.ForgeEnergyCompat;
 import mekanism.common.util.MekanismUtils;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class EnergyCompatUtils {
 
@@ -57,7 +57,7 @@ public class EnergyCompatUtils {
         return energyCompats.stream().filter(IEnergyCompat::isUsable).map(IEnergyCompat::getCapability).collect(Collectors.toList());
     }
 
-    private static boolean isTileValid(@Nullable TileEntity tile) {
+    private static boolean isTileValid(@Nullable BlockEntity tile) {
         return tile != null && !tile.isRemoved() && tile.hasWorld();
     }
 
@@ -65,7 +65,7 @@ public class EnergyCompatUtils {
         return !stack.isEmpty() && hasStrictEnergyHandler(stack, null);
     }
 
-    public static boolean hasStrictEnergyHandler(@Nullable TileEntity tile, Direction side) {
+    public static boolean hasStrictEnergyHandler(@Nullable BlockEntity tile, Direction side) {
         return isTileValid(tile) && hasStrictEnergyHandler((ICapabilityProvider) tile, side);
     }
 
@@ -81,51 +81,51 @@ public class EnergyCompatUtils {
 
     @Nullable//TODO: Transition usages of this to getLazyStrictEnergyHandler?
     public static IStrictEnergyHandler getStrictEnergyHandler(@Nonnull ItemStack stack) {
-        return MekanismUtils.toOptional(getLazyStrictEnergyHandler(stack)).orElse(null);
+        return getLazyStrictEnergyHandler(stack).resolve().orElse(null);
     }
 
     @Nonnull
-    public static LazyOptional<IStrictEnergyHandler> getLazyStrictEnergyHandler(@Nonnull ItemStack stack) {
-        return stack.isEmpty() ? LazyOptional.empty() : getLazyStrictEnergyHandler(stack, null);
+    public static Optional<IStrictEnergyHandler> getLazyStrictEnergyHandler(@Nonnull ItemStack stack) {
+        return stack.isEmpty() ? Optional.empty() : getLazyStrictEnergyHandler(stack, null);
     }
 
     @Nonnull
-    public static LazyOptional<IStrictEnergyHandler> getLazyStrictEnergyHandler(@Nullable TileEntity tile, Direction side) {
-        return isTileValid(tile) ? getLazyStrictEnergyHandler((ICapabilityProvider) tile, side) : LazyOptional.empty();
+    public static Optional<IStrictEnergyHandler> getLazyStrictEnergyHandler(@Nullable BlockEntity tile, Direction side) {
+        return isTileValid(tile) ? getLazyStrictEnergyHandler((ICapabilityProvider) tile, side) : Optional.empty();
     }
 
     @Nonnull
-    private static LazyOptional<IStrictEnergyHandler> getLazyStrictEnergyHandler(ICapabilityProvider provider, Direction side) {
+    private static Optional<IStrictEnergyHandler> getLazyStrictEnergyHandler(ICapabilityProvider provider, Direction side) {
         //TODO: Eventually look into making it so that we cache the handler we get back. Maybe by passing a listener
         // to this that we can give to the capability as we wrap the result into
         for (IEnergyCompat energyCompat : energyCompats) {
             if (energyCompat.isUsable()) {
-                LazyOptional<IStrictEnergyHandler> handler = energyCompat.getLazyStrictEnergyHandler(provider, side);
+                Optional<IStrictEnergyHandler> handler = energyCompat.getLazyStrictEnergyHandler(provider, side);
                 if (handler.isPresent()) {
                     return handler;
                 }
             }
         }
-        return LazyOptional.empty();
+        return Optional.empty();
     }
 
     /**
      * @apiNote It is expected that isEnergyCapability is called before calling this method
      */
     @Nonnull
-    public static <T> LazyOptional<T> getEnergyCapability(Capability<T> capability, @Nonnull IStrictEnergyHandler handler) {
+    public static <T> Optional<T> getEnergyCapability(Capability<T> capability, @Nonnull IStrictEnergyHandler handler) {
         if (capability == null) {
             //Should never be the case, but is when a capability does not exist due to a mod not being loaded
-            return LazyOptional.empty();
+            return Optional.empty();
         }
         //Note: The methods that call this method cache the returned lazy optional properly
         for (IEnergyCompat energyCompat : energyCompats) {
             if (energyCompat.isUsable() && energyCompat.isMatchingCapability(capability)) {
                 //Note: This is a little ugly but this extra method ensures that the supplier's type does not get prematurely resolved
-                return energyCompat.getHandlerAs(handler).cast();
+                return ((Optional<T>) energyCompat.getHandlerAs(handler));
             }
         }
-        return LazyOptional.empty();
+        return Optional.empty();
     }
 
     /**

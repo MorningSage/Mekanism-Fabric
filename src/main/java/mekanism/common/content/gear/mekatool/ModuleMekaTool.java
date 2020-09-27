@@ -7,15 +7,15 @@ import mekanism.common.MekanismLang;
 import mekanism.common.content.gear.Module;
 import mekanism.common.content.gear.ModuleConfigItem;
 import mekanism.common.content.gear.ModuleConfigItem.EnumData;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 
 public class ModuleMekaTool extends Module {
 
-    public ActionResultType onItemUse(ItemUseContext context) {
-        return ActionResultType.PASS;
+    public ActionResult onItemUse(ItemUsageContext context) {
+        return ActionResult.PASS;
     }
 
     public static class ModuleAttackAmplificationUnit extends ModuleMekaTool {
@@ -33,7 +33,7 @@ public class ModuleMekaTool extends Module {
         }
 
         @Override
-        public void addHUDStrings(List<ITextComponent> list) {
+        public void addHUDStrings(List<Text> list) {
             if (!isEnabled()) {
                 return;
             }
@@ -49,15 +49,15 @@ public class ModuleMekaTool extends Module {
             MAX(32);
 
             private final int damage;
-            private final ITextComponent label;
+            private final Text label;
 
             AttackDamage(int damage) {
                 this.damage = damage;
-                this.label = new StringTextComponent(Integer.toString(damage));
+                this.label = new LiteralText(Integer.toString(damage));
             }
 
             @Override
-            public ITextComponent getTextComponent() {
+            public Text getTextComponent() {
                 return label;
             }
 

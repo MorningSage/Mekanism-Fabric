@@ -45,6 +45,12 @@ public abstract class GuiElement extends AbstractButtonWidget implements IFancyF
     protected boolean playClickSound;
     public boolean isOverlay;
 
+    // Not Needed in Fabric
+    //@Deprecated//TO DO - 1.16.2: Remove this when mappings are updated/fixed
+    //public int getHeight() {
+    //    return getWidth_CLASH();
+    //}
+
     public GuiElement(IGuiWrapper gui, int x, int y, int width, int height, Text text) {
         super(x, y, width, height, text);
         guiObj = gui;

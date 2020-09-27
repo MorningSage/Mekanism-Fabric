@@ -13,34 +13,33 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockCardboardBox extends BlockMekanism implements IStateStorage, IHasTileEntity<TileEntityCardboardBox> {
 
     public BlockCardboardBox() {
-        super(Block.Properties.create(Material.WOOL).hardnessAndResistance(0.5F, 1F));
+        super(Block.Settings.of(Material.WOOL).strength(0.5F, 1F));
     }
 
     @Nonnull
     @Override
     @Deprecated
-    public ActionResultType onBlockActivated(@Nonnull BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull PlayerEntity player, @Nonnull Hand hand,
-          @Nonnull BlockRayTraceResult hit) {
-        if (!world.isRemote && player.isSneaking()) {
+    public ActionResult onUse(@Nonnull BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull PlayerEntity player, @Nonnull Hand hand,
+          @Nonnull BlockHitResult hit) {
+        if (!world.isClient && player.isSneaking()) {
             TileEntityCardboardBox box = MekanismUtils.getTileEntity(TileEntityCardboardBox.class, world, pos);
             if (box != null && box.storedData != null) {
                 BlockData data = box.storedData;
@@ -49,9 +48,9 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
                 world.setBlockState(pos, data.blockState);
                 if (data.tileTag != null) {
                     data.updateLocation(pos);
-                    TileEntity tile = MekanismUtils.getTileEntity(world, pos);
+                    BlockEntity tile = MekanismUtils.getTileEntity(world, pos);
                     if (tile != null) {
-                        tile.read(state, data.tileTag);
+                        tile.fromTag(state, data.tileTag);
                     }
                 }
                 //TODO: Do we need to call onBlockPlacedBy or not bother given we are setting the blockstate to what it was AND setting any tile data
@@ -59,12 +58,12 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
                 spawnAsEntity(world, pos, MekanismBlocks.CARDBOARD_BOX.getItemStack());
             }
         }
-        return player.isSneaking() ? ActionResultType.SUCCESS : ActionResultType.PASS;
+        return player.isSneaking() ? ActionResult.SUCCESS : ActionResult.PASS;
     }
 
     @Nonnull
     @Override
-    public ItemStack getPickBlock(@Nonnull BlockState state, RayTraceResult target, @Nonnull IBlockReader world, @Nonnull BlockPos pos, PlayerEntity player) {
+    public ItemStack getPickBlock(@Nonnull BlockState state, HitResult target, @Nonnull IBlockReader world, @Nonnull BlockPos pos, PlayerEntity player) {
         ItemStack itemStack = new ItemStack(this);
         TileEntityCardboardBox tile = MekanismUtils.getTileEntity(TileEntityCardboardBox.class, world, pos);
         if (tile == null) {
@@ -86,14 +85,14 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
         @Nonnull
         public final BlockState blockState;
         @Nullable
-        public CompoundNBT tileTag;
+        public CompoundTag tileTag;
 
         public BlockData(@Nonnull BlockState blockState) {
             this.blockState = blockState;
         }
 
-        public static BlockData read(CompoundNBT nbtTags) {
-            BlockData data = new BlockData(NBTUtil.readBlockState(nbtTags.getCompound(NBTConstants.BLOCK_STATE)));
+        public static BlockData read(CompoundTag nbtTags) {
+            BlockData data = new BlockData(NbtHelper.toBlockState(nbtTags.getCompound(NBTConstants.BLOCK_STATE)));
             NBTUtils.setCompoundIfPresent(nbtTags, NBTConstants.TILE_TAG, nbt -> data.tileTag = nbt);
             return data;
         }
@@ -106,8 +105,8 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
             }
         }
 
-        public CompoundNBT write(CompoundNBT nbtTags) {
-            nbtTags.put(NBTConstants.BLOCK_STATE, NBTUtil.writeBlockState(blockState));
+        public CompoundTag write(CompoundTag nbtTags) {
+            nbtTags.put(NBTConstants.BLOCK_STATE, NbtHelper.fromBlockState(blockState));
             if (tileTag != null) {
                 nbtTags.put(NBTConstants.TILE_TAG, tileTag);
             }

@@ -1,5 +1,6 @@
 package mekanism.api.chemical;
 
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.pigment.Pigment;
@@ -7,29 +8,35 @@ import mekanism.api.chemical.slurry.Slurry;
 import net.minecraft.block.Block;
 import net.minecraft.tag.*;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class ChemicalTags<CHEMICAL extends Chemical<CHEMICAL>> {
 
-    public static final ChemicalTags<Gas> GAS = new ChemicalTags<>();
-    public static final ChemicalTags<InfuseType> INFUSE_TYPE = new ChemicalTags<>();
-    public static final ChemicalTags<Pigment> PIGMENT = new ChemicalTags<>();
-    public static final ChemicalTags<Slurry> SLURRY = new ChemicalTags<>();
+    public static final ChemicalTags<Gas> GAS = new ChemicalTags<>(new Identifier(MekanismAPI.MEKANISM_MODID, "gas"), MekanismAPI::gasRegistry);
+    public static final ChemicalTags<InfuseType> INFUSE_TYPE = new ChemicalTags<>(new Identifier(MekanismAPI.MEKANISM_MODID, "infuse_type"), MekanismAPI::infuseTypeRegistry);
+    public static final ChemicalTags<Pigment> PIGMENT = new ChemicalTags<>(new Identifier(MekanismAPI.MEKANISM_MODID, "pigment"), MekanismAPI::pigmentRegistry);
+    public static final ChemicalTags<Slurry> SLURRY = new ChemicalTags<>(new Identifier(MekanismAPI.MEKANISM_MODID, "slurry"), MekanismAPI::slurryRegistry);
 
-    private final RequiredTagList<CHEMICAL> collection = new RequiredTagList<>();
+    private final Supplier<Registry<CHEMICAL>> registrySupplier;
+    private final Identifier registryName;
 
-    private ChemicalTags() {
-
-    }
-
-    public void setCollection(TagGroup<CHEMICAL> collectionIn) {
-        collection.func_232935_a_(collectionIn);
+    private ChemicalTags(Identifier registryName, Supplier<Registry<CHEMICAL>> registrySupplier) {
+        this.registrySupplier = registrySupplier;
+        this.registryName = registryName;
     }
 
     public TagGroup<CHEMICAL> getCollection() {
-        return collection.getGroup();
+        Registry<CHEMICAL> registry = registrySupplier.get();
+        if (registry == null) {
+            return (TagGroup<CHEMICAL>) ServerTagManagerHolder.getTagManager().getCustomTypeCollection(registryName);
+        }
+        return ServerTagManagerHolder.getTagManager().getCustomTypeCollection(registry);
     }
 
     public Identifier lookupTag(Tag<CHEMICAL> tag) {
@@ -53,23 +60,23 @@ public class ChemicalTags<CHEMICAL extends Chemical<CHEMICAL>> {
         return resourceLocation;
     }
 
-    public static Tag.Identified<Gas> gasTag(Identifier resourceLocation) {
-        return chemicalTag(resourceLocation, GAS);
+    public Tag.Identified<CHEMICAL> tag(Identifier name) {
+        Registry<CHEMICAL> registry = registrySupplier.get();
+        if (registry == null) {
+            return ForgeTagHandler.makeWrapperTag(registryName, name);
+        }
+        return ForgeTagHandler.makeWrapperTag(registry, name);
     }
 
-    public static Tag.Identified<InfuseType> infusionTag(Identifier resourceLocation) {
-        return chemicalTag(resourceLocation, INFUSE_TYPE);
+    public IOptionalNamedTag<CHEMICAL> optionalTag(Identifier name) {
+        return optionalTag(name, null);
     }
 
-    public static Tag.Identified<Pigment> pigmentTag(Identifier resourceLocation) {
-        return chemicalTag(resourceLocation, PIGMENT);
-    }
-
-    public static Tag.Identified<Slurry> slurryTag(Identifier resourceLocation) {
-        return chemicalTag(resourceLocation, SLURRY);
-    }
-
-    public static <CHEMICAL extends Chemical<CHEMICAL>> Tag.Identified<CHEMICAL> chemicalTag(Identifier resourceLocation, ChemicalTags<CHEMICAL> chemicalTags) {
-        return chemicalTags.collection.add(resourceLocation.toString());
+    public IOptionalNamedTag<CHEMICAL> optionalTag(Identifier name, @Nullable Supplier<Set<CHEMICAL>> defaults) {
+        Registry<CHEMICAL> registry = registrySupplier.get();
+        if (registry == null) {
+            return ForgeTagHandler.createOptionalTag(registryName, name, defaults);
+        }
+        return ForgeTagHandler.createOptionalTag(registry, name, defaults);
     }
 }

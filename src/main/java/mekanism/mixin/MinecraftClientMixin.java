@@ -38,4 +38,24 @@ public class MinecraftClientMixin {
 
         return itemStack12;
     }
+
+    @ModifyVariable(
+        at = @At("STORE"),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/util/hit/EntityHitResult;getEntity()Lnet/minecraft/entity/Entity;"
+            )
+        ),
+        method = "doItemPick"
+    )
+    public ItemStack doItemPickBlock(ItemStack itemStack12) {
+        if (this.crosshairTarget != null) {
+            if (this.crosshairTarget.getType() == HitResult.Type.ENTITY && itemStack12.getItem() instanceof EntityHasPickableItem) {
+                return ((EntityHasPickableItem) itemStack12.getItem()).getPickedResult(this.crosshairTarget);
+            }
+        }
+
+        return itemStack12;
+    }
 }

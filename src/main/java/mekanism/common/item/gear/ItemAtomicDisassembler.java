@@ -52,6 +52,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Rarity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stats.Stats;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
@@ -184,7 +185,7 @@ public class ItemAtomicDisassembler extends ItemEnergized implements IItemHUDPro
                             player.addStat(Stats.ITEM_USED.get(this));
                             if (exp > 0) {
                                 //If we have xp drop it
-                                block.dropXpOnBlockBreak(world, foundPos, exp);
+                                block.dropXpOnBlockBreak((ServerWorld) world, foundPos, exp);
                             }
                             //Use energy
                             energyContainer.extract(destroyEnergy, Action.EXECUTE, AutomationType.MANUAL);

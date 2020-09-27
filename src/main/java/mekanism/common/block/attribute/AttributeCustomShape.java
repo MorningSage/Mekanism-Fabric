@@ -1,6 +1,7 @@
 package mekanism.common.block.attribute;
 
-import net.minecraft.util.math.shapes.VoxelShape;
+
+import net.minecraft.util.shape.VoxelShape;
 
 public class AttributeCustomShape implements Attribute {
 
