@@ -1,4 +1,4 @@
-package mekanism.mixin;
+package mekanism.mixin.accessors;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

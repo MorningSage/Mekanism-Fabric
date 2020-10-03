@@ -1,4 +1,4 @@
-package mekanism.mixin;
+package mekanism.mixin.accessors;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

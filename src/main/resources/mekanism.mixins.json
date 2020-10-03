@@ -4,12 +4,13 @@
   "package": "mekanism.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "LivingEntityAccessor",
-    "WorldAccessor"
+    "accessors.LivingEntityAccessor",
+    "accessors.ServerPlayNetworkHandlerAccessor",
+    "accessors.WorldAccessor"
   ],
   "client": [
-    "HandledScreenAccessor",
-    "MinecraftClientMixin"
+    "MinecraftClientMixin",
+    "accessors.HandledScreenAccessor"
   ],
   "server": [],
   "injectors": {

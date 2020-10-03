@@ -38,23 +38,21 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLoader {
 
     public final Set<UUID> didTeleport = new ObjectOpenHashSet<>();
-    private AxisAlignedBB teleportBounds;
+    private Box teleportBounds;
     public int teleDelay = 0;
     public boolean shouldRender;
     @Nullable
@@ -123,7 +121,7 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
                     break;
             }
         }
-        player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), yaw, player.rotationPitch);
+        player.networkHandler.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), yaw, player.rotationPitch);
     }
 
     @Override
@@ -265,7 +263,9 @@ public class TileEntityTeleporter extends TileEntityMekanism implements IChunkLo
                     @Override
                     public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                         Entity repositionedEntity = repositionEntity.apply(false);
-                        repositionedEntity.setPositionAndUpdate(target.getX() + 0.5, target.getY(), target.getZ() + 0.5);
+                        if (repositionedEntity != null) {
+                            repositionedEntity.setPositionAndUpdate(target.getX() + 0.5, target.getY(), target.getZ() + 0.5);
+                        }
                         return repositionedEntity;
                     }
                 });

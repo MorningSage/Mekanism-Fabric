@@ -2,14 +2,20 @@ package mekanism.common;
 
 import javax.annotation.Nonnull;
 import mekanism.common.registries.MekanismItems;
+import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
 public class CreativeTabMekanism extends ItemGroup {
 
+    private static int expandCreativeArray() {
+        ((ItemGroupExtensions) ItemGroup.BUILDING_BLOCKS).fabric_expandArray();
+        return ItemGroup.GROUPS.length - 1;
+    }
+
     public CreativeTabMekanism() {
-        super(Mekanism.MODID);
+        super(expandCreativeArray(), Mekanism.MODID);
     }
 
     @Nonnull

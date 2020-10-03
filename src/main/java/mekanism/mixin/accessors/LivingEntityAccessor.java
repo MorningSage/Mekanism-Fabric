@@ -1,4 +1,4 @@
-package mekanism.mixin;
+package mekanism.mixin.accessors;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;

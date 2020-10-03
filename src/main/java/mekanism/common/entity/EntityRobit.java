@@ -293,7 +293,9 @@ public class EntityRobit extends PathAwareEntity implements IMekanismInventory, 
                     @Override
                     public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                         Entity repositionedEntity = repositionEntity.apply(false);
-                        repositionedEntity.setPositionAndUpdate(homeLocation.getX() + 0.5, homeLocation.getY() + 0.3, homeLocation.getZ() + 0.5);
+                        if (repositionedEntity != null) {
+                            repositionedEntity.setPositionAndUpdate(homeLocation.getX() + 0.5, homeLocation.getY() + 0.3, homeLocation.getZ() + 0.5);
+                        }
                         return repositionedEntity;
                     }
                 });

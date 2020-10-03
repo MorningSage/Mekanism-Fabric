@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiWindow;
 import mekanism.common.Mekanism;
-import mekanism.mixin.HandledScreenAccessor;
+import mekanism.mixin.accessors.HandledScreenAccessor;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.item.ItemRenderer;
