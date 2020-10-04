@@ -11,7 +11,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 
-public abstract class PlayerSound extends AbstractSoundInstance implements TickableSoundInstance {
+//TODO - 1.16.2: Should this extend EntityTickableSound
+public abstract class PlayerSound extends MovingSoundInstance {
 
     @Nonnull
     private WeakReference<PlayerEntity> playerReference;
@@ -21,8 +22,6 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
 
     private float fadeUpStep = 0.1f;
     private float fadeDownStep = 0.1f;
-
-    private boolean donePlaying = false;
 
     public PlayerSound(@Nonnull PlayerEntity player, @Nonnull SoundEvent sound) {
         super(sound, SoundCategory.PLAYERS);
@@ -53,7 +52,7 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
         //Gracefully handle the player becoming null if this object is kept around after update marks us as donePlaying
         PlayerEntity player = getPlayer();
         if (player != null) {
-            this.lastX = (float) player.getPosX();
+            this.lastX = (float) player.getX();
         }
         return this.lastX;
     }
@@ -63,7 +62,7 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
         //Gracefully handle the player becoming null if this object is kept around after update marks us as donePlaying
         PlayerEntity player = getPlayer();
         if (player != null) {
-            this.lastY = (float) player.getPosY();
+            this.lastY = (float) player.getY();
         }
         return this.lastY;
     }
@@ -73,7 +72,7 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
         //Gracefully handle the player becoming null if this object is kept around after update marks us as donePlaying
         PlayerEntity player = getPlayer();
         if (player != null) {
-            this.lastZ = (float) player.getPosZ();
+            this.lastZ = (float) player.getZ();
         }
         return this.lastZ;
     }
@@ -82,7 +81,8 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
     public void tick() {
         PlayerEntity player = getPlayer();
         if (player == null || !player.isAlive()) {
-            this.donePlaying = true;
+            //TODO - 1.16.2: Re-evaluate sounds because I feel like we may not be properly reinitializing the sounds after we mark it as being done playing
+            setDone();
             this.volume = 0.0F;
             return;
         }
@@ -98,16 +98,25 @@ public abstract class PlayerSound extends AbstractSoundInstance implements Ticka
         }
     }
 
-    @Override
-    public boolean isDone() {
-        return donePlaying;
-    }
-
     public abstract boolean shouldPlaySound(@Nonnull PlayerEntity player);
 
     @Override
     public float getVolume() {
         return super.getVolume() * MekanismConfig.client.baseSoundVolume.get();
+    }
+
+    @Override
+    public boolean shouldAlwaysPlay() {
+        return true;
+    }
+
+    @Override
+    public boolean canPlay() {
+        PlayerEntity player = getPlayer();
+        if (player == null) {
+            return super.canPlay();
+        }
+        return !player.isSilent();
     }
 
     public enum SoundType {

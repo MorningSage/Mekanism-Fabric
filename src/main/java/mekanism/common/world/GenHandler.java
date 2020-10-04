@@ -1,6 +1,6 @@
 package mekanism.common.world;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
@@ -20,10 +20,12 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.Category;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.OreFeatureConfig;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.UniformIntDistribution;
+import net.minecraft.world.gen.decorator.ConfiguredDecorator;
+import net.minecraft.world.gen.decorator.DecoratorConfig;
+import net.minecraft.world.gen.decorator.NopeDecoratorConfig;
+import net.minecraft.world.gen.feature.*;
 
 public class GenHandler {
 
@@ -37,59 +39,61 @@ public class GenHandler {
         for (OreType type : EnumUtils.ORE_TYPES) {
             ORES.put(type, getOreFeature(MekanismBlocks.ORES.get(type), MekanismConfig.world.ores.get(type), Feature.ORE));
         }
-        //TODO - 1.16.2: Figure out world gen
-        //SALT_FEATURE = getSaltFeature(MekanismBlocks.SALT_BLOCK, MekanismConfig.world.salt, Placement.COUNT_TOP_SOLID);
+        SALT_FEATURE = getSaltFeature(MekanismBlocks.SALT_BLOCK, MekanismConfig.world.salt, ConfiguredFeatures.Decorators.TOP_SOLID_HEIGHTMAP);
         //Retrogen features
         if (MekanismConfig.world.enableRegeneration.get()) {
             for (OreType type : EnumUtils.ORE_TYPES) {
                 ORE_RETROGENS.put(type, getOreFeature(MekanismBlocks.ORES.get(type), MekanismConfig.world.ores.get(type), MekanismFeatures.ORE_RETROGEN.getFeature()));
             }
-            SALT_RETROGEN_FEATURE = getSaltFeature(MekanismBlocks.SALT_BLOCK, MekanismConfig.world.salt, MekanismPlacements.TOP_SOLID_RETROGEN.getPlacement());
+            SALT_RETROGEN_FEATURE = getSaltFeature(MekanismBlocks.SALT_BLOCK, MekanismConfig.world.salt,
+                MekanismPlacements.TOP_SOLID_RETROGEN.getConfigured(DecoratorConfig.DEFAULT));
         }
-        ForgeRegistries.BIOMES.forEach(biome -> {
-            if (isValidBiome(biome)) {
-                //Add ores
-                for (ConfiguredFeature<?, ?> feature : ORES.values()) {
-                    addFeature(biome, feature);
-                }
-                //Add salt
-                addFeature(biome, SALT_FEATURE);
+    }
+
+    public static void onBiomeLoad(BiomeLoadingEvent event) {
+        if (isValidBiome(event.getCategory())) {
+            BiomeGenerationSettingsBuilder generation = event.getGeneration();
+            //Add ores
+            for (ConfiguredFeature<?, ?> feature : ORES.values()) {
+                addFeature(generation, feature);
             }
-        });
+            //TODO - 1.16.2: Look at uses of DefaultBiomeFeatures#func_243754_n as I think we maybe should only be adding
+            // things like salt to specific biome types??
+            //Add salt
+            addFeature(generation, SALT_FEATURE);
+        }
     }
 
-    private static boolean isValidBiome(Biome biome) {
+    private static boolean isValidBiome(Biome.Category biomeCategory) {
         //If this does weird things to unclassified biomes (Category.NONE), then we should also mark that biome as invalid
-        return biome.getCategory() != Category.THEEND && biome.getCategory() != Category.NETHER;
+        return biomeCategory != Category.THEEND && biomeCategory != Category.NETHER;
     }
 
-    private static void addFeature(Biome biome, @Nullable ConfiguredFeature<?, ?> feature) {
+    private static void addFeature(BiomeGenerationSettingsBuilder generation, @Nullable ConfiguredFeature<?, ?> feature) {
         if (feature != null) {
-            //TODO - 1.16.2: Figure out world gen
-            //biome.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES, feature);
+            generation.func_242513_a(GenerationStep.Feature.UNDERGROUND_ORES, feature);
         }
     }
 
     @Nullable
     private static ConfiguredFeature<?, ?> getOreFeature(IBlockProvider blockProvider, OreConfig oreConfig, Feature<OreFeatureConfig> feature) {
-        //TODO - 1.16.2: Figure out world gen
-        /*if (oreConfig.shouldGenerate.get()) {
-            return feature.withConfiguration(new OreFeatureConfig(FillerBlockType.NATURAL_STONE,
-                  blockProvider.getBlock().getDefaultState(), oreConfig.maxVeinSize.get())).withPlacement(Placement.COUNT_RANGE.configure(
-                  new CountRangeConfig(oreConfig.perChunk.get(), oreConfig.bottomOffset.get(), oreConfig.topOffset.get(), oreConfig.maxHeight.get())));
-        }*/
+        if (oreConfig.shouldGenerate.get()) {
+            return feature.configure(new OreFeatureConfig(OreFeatureConfig.Rules.BASE_STONE_OVERWORLD, blockProvider.getBlock().getDefaultState(), oreConfig.maxVeinSize.get()))
+                .method_30377(oreConfig.maxHeight.get())
+                .spreadHorizontally()
+                .repeat(oreConfig.perChunk.get());
+        }
         return null;
     }
 
     @Nullable
-    private static ConfiguredFeature<?, ?> getSaltFeature(IBlockProvider blockProvider, SaltConfig saltConfig, Placement<FrequencyConfig> placement) {
-        //TODO - 1.16.2: Figure out world gen
-        /*if (saltConfig.shouldGenerate.get()) {
+    private static ConfiguredFeature<?, ?> getSaltFeature(IBlockProvider blockProvider, SaltConfig saltConfig, ConfiguredDecorator<NopeDecoratorConfig> placement) {
+        if (saltConfig.shouldGenerate.get()) {
             BlockState state = blockProvider.getBlock().getDefaultState();
-            return Feature.DISK.withConfiguration(new SphereReplaceConfig(state, saltConfig.maxVeinSize.get(), saltConfig.ySize.get(),
-                  Lists.newArrayList(Blocks.DIRT.getDefaultState(), Blocks.CLAY.getDefaultState(), state)))
-                  .withPlacement(placement.configure(new FrequencyConfig(saltConfig.perChunk.get())));
-        }*/
+            return Feature.DISK.configure(new DiskFeatureConfig(state, UniformIntDistribution.of(saltConfig.baseRadius.get(), saltConfig.spread.get()),
+                saltConfig.ySize.get(), ImmutableList.of(Blocks.DIRT.getDefaultState(), Blocks.CLAY.getDefaultState(), state)))
+                .decorate(placement.spreadHorizontally()).repeat(saltConfig.perChunk.get());
+        }
         return null;
     }
 
@@ -100,7 +104,7 @@ public class GenHandler {
         BlockPos blockPos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
         Biome biome = world.getBiome(blockPos);
         boolean generated = false;
-        if (isValidBiome(biome) && world.chunkExists(chunkX, chunkZ)) {
+        if (isValidBiome(biome.getCategory()) && world.isChunkLoaded(chunkX, chunkZ)) {
             for (ConfiguredFeature<?, ?> feature : ORE_RETROGENS.values()) {
                 generated |= placeFeature(feature, world, random, blockPos);
             }

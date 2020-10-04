@@ -2,11 +2,12 @@ package mekanism.common.registration.impl;
 
 import javax.annotation.Nonnull;
 import mekanism.common.registration.WrappedRegistryObject;
-import net.minecraft.world.gen.placement.IPlacementConfig;
-import net.minecraft.world.gen.placement.Placement;
+import net.minecraft.world.gen.decorator.ConfiguredDecorator;
+import net.minecraft.world.gen.decorator.Decorator;
+import net.minecraft.world.gen.decorator.DecoratorConfig;
 import net.minecraftforge.fml.RegistryObject;
 
-public class PlacementRegistryObject<CONFIG extends IPlacementConfig, PLACEMENT extends Placement<CONFIG>> extends WrappedRegistryObject<PLACEMENT> {
+public class PlacementRegistryObject<CONFIG extends DecoratorConfig, PLACEMENT extends Decorator<CONFIG>> extends WrappedRegistryObject<PLACEMENT> {
 
     public PlacementRegistryObject(RegistryObject<PLACEMENT> registryObject) {
         super(registryObject);
@@ -15,5 +16,10 @@ public class PlacementRegistryObject<CONFIG extends IPlacementConfig, PLACEMENT 
     @Nonnull
     public PLACEMENT getPlacement() {
         return get();
+    }
+
+    @Nonnull
+    public ConfiguredDecorator<CONFIG> getConfigured(CONFIG placementConfig) {
+        return getPlacement().configure(placementConfig);
     }
 }
